@@ -5,6 +5,7 @@ metadata:
   namespace: sso
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    gitops.test/pipeline-verification: "2025-09-06-test"
   labels:
     app: sso
 spec:
