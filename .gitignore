@@ -1,0 +1,81 @@
+# Project-specific documentation and tracking files
+TODO.md
+PRD.md
+IDEA.md
+service-now-info.md
+
+# MCP and cache directories
+.mcp-adr-cache/
+.gemini/
+
+# Node.js dependencies
+node_modules/
+package-lock.json
+
+# VS Code settings
+.vscode/
+
+# Build artifacts and downloads
+yq_linux_amd64.tar.gz
+yq.1
+
+# Ansible files with potential secrets
+ansible/roles/*/defaults/main.yml
+ansible/roles/*/vars/main.yml
+ansible/vars/production.yml
+ansible/vars/*prod*.yml
+ansible/vars/*secret*.yml
+
+# Shell scripts (likely temporary/local)
+cleanup-secrets.sh
+configure-openshift-packages.sh
+debug-secret-flow.sh
+final-attempt.sh
+final-solution.sh
+gemini-cli-mcp-server.sh
+install-man-page.sh
+setup-and-verify-secret.sh
+the-final-final-attempt.sh
+verify-secret.sh
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+*.sublime-project
+*.sublime-workspace
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Sensitive files
+*secret*
+*password*
+*credential*
+*key*
+!**/secret-reader-*.yaml
+!**/external-secret.yaml
+!**/secret-store.yaml
+
+# Backup files
+*.backup
