@@ -92,7 +92,7 @@ EXAMPLES = r'''
     endpoint_url: "https://keycloak-sso.apps.cluster.example.com"
     oauth_profile:
       client_id: "servicenow-client"
-      client_secret: "{{ vault_keycloak_client_secret }}"
+      client_secret: "{{ vault_oauth_client_secret }}"
       token_url: "https://keycloak-sso.apps.cluster.example.com/auth/realms/servicenow/protocol/openid-connect/token"
     state: present
 
