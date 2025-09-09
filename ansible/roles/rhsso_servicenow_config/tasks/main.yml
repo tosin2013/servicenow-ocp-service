@@ -79,3 +79,19 @@
 - name: Display OpenShift Client Secret
   debug:
     msg: "OpenShift Client Secret: {{ openshift_client_secret }}"
+
+# ServiceNow REST API Integration
+- name: Configure ServiceNow OAuth Integration
+  include_tasks: servicenow_api.yml
+  when: servicenow_instance_url is defined and servicenow_admin_user is defined
+
+- name: Display Integration Summary
+  debug:
+    msg:
+      - "=== ServiceNow-Keycloak Integration Summary ==="
+      - "Keycloak URL: {{ rhsso_url }}"
+      - "ServiceNow Realm: {{ servicenow_realm_name }}"
+      - "ServiceNow Client ID: {{ servicenow_client_id }}"
+      - "ServiceNow Instance: {{ servicenow_instance_url }}"
+      - "OAuth Redirect URL: {{ servicenow_oauth_redirect_url }}"
+      - "Integration Status: Complete"

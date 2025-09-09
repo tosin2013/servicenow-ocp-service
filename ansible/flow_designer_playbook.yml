@@ -1,0 +1,165 @@
+---
+# ServiceNow Flow Designer Implementation Playbook
+# This playbook deploys automated workflows for user provisioning, project management, and monitoring
+
+- name: Deploy ServiceNow Flow Designer Workflows
+  hosts: localhost
+  gather_facts: yes
+  vars_files:
+    - servicenow_integration_vars.yml
+  
+  roles:
+    - servicenow_flow_designer
+  
+  post_tasks:
+    - name: Create Flow Designer Configuration Summary
+      copy:
+        content: |
+          # ServiceNow Flow Designer Implementation Summary
+          # Generated on {{ ansible_date_time.iso8601 }}
+          
+          ## Deployed Workflows
+          
+          ### 1. User Provisioning Flow
+          - **Name**: {{ user_provisioning_flow_name }}
+          - **Purpose**: Automated Keycloak user creation from ServiceNow requests
+          - **Trigger**: User request approval (state=3, approval=approved)
+          - **Actions**:
+            - Extract user details from ServiceNow request
+            - Create user in Keycloak via REST API
+            - Set temporary password
+            - Update request status
+            - Send notification email
+          
+          ### 2. Project Management Flow
+          - **Name**: {{ project_management_flow_name }}
+          - **Purpose**: ServiceNow-initiated OpenShift project creation
+          - **Trigger**: Project request approval for OpenShift projects
+          - **Actions**:
+            - Create OpenShift namespace/project
+            - Configure role bindings (admin access for requestor)
+            - Set resource quotas and limits
+            - Apply network policies
+            - Create project record in ServiceNow
+            - Send project details email
+          
+          ### 3. Monitoring Integration Flow
+          - **Name**: {{ monitoring_integration_flow_name }}
+          - **Purpose**: Connect OpenShift metrics to ServiceNow incidents
+          - **Trigger**: Webhook from OpenShift Alertmanager
+          - **Actions**:
+            - Parse incoming alert data
+            - Check for existing incidents
+            - Create or update incidents based on alerts
+            - Send alert summary notifications
+          
+          ## Service Catalog Items
+          
+          ### OpenShift Project Request
+          - **URL**: {{ servicenow_instance_url }}/nav_to.do?uri=catalog_home.do
+          - **Fields**: Project name, display name, description, environment, team
+          - **Workflow**: Automated project creation with proper permissions
+          
+          ### Keycloak User Account Request
+          - **URL**: {{ servicenow_instance_url }}/nav_to.do?uri=catalog_home.do
+          - **Fields**: User selection, access level
+          - **Workflow**: Automated user provisioning in Keycloak
+          
+          ## Integration Endpoints
+          
+          ### Webhook for OpenShift Alerts
+          - **URL**: {{ servicenow_instance_url }}/api/now/webhook/openshift_alerts
+          - **Method**: POST
+          - **Purpose**: Receive Alertmanager notifications
+          - **Authentication**: None (internal webhook)
+          
+          ### REST Messages
+          - **Keycloak User Creation**: {{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users
+          - **OpenShift Project Creation**: {{ openshift_api_url }}/api/v1/namespaces
+          - **OpenShift Role Binding**: {{ openshift_api_url }}/apis/rbac.authorization.k8s.io/v1/namespaces/{namespace}/rolebindings
+          
+          ## Configuration Details
+          
+          ### ServiceNow Configuration
+          - **Instance**: {{ servicenow_instance_url }}
+          - **OAuth Profile**: {{ oauth_entity_profile }}
+          - **Credential Alias**: {{ oauth_credential_alias }}
+          
+          ### Keycloak Configuration
+          - **URL**: {{ keycloak_url }}
+          - **Realm**: {{ keycloak_realm }}
+          - **Admin User**: {{ keycloak_admin_user }}
+          
+          ### OpenShift Configuration
+          - **API URL**: {{ openshift_api_url }}
+          - **Apps Domain**: {{ openshift_apps_domain }}
+          - **Console**: https://console-openshift-console.{{ openshift_apps_domain }}
+          
+          ## Testing Instructions
+          
+          ### 1. Test User Provisioning
+          1. Navigate to ServiceNow Service Catalog
+          2. Find "Keycloak User Account Request"
+          3. Submit request for a test user
+          4. Approve the request
+          5. Verify user creation in Keycloak
+          
+          ### 2. Test Project Management
+          1. Navigate to ServiceNow Service Catalog
+          2. Find "OpenShift Project Request"
+          3. Submit request with project details
+          4. Approve the request
+          5. Verify project creation in OpenShift Console
+          
+          ### 3. Test Monitoring Integration
+          1. Configure Alertmanager to send webhooks to ServiceNow
+          2. Trigger a test alert in OpenShift
+          3. Verify incident creation in ServiceNow
+          4. Check alert details and assignment
+          
+          ## Troubleshooting
+          
+          ### Flow Designer Issues
+          - Check Flow Designer execution logs: {{ servicenow_instance_url }}/nav_to.do?uri=flow_designer.do
+          - Verify OAuth authentication is working
+          - Check REST message configurations
+          
+          ### Integration Issues
+          - Verify network connectivity between ServiceNow and external systems
+          - Check authentication credentials and tokens
+          - Review webhook endpoint accessibility
+          
+          ## Maintenance
+          
+          ### Regular Tasks
+          - Monitor flow execution success rates
+          - Update OAuth tokens as needed
+          - Review and update resource quotas
+          - Maintain user access levels
+          
+          ### Updates
+          - Flow definitions can be updated through Flow Designer UI
+          - REST message configurations in System Web Services
+          - Catalog items in Service Catalog management
+        dest: /tmp/flow_designer_implementation_summary.md
+      delegate_to: localhost
+      run_once: true
+    
+    - name: Display Implementation Complete Message
+      debug:
+        msg:
+          - "🎉 ServiceNow Flow Designer Implementation Complete!"
+          - "======================================================"
+          - ""
+          - "✅ All workflows deployed successfully"
+          - "✅ Service catalog items created"
+          - "✅ Integration endpoints configured"
+          - "✅ Documentation generated: /tmp/flow_designer_implementation_summary.md"
+          - ""
+          - "🚀 Ready for Production Use!"
+          - ""
+          - "Next Steps:"
+          - "1. Test workflows through ServiceNow Service Catalog"
+          - "2. Configure OpenShift Alertmanager webhook"
+          - "3. Train users on new automated processes"
+          - "4. Monitor workflow execution and performance"

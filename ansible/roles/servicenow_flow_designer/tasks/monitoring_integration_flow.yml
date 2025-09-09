@@ -1,0 +1,206 @@
+---
+# Monitoring Integration Flow Implementation
+# This file creates ServiceNow Flow Designer workflow for OpenShift monitoring and alerting
+
+- name: Create Monitoring Integration Flow in ServiceNow
+  uri:
+    url: "{{ servicenow_instance_url }}/api/now/table/sys_hub_flow"
+    method: POST
+    user: "{{ servicenow_admin_user }}"
+    password: "{{ servicenow_admin_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    body_format: json
+    body:
+      name: "{{ monitoring_integration_flow_name }}"
+      description: "Connect OpenShift metrics to ServiceNow incidents with automated alerting"
+      active: true
+      application: "Global"
+      category: "custom"
+      flow_designer: true
+      trigger_conditions: |
+        // Trigger on webhook from OpenShift Alertmanager
+        if (request.body && request.body.alerts) {
+          return true;
+        }
+        return false;
+      flow_definition: |
+        {
+          "trigger": {
+            "name": "Webhook Received",
+            "type": "inbound_webhook",
+            "endpoint": "/api/now/webhook/openshift_alerts"
+          },
+          "actions": [
+            {
+              "name": "Parse Alert Data",
+              "type": "script",
+              "script": "var alerts = request.body.alerts;\nvar processedAlerts = [];\n\nfor (var i = 0; i < alerts.length; i++) {\n  var alert = alerts[i];\n  var alertData = {\n    alertname: alert.labels.alertname,\n    severity: alert.labels.severity || 'warning',\n    namespace: alert.labels.namespace || 'unknown',\n    pod: alert.labels.pod || 'unknown',\n    instance: alert.labels.instance || 'unknown',\n    summary: alert.annotations.summary || alert.labels.alertname,\n    description: alert.annotations.description || 'No description available',\n    status: alert.status,\n    startsAt: alert.startsAt,\n    endsAt: alert.endsAt,\n    generatorURL: alert.generatorURL\n  };\n  processedAlerts.push(alertData);\n}\n\nflow.alerts = processedAlerts;"
+            },
+            {
+              "name": "Process Each Alert",
+              "type": "for_each",
+              "collection": "${flow.alerts}",
+              "actions": [
+                {
+                  "name": "Check Existing Incident",
+                  "type": "lookup_record",
+                  "table": "{{ incident_table }}",
+                  "conditions": "u_alert_name=${item.alertname}^u_namespace=${item.namespace}^state!=7^state!=8",
+                  "fields": "sys_id,number,state"
+                },
+                {
+                  "name": "Create or Update Incident",
+                  "type": "conditional",
+                  "condition": "${lookup_result.length == 0}",
+                  "true_actions": [
+                    {
+                      "name": "Create New Incident",
+                      "type": "create_record",
+                      "table": "{{ incident_table }}",
+                      "fields": {
+                        "short_description": "${item.summary}",
+                        "description": "${item.description}",
+                        "category": "Software",
+                        "subcategory": "Application",
+                        "u_alert_name": "${item.alertname}",
+                        "u_namespace": "${item.namespace}",
+                        "u_pod": "${item.pod}",
+                        "u_instance": "${item.instance}",
+                        "u_severity": "${item.severity}",
+                        "u_openshift_url": "${item.generatorURL}",
+                        "priority": "${item.severity == 'critical' ? '1' : item.severity == 'warning' ? '3' : '4'}",
+                        "impact": "${item.severity == 'critical' ? '1' : '3'}",
+                        "urgency": "${item.severity == 'critical' ? '1' : '3'}",
+                        "state": "1",
+                        "assignment_group": "OpenShift Operations",
+                        "caller_id": "system"
+                      }
+                    }
+                  ],
+                  "false_actions": [
+                    {
+                      "name": "Update Existing Incident",
+                      "type": "update_record",
+                      "table": "{{ incident_table }}",
+                      "sys_id": "${lookup_result[0].sys_id}",
+                      "fields": {
+                        "work_notes": "Alert updated: ${item.summary}\\nStatus: ${item.status}\\nTime: ${gs.nowDateTime()}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Send Alert Summary",
+              "type": "send_email",
+              "to": "openshift-ops@company.com",
+              "subject": "OpenShift Alert Summary - ${flow.alerts.length} alerts processed",
+              "body": "OpenShift Alert Processing Summary:\\n\\nTotal Alerts: ${flow.alerts.length}\\n\\nAlert Details:\\n${flow.alerts.map(function(alert) { return '- ' + alert.alertname + ' (' + alert.severity + ') in ' + alert.namespace; }).join('\\n')}"
+            }
+          ]
+        }
+    status_code: [201, 400]
+    validate_certs: false
+  register: monitoring_integration_flow_result
+  failed_when: 
+    - monitoring_integration_flow_result.status not in [201, 400]
+    - monitoring_integration_flow_result.status == 400 and 'already exists' not in (monitoring_integration_flow_result.json.error.message | default(''))
+
+- name: Create Incident Custom Fields for OpenShift Monitoring
+  uri:
+    url: "{{ servicenow_instance_url }}/api/now/table/sys_dictionary"
+    method: POST
+    user: "{{ servicenow_admin_user }}"
+    password: "{{ servicenow_admin_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    body_format: json
+    body:
+      table_name: "{{ incident_table }}"
+      column_name: "{{ item.column }}"
+      column_label: "{{ item.label }}"
+      internal_type: "{{ item.type }}"
+      max_length: "{{ item.length | default(255) }}"
+      active: true
+    status_code: [201, 400]
+    validate_certs: false
+  register: custom_fields_result
+  failed_when: false
+  loop:
+    - { column: "u_alert_name", label: "Alert Name", type: "string", length: 255 }
+    - { column: "u_namespace", label: "OpenShift Namespace", type: "string", length: 100 }
+    - { column: "u_pod", label: "Pod Name", type: "string", length: 255 }
+    - { column: "u_instance", label: "Instance", type: "string", length: 255 }
+    - { column: "u_severity", label: "Alert Severity", type: "string", length: 50 }
+    - { column: "u_openshift_url", label: "OpenShift Console URL", type: "url", length: 500 }
+
+- name: Create OpenShift Operations Assignment Group
+  uri:
+    url: "{{ servicenow_instance_url }}/api/now/table/sys_user_group"
+    method: POST
+    user: "{{ servicenow_admin_user }}"
+    password: "{{ servicenow_admin_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    body_format: json
+    body:
+      name: "OpenShift Operations"
+      description: "OpenShift platform operations and monitoring team"
+      type: "itil"
+      active: true
+      manager: "admin"
+    status_code: [201, 400]
+    validate_certs: false
+  register: ops_group_result
+  failed_when: false
+
+- name: Create Webhook Endpoint for OpenShift Alerts
+  uri:
+    url: "{{ servicenow_instance_url }}/api/now/table/sys_webhook"
+    method: POST
+    user: "{{ servicenow_admin_user }}"
+    password: "{{ servicenow_admin_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    body_format: json
+    body:
+      name: "OpenShift Alertmanager Webhook"
+      path: "/api/now/webhook/openshift_alerts"
+      active: true
+      authentication: "none"
+      description: "Webhook endpoint for receiving OpenShift Alertmanager notifications"
+      script: |
+        // Process incoming OpenShift alerts
+        var alertData = request.body;
+        if (alertData && alertData.alerts) {
+          // Trigger the monitoring integration flow
+          var flow = new sn_fd.FlowAPI();
+          flow.startFlow('{{ monitoring_integration_flow_name }}', {
+            alerts: alertData.alerts,
+            receiver: alertData.receiver,
+            status: alertData.status,
+            externalURL: alertData.externalURL
+          });
+        }
+    status_code: [201, 400]
+    validate_certs: false
+  register: webhook_result
+  failed_when: false
+
+- name: Display Monitoring Integration Flow Creation Result
+  debug:
+    msg: 
+      - "Monitoring Integration Flow: {{ 'Success' if monitoring_integration_flow_result.status == 201 else 'Skipped or Failed' }}"
+      - "Custom Fields: {{ custom_fields_result.results | selectattr('status', 'equalto', 201) | list | length }} created"
+      - "Operations Group: {{ 'Success' if ops_group_result.status == 201 else 'Skipped or Failed' }}"
+      - "Webhook Endpoint: {{ 'Success' if webhook_result.status == 201 else 'Skipped or Failed' }}"

@@ -8,7 +8,7 @@
   vars:
     sn_host: "https://dev295398.service-now.com"
     sn_username: "admin"
-    sn_password: "*AFel2uYm9N@"
+    sn_password: "{{ vault_servicenow_password }}"
 
   tasks:
     - name: Create a new incident

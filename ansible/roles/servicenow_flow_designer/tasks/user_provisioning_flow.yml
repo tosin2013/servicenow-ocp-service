@@ -1,0 +1,154 @@
+---
+# User Provisioning Flow Implementation
+# This file creates ServiceNow Flow Designer workflow for automated Keycloak user creation
+
+- name: Create User Provisioning Flow in ServiceNow
+  uri:
+    url: "{{ servicenow_instance_url }}/api/now/table/sys_hub_flow"
+    method: POST
+    user: "{{ servicenow_admin_user }}"
+    password: "{{ servicenow_admin_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    body_format: json
+    body:
+      name: "{{ user_provisioning_flow_name }}"
+      description: "Automated Keycloak user creation from ServiceNow requests"
+      active: true
+      application: "Global"
+      category: "custom"
+      flow_designer: true
+      trigger_conditions: |
+        // Trigger when a user request is approved
+        if (current.state == '3' && current.approval == 'approved') {
+          return true;
+        }
+        return false;
+      flow_definition: |
+        {
+          "trigger": {
+            "name": "Record Updated",
+            "table": "{{ user_request_table }}",
+            "conditions": "state=3^approval=approved"
+          },
+          "actions": [
+            {
+              "name": "Extract User Details",
+              "type": "script",
+              "script": "var userDetails = {\n  username: current.requested_for.user_name,\n  email: current.requested_for.email,\n  firstName: current.requested_for.first_name,\n  lastName: current.requested_for.last_name,\n  department: current.requested_for.department.name\n};\nflow.userDetails = userDetails;"
+            },
+            {
+              "name": "Create Keycloak User",
+              "type": "rest_message",
+              "rest_message": "Keycloak User Creation",
+              "endpoint": "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users",
+              "method": "POST",
+              "authentication": "{{ oauth_credential_alias }}",
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": "{\n  \"username\": \"${flow.userDetails.username}\",\n  \"email\": \"${flow.userDetails.email}\",\n  \"firstName\": \"${flow.userDetails.firstName}\",\n  \"lastName\": \"${flow.userDetails.lastName}\",\n  \"enabled\": true,\n  \"emailVerified\": true,\n  \"attributes\": {\n    \"department\": [\"${flow.userDetails.department}\"]\n  }\n}"
+            },
+            {
+              "name": "Set Temporary Password",
+              "type": "rest_message",
+              "rest_message": "Keycloak Password Reset",
+              "endpoint": "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users/${keycloak_user_id}/reset-password",
+              "method": "PUT",
+              "authentication": "{{ oauth_credential_alias }}",
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": "{\n  \"type\": \"password\",\n  \"value\": \"TempPass123!\",\n  \"temporary\": true\n}"
+            },
+            {
+              "name": "Update Request Status",
+              "type": "update_record",
+              "table": "{{ user_request_table }}",
+              "sys_id": "${current.sys_id}",
+              "fields": {
+                "state": "7",
+                "work_notes": "Keycloak user created successfully. Username: ${flow.userDetails.username}"
+              }
+            },
+            {
+              "name": "Send Notification",
+              "type": "send_email",
+              "to": "${flow.userDetails.email}",
+              "subject": "ServiceNow Account Created",
+              "body": "Your ServiceNow-Keycloak account has been created.\nUsername: ${flow.userDetails.username}\nTemporary Password: TempPass123!\nPlease log in and change your password."
+            }
+          ]
+        }
+    status_code: [201, 400]
+    validate_certs: false
+  register: user_provisioning_flow_result
+  failed_when: 
+    - user_provisioning_flow_result.status not in [201, 400]
+    - user_provisioning_flow_result.status == 400 and 'already exists' not in (user_provisioning_flow_result.json.error.message | default(''))
+
+- name: Create REST Message for Keycloak User Creation
+  uri:
+    url: "{{ servicenow_instance_url }}/api/now/table/sys_rest_message"
+    method: POST
+    user: "{{ servicenow_admin_user }}"
+    password: "{{ servicenow_admin_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    body_format: json
+    body:
+      name: "Keycloak User Creation"
+      description: "REST message for creating users in Keycloak"
+      endpoint: "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users"
+      authentication_type: "oauth2"
+      oauth_profile: "{{ oauth_entity_profile }}"
+      use_mutual_auth: false
+    status_code: [201, 400]
+    validate_certs: false
+  register: rest_message_result
+  failed_when: false
+
+- name: Create REST Message Method for User Creation
+  uri:
+    url: "{{ servicenow_instance_url }}/api/now/table/sys_rest_message_fn"
+    method: POST
+    user: "{{ servicenow_admin_user }}"
+    password: "{{ servicenow_admin_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    body_format: json
+    body:
+      rest_message: "{{ rest_message_result.json.result.sys_id | default('') }}"
+      function_name: "createUser"
+      http_method: "POST"
+      endpoint: "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users"
+      content: |
+        {
+          "username": "${username}",
+          "email": "${email}",
+          "firstName": "${firstName}",
+          "lastName": "${lastName}",
+          "enabled": true,
+          "emailVerified": true,
+          "attributes": {
+            "department": ["${department}"]
+          }
+        }
+    status_code: [201, 400]
+    validate_certs: false
+  register: rest_method_result
+  failed_when: false
+  when: rest_message_result.status == 201
+
+- name: Display User Provisioning Flow Creation Result
+  debug:
+    msg: 
+      - "User Provisioning Flow: {{ 'Success' if user_provisioning_flow_result.status == 201 else 'Skipped or Failed' }}"
+      - "REST Message: {{ 'Success' if rest_message_result.status == 201 else 'Skipped or Failed' }}"
+      - "REST Method: {{ 'Success' if rest_method_result.status == 201 else 'Skipped or Failed' }}"
