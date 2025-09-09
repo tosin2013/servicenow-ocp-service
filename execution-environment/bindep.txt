@@ -1,0 +1,41 @@
+# System packages required for the execution environment
+# Format: package_name [selector] [platform:platform_name ...]
+
+# Basic utilities
+curl [platform:centos-8 platform:rhel-8 platform:fedora]
+tar [platform:centos-8 platform:rhel-8 platform:fedora]
+wget [platform:centos-8 platform:rhel-8 platform:fedora]
+
+# Git for GitOps operations
+git [platform:centos-8 platform:rhel-8 platform:fedora]
+
+# JSON processing
+jq [platform:centos-8 platform:rhel-8 platform:fedora]
+
+# Network utilities
+net-tools [platform:centos-8 platform:rhel-8 platform:fedora]
+bind-utils [platform:centos-8 platform:rhel-8 platform:fedora]
+telnet [platform:centos-8 platform:rhel-8 platform:fedora]
+
+# SSL/TLS tools
+ca-certificates [platform:centos-8 platform:rhel-8 platform:fedora]
+openssl [platform:centos-8 platform:rhel-8 platform:fedora]
+
+# Development tools (for pip compilations)
+gcc [compile platform:centos-8 platform:rhel-8 platform:fedora]
+python3-devel [compile platform:centos-8 platform:rhel-8 platform:fedora]
+libffi-devel [compile platform:centos-8 platform:rhel-8 platform:fedora]
+openssl-devel [compile platform:centos-8 platform:rhel-8 platform:fedora]
+
+# Container tools
+podman [platform:centos-8 platform:rhel-8 platform:fedora]
+skopeo [platform:centos-8 platform:rhel-8 platform:fedora]
+
+# Text processing
+sed [platform:centos-8 platform:rhel-8 platform:fedora]
+awk [platform:centos-8 platform:rhel-8 platform:fedora]
+grep [platform:centos-8 platform:rhel-8 platform:fedora]
+
+# Archive utilities
+unzip [platform:centos-8 platform:rhel-8 platform:fedora]
+zip [platform:centos-8 platform:rhel-8 platform:fedora]

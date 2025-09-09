@@ -1,0 +1,250 @@
+name: Build and Push Execution Environment
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'execution-environment/**'
+      - '.github/workflows/build-ee.yml'
+    tags:
+      - 'ee-v*'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'execution-environment/**'
+
+env:
+  REGISTRY: quay.io/servicenow-ocp
+  IMAGE_NAME: servicenow-ocp-ee
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install ansible-builder
+      run: |
+        pip install ansible-builder>=3.0.0
+        
+    - name: Set up Podman
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y podman
+        
+    - name: Install Trivy for security scanning
+      run: |
+        sudo apt-get install wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy
+        
+    - name: Generate version tag
+      id: version
+      run: |
+        if [[ $GITHUB_REF == refs/tags/ee-v* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/ee-v}
+        elif [[ $GITHUB_REF == refs/heads/main ]]; then
+          VERSION="latest"
+        else
+          VERSION="dev-${GITHUB_SHA::8}"
+        fi
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Building version: ${VERSION}"
+        
+    - name: Build execution environment
+      working-directory: execution-environment
+      run: |
+        ansible-builder build \
+          --tag "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+          --container-runtime podman \
+          --verbosity 2 \
+          .
+          
+    - name: Test execution environment
+      run: |
+        # Test basic Python functionality
+        echo "Testing Python dependencies..."
+        podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+          python3 -c "
+import yaml
+import requests
+import kubernetes
+import openshift
+print('✓ Python dependencies working')
+"
+        
+        # Test Ansible collections
+        echo "Testing Ansible collections..."
+        podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+          ansible-galaxy collection list
+          
+        # Test OpenShift CLI
+        echo "Testing OpenShift CLI..."
+        podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+          oc version --client
+          
+        # Test custom modules can be imported
+        echo "Testing custom modules..."
+        podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+          python3 -c "
+import sys
+sys.path.append('/opt/ansible/custom-modules')
+try:
+    import servicenow_connection_alias
+    import openshift_project_with_rbac
+    print('✓ Custom modules can be imported')
+except ImportError as e:
+    print(f'✗ Failed to import custom modules: {e}')
+    exit(1)
+"
+        
+    - name: Security scan with Trivy
+      run: |
+        trivy image --exit-code 1 --severity HIGH,CRITICAL \
+          --format sarif --output trivy-results.sarif \
+          "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+          
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: trivy-results.sarif
+        
+    - name: Generate SBOM (Software Bill of Materials)
+      run: |
+        podman run --rm -v $(pwd):/workspace "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+          sh -c "
+echo 'Generating Software Bill of Materials...'
+echo '# Software Bill of Materials' > /workspace/SBOM.md
+echo '' >> /workspace/SBOM.md
+echo '## Base Image' >> /workspace/SBOM.md
+echo 'registry.redhat.io/ubi8/ubi:latest' >> /workspace/SBOM.md
+echo '' >> /workspace/SBOM.md
+echo '## Python Packages' >> /workspace/SBOM.md
+pip list --format=markdown >> /workspace/SBOM.md
+echo '' >> /workspace/SBOM.md
+echo '## Ansible Collections' >> /workspace/SBOM.md
+ansible-galaxy collection list >> /workspace/SBOM.md
+echo '' >> /workspace/SBOM.md
+echo '## System Packages' >> /workspace/SBOM.md
+rpm -qa --qf '%{NAME}-%{VERSION}-%{RELEASE}\n' | sort >> /workspace/SBOM.md
+"
+        
+    - name: Login to Container Registry
+      if: github.event_name != 'pull_request'
+      uses: redhat-actions/podman-login@v1
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+        
+    - name: Push to registry
+      if: github.event_name != 'pull_request'
+      run: |
+        # Tag for registry
+        podman tag "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+          "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+          
+        # Push versioned tag
+        podman push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+        
+        # Also push as latest if this is a release tag
+        if [[ "${{ steps.version.outputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          podman tag "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          podman push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        fi
+        
+    - name: Generate image manifest
+      if: github.event_name != 'pull_request'
+      run: |
+        cat > image-manifest.json << EOF
+        {
+          "image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}",
+          "built_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "version": "${{ steps.version.outputs.version }}",
+          "git_ref": "${{ github.ref }}",
+          "git_sha": "${{ github.sha }}",
+          "base_image": "registry.redhat.io/ubi8/ubi:latest",
+          "size_mb": $(podman images --format "table {{.Size}}" "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" | tail -n1 | sed 's/MB//' | tr -d ' ')
+        }
+        EOF
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: execution-environment-artifacts
+        path: |
+          SBOM.md
+          image-manifest.json
+          trivy-results.sarif
+          
+    - name: Create release
+      if: startsWith(github.ref, 'refs/tags/ee-v')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Execution Environment ${{ steps.version.outputs.version }}
+        body: |
+          ## ServiceNow OpenShift Custom Execution Environment ${{ steps.version.outputs.version }}
+          
+          ### Container Image
+          - **Registry**: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}`
+          - **Built**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          - **Git SHA**: ${{ github.sha }}
+          
+          ### Key Features
+          - Python libraries for Keycloak and OpenShift integration
+          - Ansible collections for Kubernetes and ServiceNow
+          - Custom modules for ServiceNow connection management
+          - OpenShift CLI tools
+          - Security hardened with vulnerability scanning
+          
+          ### Usage in AAP
+          ```yaml
+          execution_environment:
+            image: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+          ```
+          
+          See attached SBOM.md for complete software bill of materials.
+        draft: false
+        prerelease: false
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name != 'pull_request'
+    
+    steps:
+    - name: Run comprehensive security scan
+      run: |
+        echo "Running additional security scans..."
+        # Add additional security scanning tools here
+        # Example: Grype, Clair, etc.
+        
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Run integration tests
+      run: |
+        echo "Running integration tests..."
+        # Add integration tests here
+        # Test actual ServiceNow and OpenShift API interactions
+        # Mock services for testing

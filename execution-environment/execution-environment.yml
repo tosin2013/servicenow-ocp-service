@@ -1,0 +1,51 @@
+---
+version: 3
+
+images:
+  base_image:
+    name: 'registry.redhat.io/ubi8/ubi:latest'
+
+dependencies:
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+
+additional_build_steps:
+  prepend_base:
+    - RUN dnf update -y && dnf install -y curl tar git jq ca-certificates openssl
+    
+  prepend_galaxy:
+    # Install OpenShift CLI
+    - RUN curl -sLo /tmp/oc.tar.gz "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz" && \
+        tar -xzf /tmp/oc.tar.gz -C /usr/local/bin/ oc && \
+        chmod +x /usr/local/bin/oc && \
+        rm -f /tmp/oc.tar.gz
+    
+    # Copy custom CA certificates if needed
+    - COPY custom-ca-certs/ /etc/pki/ca-trust/source/anchors/ || true
+    - RUN update-ca-trust || true
+    
+  append_final:
+    # Clean up package cache
+    - RUN dnf clean all
+    
+    # Set up ansible paths
+    - RUN mkdir -p /opt/ansible/custom-modules /opt/ansible/plugins /opt/ansible/configs
+    
+    # Copy custom modules and plugins
+    - COPY custom-modules/ /opt/ansible/custom-modules/
+    - COPY plugins/ /opt/ansible/plugins/
+    
+    # Set environment variables
+    - ENV ANSIBLE_HOST_KEY_CHECKING=False
+    - ENV ANSIBLE_GATHERING=smart  
+    - ENV ANSIBLE_RETRY_FILES_ENABLED=False
+    - ENV PYTHONUNBUFFERED=1
+    - ENV ANSIBLE_LIBRARY=/opt/ansible/custom-modules
+    - ENV ANSIBLE_COLLECTIONS_PATH=/usr/share/ansible/collections
+    
+    # Use non-root user for security
+    - USER 1001
+
+build_arg_defaults:
+  ANSIBLE_CORE_VERSION: ">=2.14.0"
