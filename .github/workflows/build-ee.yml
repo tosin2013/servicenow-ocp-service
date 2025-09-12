@@ -66,8 +66,7 @@ jobs:
         ansible-builder build \
           --tag "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
           --container-runtime podman \
-          --verbosity 2 \
-          .
+          --verbosity 2
           
     - name: Test execution environment
       run: |
@@ -100,7 +99,7 @@ jobs:
           "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
           
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: trivy-results.sarif
