@@ -73,6 +73,9 @@ logs/
 *password*
 *credential*
 *key*
+.vault_pass
+.vault_pass.txt
+ansible.cfg
 !**/secret-reader-*.yaml
 !**/external-secret.yaml
 !**/secret-store.yaml

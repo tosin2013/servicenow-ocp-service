@@ -90,15 +90,22 @@ We will enhance the architecture by introducing **Ansible Automation Platform (A
 ## Implementation Considerations
 
 ### Deployment Strategy:
-1. **Phase 1:** Deploy AAP on OpenShift using the AAP Operator
+1. **Phase 1:** Deploy AAP on OpenShift using kustomize and AAP Operator (ADR-012)
 2. **Phase 2:** Migrate existing Ansible playbooks to AAP Job Templates
 3. **Phase 3:** Update ServiceNow workflows to call AAP instead of direct APIs
 4. **Phase 4:** Implement monitoring, alerting, and operational procedures
 
+### Deployment Implementation:
+The AAP deployment is now implemented via GitOps using kustomize overlays at `kustomize/ansible-automation-platform/`:
+- **Operator Deployment:** Automated subscription management with configurable channels
+- **Instance Configuration:** AnsibleAutomationPlatform custom resource with controller and hub components
+- **Environment Management:** Layered overlays support multiple deployment environments
+- **ArgoCD Integration:** Fully integrated with existing GitOps workflow (ADR-004)
+
 ### Integration Points:
 - **ServiceNow Integration:** Use AAP REST API for job template execution
 - **Credential Management:** Migrate credentials from ServiceNow to AAP credential store
-- **GitOps Integration:** AAP playbooks stored in Git, aligned with ADR-004 principles
+- **GitOps Integration:** AAP deployment and playbooks stored in Git, aligned with ADR-004 principles
 - **Monitoring Integration:** AAP metrics and logs integrated with OpenShift monitoring (ADR-008)
 
 ## References

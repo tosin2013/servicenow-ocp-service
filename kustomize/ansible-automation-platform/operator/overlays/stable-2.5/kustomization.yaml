@@ -14,4 +14,3 @@ patches:
       kind: Subscription
       name: ansible-automation-platform
       namespace: aap
-      version: v1alpha1
