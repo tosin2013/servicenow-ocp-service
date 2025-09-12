@@ -60,13 +60,23 @@ jobs:
         echo "version=${VERSION}" >> $GITHUB_OUTPUT
         echo "Building version: ${VERSION}"
         
+    echo "Building version: ${VERSION}"
+        
+    - name: Login to Red Hat Registry
+      uses: redhat-actions/podman-login@v1
+      with:
+        registry: registry.redhat.io
+        username: ${{ secrets.REDHAT_USERNAME }}
+        password: ${{ secrets.REDHAT_PASSWORD }}
+
     - name: Build execution environment
       working-directory: execution-environment
       run: |
         ansible-builder build \
           --tag "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
           --container-runtime podman \
-          --verbosity 2
+          --verbosity 2 \
+          .
           
     - name: Test execution environment
       run: |
