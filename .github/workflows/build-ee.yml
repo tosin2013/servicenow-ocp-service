@@ -71,17 +71,18 @@ jobs:
           
     - name: Test execution environment
       run: |
-        # Test basic Python functionality
+        # Test basic Python functionality using external script
         echo "Testing Python dependencies..."
-        podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
-          python3 -c "
-import yaml
-import requests
-import kubernetes
-import openshift
-print('✓ Python dependencies working')
-"
+        podman run --rm -v ./execution-environment/tests:/tests:ro \
+          "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+          python3 /tests/test_dependencies.py
         
+        # Test custom modules can be imported using external script
+        echo "Testing custom modules..."
+        podman run --rm -v ./execution-environment/tests:/tests:ro \
+          "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+          python3 /tests/test_custom_modules.py
+
         # Test Ansible collections
         echo "Testing Ansible collections..."
         podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
@@ -91,21 +92,6 @@ print('✓ Python dependencies working')
         echo "Testing OpenShift CLI..."
         podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
           oc version --client
-          
-        # Test custom modules can be imported
-        echo "Testing custom modules..."
-        podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
-          python3 -c "
-import sys
-sys.path.append('/opt/ansible/custom-modules')
-try:
-    import servicenow_connection_alias
-    import openshift_project_with_rbac
-    print('✓ Custom modules can be imported')
-except ImportError as e:
-    print(f'✗ Failed to import custom modules: {e}')
-    exit(1)
-"
         
     - name: Security scan with Trivy
       run: |
@@ -121,23 +107,24 @@ except ImportError as e:
         
     - name: Generate SBOM (Software Bill of Materials)
       run: |
-        podman run --rm -v $(pwd):/workspace "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
+        podman run --rm -v $(pwd):/workspace \
+          "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
           sh -c "
-echo 'Generating Software Bill of Materials...'
-echo '# Software Bill of Materials' > /workspace/SBOM.md
-echo '' >> /workspace/SBOM.md
-echo '## Base Image' >> /workspace/SBOM.md
-echo 'registry.redhat.io/ubi8/ubi:latest' >> /workspace/SBOM.md
-echo '' >> /workspace/SBOM.md
-echo '## Python Packages' >> /workspace/SBOM.md
-pip list --format=markdown >> /workspace/SBOM.md
-echo '' >> /workspace/SBOM.md
-echo '## Ansible Collections' >> /workspace/SBOM.md
-ansible-galaxy collection list >> /workspace/SBOM.md
-echo '' >> /workspace/SBOM.md
-echo '## System Packages' >> /workspace/SBOM.md
-rpm -qa --qf '%{NAME}-%{VERSION}-%{RELEASE}\n' | sort >> /workspace/SBOM.md
-"
+            echo 'Generating Software Bill of Materials...' && \
+            echo '# Software Bill of Materials' > /workspace/SBOM.md && \
+            echo '' >> /workspace/SBOM.md && \
+            echo '## Base Image' >> /workspace/SBOM.md && \
+            echo 'registry.redhat.io/ubi8/ubi:latest' >> /workspace/SBOM.md && \
+            echo '' >> /workspace/SBOM.md && \
+            echo '## Python Packages' >> /workspace/SBOM.md && \
+            pip list --format=markdown >> /workspace/SBOM.md && \
+            echo '' >> /workspace/SBOM.md && \
+            echo '## Ansible Collections' >> /workspace/SBOM.md && \
+            ansible-galaxy collection list >> /workspace/SBOM.md && \
+            echo '' >> /workspace/SBOM.md && \
+            echo '## System Packages' >> /workspace/SBOM.md && \
+            rpm -qa --qf '%{NAME}-%{VERSION}-%{RELEASE}\n' | sort >> /workspace/SBOM.md
+          "
         
     - name: Login to Container Registry
       if: github.event_name != 'pull_request'
