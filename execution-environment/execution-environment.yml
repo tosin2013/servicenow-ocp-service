@@ -46,6 +46,3 @@ additional_build_steps:
     
     # Use non-root user for security
     - USER 1001
-
-build_arg_defaults:
-  ANSIBLE_CORE_VERSION: ">=2.14.0"
