@@ -16,7 +16,7 @@ servicenow_realm_name: "servicenow"
 # OpenShift Configuration
 ocp_api_url: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
 ocp_apps_domain: "apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
-ocp_token: "sha256~UZSaW1BmEY8v5aP66hzsFDJ0vYVqBwO4ZjP48U7uFII"
+ocp_token: "{{ lookup('env', 'OCP_TOKEN') }}"  # Retrieved from environment variable
 
 # Flow Designer Workflow Names
 user_flow_name: "Keycloak User Provisioning"
