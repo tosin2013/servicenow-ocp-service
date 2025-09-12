@@ -75,12 +75,12 @@ jobs:
         echo "Testing Python dependencies..."
         podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
           python3 -c "
-import yaml
-import requests
-import kubernetes
-import openshift
-print('✓ Python dependencies working')
-"
+        import yaml
+        import requests
+        import kubernetes
+        import openshift
+        print('✓ Python dependencies working')
+        "
         
         # Test Ansible collections
         echo "Testing Ansible collections..."
@@ -96,16 +96,16 @@ print('✓ Python dependencies working')
         echo "Testing custom modules..."
         podman run --rm "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
           python3 -c "
-import sys
-sys.path.append('/opt/ansible/custom-modules')
-try:
-    import servicenow_connection_alias
-    import openshift_project_with_rbac
-    print('✓ Custom modules can be imported')
-except ImportError as e:
-    print(f'✗ Failed to import custom modules: {e}')
-    exit(1)
-"
+        import sys
+        sys.path.append('/opt/ansible/custom-modules')
+        try:
+            import servicenow_connection_alias
+            import openshift_project_with_rbac
+            print('✓ Custom modules can be imported')
+        except ImportError as e:
+            print(f'✗ Failed to import custom modules: {e}')
+            exit(1)
+        "
         
     - name: Security scan with Trivy
       run: |
