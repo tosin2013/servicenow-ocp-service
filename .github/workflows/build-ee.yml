@@ -73,8 +73,7 @@ jobs:
         ansible-builder build \
           --tag "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" \
           --container-runtime podman \
-          --verbosity 2 \
-          .
+          --verbosity 2
           
     - name: Test execution environment
       run: |
