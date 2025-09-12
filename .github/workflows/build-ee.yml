@@ -60,8 +60,6 @@ jobs:
         echo "version=${VERSION}" >> $GITHUB_OUTPUT
         echo "Building version: ${VERSION}"
         
-    echo "Building version: ${VERSION}"
-        
     - name: Login to Red Hat Registry
       uses: redhat-actions/podman-login@v1
       with:
