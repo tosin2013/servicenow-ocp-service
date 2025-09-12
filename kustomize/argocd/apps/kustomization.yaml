@@ -6,3 +6,5 @@ resources:
   - external-secrets-operator.yaml
   - rhsso-operator.yaml
   - rhsso-instance.yaml
+  - aap-operator.yaml
+  - aap-instance.yaml
