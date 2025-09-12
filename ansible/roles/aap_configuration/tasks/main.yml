@@ -1,0 +1,28 @@
+---
+# ansible/roles/aap_configuration/tasks/main.yml
+
+- name: Configure Ansible Automation Platform
+  block:
+    - name: Set AAP provider details
+      ansible.builtin.set_fact:
+        controller_host: "{{ aap_url }}"
+        controller_username: "{{ aap_username }}"
+        controller_password: "{{ aap_password }}"
+        controller_validate_certs: false
+
+    - name: Include credential setup tasks
+      include_tasks: setup_credentials.yml
+
+    - name: Include project setup tasks
+      include_tasks: setup_project.yml
+
+    - name: Include inventory setup tasks
+      include_tasks: setup_inventory.yml
+
+    - name: Include job template setup tasks
+      include_tasks: setup_job_template.yml
+  
+  rescue:
+    - name: Configuration Failed
+      ansible.builtin.fail:
+        msg: "Failed to configure Ansible Automation Platform. Please check AAP credentials and connectivity."

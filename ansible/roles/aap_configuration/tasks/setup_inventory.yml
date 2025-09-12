@@ -1,0 +1,8 @@
+---
+# ansible/roles/aap_configuration/tasks/setup_inventory.yml
+
+- name: Create Default Inventory
+  ansible.controller.inventory:
+    name: "Default Inventory"
+    organization: "Default"
+    state: present

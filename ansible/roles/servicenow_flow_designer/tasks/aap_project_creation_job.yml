@@ -1,0 +1,16 @@
+---
+# ansible/roles/servicenow_flow_designer/tasks/aap_project_creation_job.yml
+
+- name: Simulate AAP Job Template for OpenShift Project Creation
+  debug:
+    msg:
+      - "Simulating AAP Job Template Execution"
+      - "Playbook: ansible/servicenow_project_creation.yml"
+      - "Input Variables:"
+      - "  project_name: {{ project_details.projectName }}"
+      - "  display_name: {{ project_details.displayName }}"
+      - "  description: {{ project_details.description }}"
+      - "  requestor: {{ project_details.requestor }}"
+      - "  servicenow_request_number: {{ servicenow_request.number }}"
+      - "  environment: {{ project_details.environment }}"
+      - "  team: {{ project_details.team }}"

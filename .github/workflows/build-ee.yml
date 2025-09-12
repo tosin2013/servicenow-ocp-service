@@ -14,7 +14,7 @@ on:
       - 'execution-environment/**'
 
 env:
-  REGISTRY: quay.io/servicenow-ocp
+  REGISTRY: quay.io/takinosh
   IMAGE_NAME: servicenow-ocp-ee
 
 jobs:

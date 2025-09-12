@@ -1,0 +1,166 @@
+---
+# OIDC Authentication Flow Testing
+# This file tests the OIDC authentication flow between OpenShift and Keycloak
+
+- name: Test Keycloak OIDC discovery endpoint
+  uri:
+    url: "{{ oidc_issuer_url }}/.well-known/openid_configuration"
+    method: GET
+    validate_certs: false
+    status_code: [200]
+  register: oidc_discovery_test
+  failed_when: false
+
+- name: Parse OIDC discovery response
+  set_fact:
+    oidc_endpoints: "{{ oidc_discovery_test.json | default({}) }}"
+  when: oidc_discovery_test.status == 200
+
+- name: Test Keycloak authorization endpoint
+  uri:
+    url: "{{ oidc_endpoints.authorization_endpoint | default(oidc_authorization_endpoint) }}"
+    method: GET
+    validate_certs: false
+    status_code: [200, 400, 401]  # 400/401 expected without proper parameters
+  register: auth_endpoint_test
+  failed_when: false
+
+- name: Test Keycloak token endpoint
+  uri:
+    url: "{{ oidc_endpoints.token_endpoint | default(oidc_token_endpoint) }}"
+    method: POST
+    validate_certs: false
+    body_format: form-urlencoded
+    body:
+      grant_type: "client_credentials"
+      client_id: "{{ oidc_client_id }}"
+      client_secret: "{{ oidc_client_secret }}"
+    status_code: [200, 400, 401]  # May fail if client_credentials not enabled
+  register: token_endpoint_test
+  failed_when: false
+
+- name: Test Keycloak userinfo endpoint
+  uri:
+    url: "{{ oidc_endpoints.userinfo_endpoint | default(oidc_userinfo_endpoint) }}"
+    method: GET
+    validate_certs: false
+    status_code: [200, 401]  # 401 expected without valid token
+  register: userinfo_endpoint_test
+  failed_when: false
+
+- name: Test OpenShift OAuth metadata endpoint
+  uri:
+    url: "{{ openshift_api_url }}/.well-known/oauth_authorization_server"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ openshift_token }}"
+    validate_certs: false
+    status_code: [200]
+  register: openshift_oauth_metadata
+  failed_when: false
+
+- name: Check if OIDC provider appears in OpenShift OAuth metadata
+  set_fact:
+    oidc_in_oauth_metadata: "{{ (openshift_oauth_metadata.json.issuer | default('')) in oidc_issuer_url }}"
+  when: openshift_oauth_metadata.status == 200
+
+- name: Test OpenShift login page for OIDC provider
+  uri:
+    url: "{{ openshift_console_url }}/auth/login"
+    method: GET
+    validate_certs: false
+    status_code: [200]
+  register: login_page_test
+  failed_when: false
+
+- name: Create test user in Keycloak for OIDC testing
+  uri:
+    url: "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users"
+    method: POST
+    user: "{{ keycloak_admin_user }}"
+    password: "{{ keycloak_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    body_format: json
+    body:
+      username: "oidc-test-user"
+      email: "oidc-test@example.com"
+      firstName: "OIDC"
+      lastName: "Test User"
+      enabled: true
+      emailVerified: true
+      groups:
+        - "/developers"
+      credentials:
+        - type: "password"
+          value: "TestPassword123!"
+          temporary: false
+    status_code: [201, 409]  # 409 if user already exists
+  register: test_user_creation
+  failed_when: false
+
+- name: Get test user details
+  uri:
+    url: "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users?username=oidc-test-user"
+    method: GET
+    user: "{{ keycloak_admin_user }}"
+    password: "{{ keycloak_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+  register: test_user_details
+  when: test_user_creation.status in [201, 409]
+
+- name: Set test user ID
+  set_fact:
+    test_user_id: "{{ test_user_details.json[0].id }}"
+  when: 
+    - test_user_details is defined
+    - test_user_details.json | length > 0
+
+- name: Add test user to developers group
+  uri:
+    url: "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users/{{ test_user_id }}/groups/{{ developers_group_id | default('developers') }}"
+    method: PUT
+    user: "{{ keycloak_admin_user }}"
+    password: "{{ keycloak_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: [204, 404]  # 404 if group doesn't exist
+  register: add_user_to_group
+  failed_when: false
+  when: test_user_id is defined
+
+- name: Generate OIDC integration test summary
+  set_fact:
+    oidc_test_summary:
+      keycloak_discovery: "{{ 'Success' if oidc_discovery_test.status == 200 else 'Failed' }}"
+      authorization_endpoint: "{{ 'Accessible' if auth_endpoint_test.status in [200, 400, 401] else 'Failed' }}"
+      token_endpoint: "{{ 'Accessible' if token_endpoint_test.status in [200, 400, 401] else 'Failed' }}"
+      userinfo_endpoint: "{{ 'Accessible' if userinfo_endpoint_test.status in [200, 401] else 'Failed' }}"
+      openshift_oauth_metadata: "{{ 'Success' if openshift_oauth_metadata.status == 200 else 'Failed' }}"
+      openshift_login_page: "{{ 'Accessible' if login_page_test.status == 200 else 'Failed' }}"
+      test_user_created: "{{ 'Success' if test_user_creation.status in [201, 409] else 'Failed' }}"
+
+- name: Display OIDC integration test results
+  debug:
+    msg:
+      - "🧪 OIDC Integration Test Results"
+      - "==============================="
+      - "Keycloak OIDC Discovery: {{ oidc_test_summary.keycloak_discovery }}"
+      - "Authorization Endpoint: {{ oidc_test_summary.authorization_endpoint }}"
+      - "Token Endpoint: {{ oidc_test_summary.token_endpoint }}"
+      - "UserInfo Endpoint: {{ oidc_test_summary.userinfo_endpoint }}"
+      - "OpenShift OAuth Metadata: {{ oidc_test_summary.openshift_oauth_metadata }}"
+      - "OpenShift Login Page: {{ oidc_test_summary.openshift_login_page }}"
+      - "Test User Created: {{ oidc_test_summary.test_user_created }}"
+      - ""
+      - "🔗 Test URLs:"
+      - "  Keycloak OIDC Discovery: {{ oidc_issuer_url }}/.well-known/openid_configuration"
+      - "  OpenShift Console Login: {{ openshift_console_url }}/auth/login"
+      - "  Test User: oidc-test-user / TestPassword123!"
+      - ""
+      - "📋 Manual Testing Steps:"
+      - "  1. Navigate to {{ openshift_console_url }}"
+      - "  2. Click on '{{ oidc_display_name }}' login option"
+      - "  3. Login with: oidc-test-user / TestPassword123!"
+      - "  4. Verify user has 'edit' permissions (developers group)"

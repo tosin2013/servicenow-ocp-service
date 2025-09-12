@@ -1,0 +1,9 @@
+---
+# ansible/configure_aap.yml
+
+- name: Configure Ansible Automation Platform
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - aap_configuration

@@ -1,0 +1,103 @@
+---
+# ansible/servicenow_project_creation.yml
+
+- name: Create OpenShift Project from ServiceNow Request
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    # These variables would be passed in from the AAP Job Template,
+    # which in turn gets them from the ServiceNow Flow Designer call.
+    project_name: "example-project"
+    display_name: "Example Project"
+    description: "An example project created from a ServiceNow request."
+    requestor: "example-user"
+    servicenow_request_number: "REQ0000001"
+    environment: "development"
+    team: "example-team"
+
+  tasks:
+    - name: Set OpenShift API authentication facts
+      set_fact:
+        openshift_auth:
+          api_key: "{{ lookup('env', 'OPENSHIFT_API_TOKEN') }}"
+      no_log: true
+
+    - name: Fail if OPENSHIFT_API_TOKEN is not set
+      fail:
+        msg: "The OPENSHIFT_API_TOKEN environment variable is not set. This playbook requires an OpenShift API token for authentication."
+      when: openshift_auth.api_key is not defined or openshift_auth.api_key == ""
+
+    - name: Create OpenShift Project (Namespace)
+      kubernetes.core.k8s:
+        state: present
+        api_key: "{{ openshift_auth.api_key }}"
+        api_version: v1
+        kind: Namespace
+        name: "{{ project_name }}"
+        definition:
+          metadata:
+            labels:
+              servicenow.request: "{{ servicenow_request_number }}"
+              environment: "{{ environment }}"
+              team: "{{ team }}"
+              managed-by: "servicenow-aap"
+            annotations:
+              openshift.io/display-name: "{{ display_name }}"
+              openshift.io/description: "{{ description }}"
+              openshift.io/requestor: "{{ requestor }}"
+
+    - name: Create Project Role Binding
+      kubernetes.core.k8s:
+        state: present
+        api_key: "{{ openshift_auth.api_key }}"
+        definition:
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: RoleBinding
+          metadata:
+            name: "{{ requestor }}-admin"
+            namespace: "{{ project_name }}"
+          subjects:
+            - kind: User
+              name: "{{ requestor }}"
+              apiGroup: rbac.authorization.k8s.io
+          roleRef:
+            kind: ClusterRole
+            name: admin
+            apiGroup: rbac.authorization.k8s.io
+
+    - name: Create Resource Quotas
+      kubernetes.core.k8s:
+        state: present
+        api_key: "{{ openshift_auth.api_key }}"
+        definition:
+          apiVersion: v1
+          kind: ResourceQuota
+          metadata:
+            name: "compute-quota"
+            namespace: "{{ project_name }}"
+          spec:
+            hard:
+              requests.cpu: "4"
+              requests.memory: "8Gi"
+              limits.cpu: "8"
+              limits.memory: "16Gi"
+              pods: "10"
+              persistentvolumeclaims: "5"
+
+    - name: Create default-deny Network Policy
+      kubernetes.core.k8s:
+        state: present
+        api_key: "{{ openshift_auth.api_key }}"
+        definition:
+          apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: "default-deny-all"
+            namespace: "{{ project_name }}"
+          spec:
+            podSelector: {}
+            policyTypes:
+              - Ingress
+              - Egress

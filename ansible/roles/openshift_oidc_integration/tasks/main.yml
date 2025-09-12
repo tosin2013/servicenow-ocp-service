@@ -1,0 +1,81 @@
+---
+# OpenShift OIDC Integration Tasks
+# This file orchestrates the complete OIDC integration between OpenShift and Keycloak
+
+- name: Display OpenShift OIDC Integration Banner
+  debug:
+    msg:
+      - "🔐 OpenShift OIDC Integration with Keycloak"
+      - "============================================="
+      - "Configuring OpenShift to use Keycloak as OIDC identity provider"
+      - "OpenShift API: {{ openshift_api_url }}"
+      - "Keycloak URL: {{ keycloak_url }}"
+      - "Realm: {{ keycloak_realm }}"
+      - "OIDC Provider: {{ oidc_provider_name }}"
+      - ""
+
+- name: Verify OpenShift API Access
+  uri:
+    url: "{{ openshift_api_url }}/version"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ openshift_token }}"
+    validate_certs: false
+    status_code: [200, 401, 403]
+  register: openshift_api_test
+  failed_when: false
+
+- name: Display OpenShift API Access Status
+  debug:
+    msg: "OpenShift API Access: {{ 'Success' if openshift_api_test.status == 200 else 'Failed - Check token' }}"
+
+- name: Verify Keycloak Admin Access
+  uri:
+    url: "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}"
+    method: GET
+    user: "{{ keycloak_admin_user }}"
+    password: "{{ keycloak_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: [200, 401, 403]
+  register: keycloak_api_test
+  failed_when: false
+
+- name: Display Keycloak API Access Status
+  debug:
+    msg: "Keycloak API Access: {{ 'Success' if keycloak_api_test.status == 200 else 'Failed - Check credentials' }}"
+
+- name: Configure Keycloak OpenShift Client
+  include_tasks: keycloak_client_config.yml
+  when: keycloak_api_test.status == 200
+
+- name: Configure OpenShift OIDC Identity Provider
+  include_tasks: openshift_oauth_config.yml
+  when: openshift_api_test.status == 200
+
+- name: Configure RBAC and Group Mappings
+  include_tasks: rbac_group_mappings.yml
+  when:
+    - openshift_api_test.status == 200
+    - create_cluster_role_bindings | bool
+
+- name: Test OIDC Authentication Flow
+  include_tasks: test_oidc_flow.yml
+  when:
+    - openshift_api_test.status == 200
+    - keycloak_api_test.status == 200
+
+- name: OIDC Integration Summary
+  debug:
+    msg:
+      - "🎯 OpenShift OIDC Integration Summary"
+      - "====================================="
+      - "✅ Keycloak Client: {{ 'Configured' if keycloak_api_test.status == 200 else 'Skipped' }}"
+      - "✅ OpenShift OAuth: {{ 'Configured' if openshift_api_test.status == 200 else 'Skipped' }}"
+      - "✅ RBAC Mappings: {{ 'Configured' if (openshift_api_test.status == 200 and create_cluster_role_bindings) else 'Skipped' }}"
+      - ""
+      - "🚀 Next Steps:"
+      - "  1. Test login at: {{ openshift_console_url }}"
+      - "  2. Verify user groups and permissions"
+      - "  3. Configure additional RBAC as needed"
+      - ""

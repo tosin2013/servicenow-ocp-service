@@ -40,56 +40,13 @@
               "script": "var projectDetails = {\n  projectName: current.variables.project_name || 'project-' + current.number.toLowerCase(),\n  displayName: current.variables.display_name || current.short_description,\n  description: current.variables.description || current.description,\n  requestor: current.requested_for.user_name,\n  environment: current.variables.environment || 'development',\n  team: current.variables.team || 'default'\n};\nflow.projectDetails = projectDetails;"
             },
             {
-              "name": "Create OpenShift Project",
-              "type": "rest_message",
-              "rest_message": "OpenShift Project Creation",
-              "endpoint": "{{ openshift_api_url }}/api/v1/namespaces",
-              "method": "POST",
-              "authentication": "oauth2",
-              "headers": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {{ openshift_token }}"
-              },
-              "body": "{\n  \"apiVersion\": \"v1\",\n  \"kind\": \"Namespace\",\n  \"metadata\": {\n    \"name\": \"${flow.projectDetails.projectName}\",\n    \"labels\": {\n      \"servicenow.request\": \"${current.number}\",\n      \"environment\": \"${flow.projectDetails.environment}\",\n      \"team\": \"${flow.projectDetails.team}\",\n      \"managed-by\": \"servicenow\"\n    },\n    \"annotations\": {\n      \"openshift.io/display-name\": \"${flow.projectDetails.displayName}\",\n      \"openshift.io/description\": \"${flow.projectDetails.description}\",\n      \"openshift.io/requestor\": \"${flow.projectDetails.requestor}\"\n    }\n  }\n}"
-            },
-            {
-              "name": "Create Project Role Binding",
-              "type": "rest_message",
-              "rest_message": "OpenShift RoleBinding Creation",
-              "endpoint": "{{ openshift_api_url }}/apis/rbac.authorization.k8s.io/v1/namespaces/${flow.projectDetails.projectName}/rolebindings",
-              "method": "POST",
-              "authentication": "oauth2",
-              "headers": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {{ openshift_token }}"
-              },
-              "body": "{\n  \"apiVersion\": \"rbac.authorization.k8s.io/v1\",\n  \"kind\": \"RoleBinding\",\n  \"metadata\": {\n    \"name\": \"${flow.projectDetails.requestor}-admin\",\n    \"namespace\": \"${flow.projectDetails.projectName}\"\n  },\n  \"subjects\": [{\n    \"kind\": \"User\",\n    \"name\": \"${flow.projectDetails.requestor}\",\n    \"apiGroup\": \"rbac.authorization.k8s.io\"\n  }],\n  \"roleRef\": {\n    \"kind\": \"ClusterRole\",\n    \"name\": \"admin\",\n    \"apiGroup\": \"rbac.authorization.k8s.io\"\n  }\n}"
-            },
-            {
-              "name": "Create Resource Quotas",
-              "type": "rest_message",
-              "rest_message": "OpenShift ResourceQuota Creation",
-              "endpoint": "{{ openshift_api_url }}/api/v1/namespaces/${flow.projectDetails.projectName}/resourcequotas",
-              "method": "POST",
-              "authentication": "oauth2",
-              "headers": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {{ openshift_token }}"
-              },
-              "body": "{\n  \"apiVersion\": \"v1\",\n  \"kind\": \"ResourceQuota\",\n  \"metadata\": {\n    \"name\": \"compute-quota\",\n    \"namespace\": \"${flow.projectDetails.projectName}\"\n  },\n  \"spec\": {\n    \"hard\": {\n      \"requests.cpu\": \"4\",\n      \"requests.memory\": \"8Gi\",\n      \"limits.cpu\": \"8\",\n      \"limits.memory\": \"16Gi\",\n      \"pods\": \"10\",\n      \"persistentvolumeclaims\": \"5\"\n    }\n  }\n}"
-            },
-            {
-              "name": "Create Network Policy",
-              "type": "rest_message",
-              "rest_message": "OpenShift NetworkPolicy Creation",
-              "endpoint": "{{ openshift_api_url }}/apis/networking.k8s.io/v1/namespaces/${flow.projectDetails.projectName}/networkpolicies",
-              "method": "POST",
-              "authentication": "oauth2",
-              "headers": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {{ openshift_token }}"
-              },
-              "body": "{\n  \"apiVersion\": \"networking.k8s.io/v1\",\n  \"kind\": \"NetworkPolicy\",\n  \"metadata\": {\n    \"name\": \"default-deny-all\",\n    \"namespace\": \"${flow.projectDetails.projectName}\"\n  },\n  \"spec\": {\n    \"podSelector\": {},\n    \"policyTypes\": [\"Ingress\", \"Egress\"]\n  }\n}"
+              "name": "Trigger AAP Job for Project Creation",
+              "type": "include_tasks",
+              "file": "aap_project_creation_job.yml",
+              "vars": {
+                "project_details": "${flow.projectDetails}",
+                "servicenow_request": "${current}"
+              }
             },
             {
               "name": "Update Request Status",

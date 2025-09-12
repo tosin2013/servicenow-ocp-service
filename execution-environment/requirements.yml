@@ -21,6 +21,10 @@ collections:
   # GitOps and Git operations
   - name: community.crypto
     version: ">=2.0.0"
+
+  # AAP Configuration
+  - name: ansible.controller
+    version: ">=4.3.0"
     
   # Additional useful collections
   - name: containers.podman

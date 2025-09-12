@@ -50,4 +50,11 @@ monitoring_integration_flow_name: "OpenShift Monitoring Integration"
 # ServiceNow Tables
 user_request_table: "sc_request"
 project_request_table: "sc_req_item"
+# Incident Management
 incident_table: "incident"
+
+# Ansible Automation Platform Configuration
+aap_url: "https://ansible-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+aap_username: "admin"
+aap_password: "{{ vault_aap_password }}"
+

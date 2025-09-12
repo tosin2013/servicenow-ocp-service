@@ -1,0 +1,78 @@
+---
+# OpenShift OIDC Integration Variables
+# This file contains configuration variables for OpenShift-Keycloak OIDC integration
+
+# OpenShift Configuration
+ocp_api_url: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+ocp_apps_domain: "apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+ocp_console_url: "https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+
+# Keycloak Configuration
+rhsso_url: "https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+keycloak_username: "admin"
+servicenow_realm_name: "servicenow"
+
+# OIDC Identity Provider Configuration
+oidc_name: "keycloak-oidc"
+oidc_display: "Keycloak SSO"
+openshift_client_id: "openshift"
+
+# RBAC Configuration
+create_cluster_role_bindings: true
+default_cluster_role: "view"
+admin_groups:
+  - "cluster-admins"
+  - "openshift-admins"
+
+# Certificate Configuration
+ca_bundle_configmap: "keycloak-ca-bundle"
+create_ca_configmap: false  # Set to true if using custom CA
+
+# Group Mappings (customize based on your Keycloak groups)
+group_mappings:
+  cluster_admins:
+    - "/cluster-admins"
+    - "/openshift-admins"
+  developers:
+    - "/developers"
+    - "/dev-team"
+  viewers:
+    - "/viewers"
+    - "/read-only"
+  servicenow_users:
+    - "/servicenow-users"
+  servicenow_operators:
+    - "/servicenow-operators"
+
+# OIDC Scopes and Claims Configuration
+oidc_scopes:
+  - openid
+  - profile
+  - email
+  - groups
+
+oidc_claims:
+  preferredUsername:
+    - preferred_username
+    - username
+  name:
+    - name
+    - full_name
+  email:
+    - email
+  groups:
+    - groups
+
+# Testing Configuration
+create_test_user: true
+test_user_username: "oidc-test-user"
+test_user_password: "TestPassword123!"
+test_user_email: "oidc-test@example.com"
+test_user_groups:
+  - "/developers"
+
+# Integration Features
+enable_keycloak_client_config: true
+enable_openshift_oauth_config: true
+enable_rbac_group_mappings: true
+enable_oidc_flow_testing: true

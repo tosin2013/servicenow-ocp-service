@@ -8,6 +8,7 @@
     # Default values - override with -e @vars/production.yml
     rhsso_external_url: "https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
     servicenow_url: "https://dev295398.service-now.com"
+    openshift_api_url: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
     realm_name: "servicenow"
     client_id: "servicenow-client"
     
@@ -50,8 +51,10 @@
           - "   - OAuth Entity Profile: keycloak_profile"
           - "   - OAuth2 Auth Profile: Keycloak OAuth2 Profile"
           - "   - Application Registry: {{ oauth_app_name | default('Keycloak SSO Integration') }}"
-          - "   - Connection Alias: keycloak_connection"
-          - "   - Credential Alias: keycloak_credentials"
+          - "   - Keycloak Connection Alias: keycloak_connection"
+          - "   - OpenShift Connection Alias: openshift_connection"
+          - "   - Keycloak Credential Alias: keycloak_credentials"
+          - "   - OpenShift Credential Record: openshift_service_account_token"
           - ""
           - "🔗 Access Points:"
           - "   - Keycloak Admin: {{ rhsso_external_url }}/auth/admin"
@@ -85,8 +88,10 @@
           - OAuth Entity Profile: keycloak_profile
           - OAuth2 Auth Profile: Keycloak OAuth2 Profile
           - Application Registry: {{ oauth_app_name | default('Keycloak SSO Integration') }}
-          - Connection Alias: keycloak_connection
-          - Credential Alias: keycloak_credentials
+          - Keycloak Connection Alias: keycloak_connection
+          - OpenShift Connection Alias: openshift_connection
+          - Keycloak Credential Alias: keycloak_credentials
+          - OpenShift Credential Record: openshift_service_account_token
           
           ### Integration Endpoints
           - Authorization URL: {{ rhsso_external_url }}/auth/realms/{{ realm_name }}/protocol/openid-connect/auth
