@@ -1,8 +1,8 @@
 # Software Bill of Materials (SBOM)
 
-**Image**: `quay.io/takinosh/servicenow-ocp-ee:test-hub-version-1758139175`  
-**Built**: 2025-09-17T20:02:51Z  
-**Git SHA**: f858e0f7ee1ab397a4843b554b4e30b4f3f0e90e
+**Image**: `quay.io/takinosh/servicenow-ocp-ee:test-shell-fix-1758141209`  
+**Built**: 2025-09-17T20:34:20Z  
+**Git SHA**: 0d539b13c009d36b250ccadec9b1af34a2f722dd
 
 ## Base Image
 - Red Hat Universal Base Image (UBI) 9

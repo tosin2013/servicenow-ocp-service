@@ -13,6 +13,8 @@
 
 # Note: openshift-clients excluded - installed via other methods (like tarball)
 # Bindep doesn't support exclusion syntax, so we simply don't list packages we don't want
+!openshift-clients [platform:rhel-9]
+!openshift-clients [platform:rhel-8]
 
 dnf   [platform:rpm]
 pkg-config [platform:rpm]
