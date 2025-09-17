@@ -8,6 +8,13 @@ set -euo pipefail
 # Change to the script's directory to ensure correct context
 cd "$(dirname "$0")"
 
+# Source environment variables from optional configs if available
+if [[ -f "files/optional-configs/rhsm-activation.env" ]]; then
+    echo "🔧 Sourcing environment variables from rhsm-activation.env..."
+    source files/optional-configs/rhsm-activation.env
+    echo "✅ Environment variables loaded"
+fi
+
 # Variables from environment or defaults
 REGISTRY="${REGISTRY:-quay.io/takinosh}"
 IMAGE_NAME="${IMAGE_NAME:-servicenow-ocp-ee}"
@@ -71,8 +78,24 @@ fi
 # Download collections using Makefile approach
 echo "📦 Downloading Ansible collections using Makefile..."
 echo "🔑 Using Automation Hub token for collection downloads"
+
+# Ensure ANSIBLE_HUB_TOKEN is exported (like maketoken.sh does)
+if [[ -n "${ANSIBLE_HUB_TOKEN}" ]]; then
+    export ANSIBLE_HUB_TOKEN=${ANSIBLE_HUB_TOKEN}
+    echo "✅ ANSIBLE_HUB_TOKEN exported (length: ${#ANSIBLE_HUB_TOKEN})"
+else
+    echo "⚠️  ANSIBLE_HUB_TOKEN not found in environment"
+fi
+
+# Run make token - this must succeed for a proper build
 make token
-echo "✅ Collections downloaded successfully via make token"
+if [[ $? -eq 0 ]]; then
+    echo "✅ Collections downloaded successfully via make token"
+else
+    echo "❌ Collection download failed!"
+    echo "❌ Cannot proceed with build without proper collections"
+    exit 1
+fi
 
 # Build the execution environment using Makefile approach
 echo "🔨 Building execution environment using Makefile..."
@@ -80,7 +103,6 @@ export TARGET_NAME="${REGISTRY}/${IMAGE_NAME}"
 export TARGET_TAG="${EE_VERSION}"
 export CONTAINER_ENGINE="${CONTAINER_RUNTIME}"
 make build
-echo "✅ Build completed successfully via make build"
 
 if [[ $? -eq 0 ]]; then
     echo "✅ Build completed successfully!"

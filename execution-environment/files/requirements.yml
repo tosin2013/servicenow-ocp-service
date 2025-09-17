@@ -11,7 +11,8 @@ collections:
   - name: redhat_cop.aap_utilities  # aap
   # - name: infra.aap_configuration  # aap
   - name: ansible.platform  # aap (pulls kubernetes.core; requires openshift-clients on RHEL)
-  - name: ansible.hub  # aap
+  - name: ansible.hub
+    version: 1.0.1
   - name: ansible.controller  # aap
   # - name: ansible.eda  # aap (may pull kubernetes.core)
   # - name: amazon.aws  # cloud
