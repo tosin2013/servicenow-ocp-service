@@ -46,21 +46,21 @@ token: # Test token
 build: # Build the execution environment image
 	@echo "\n\n***************************** Building... \n"
 	$(CONTAINER_ENGINE) login $(SOURCE_HUB)
-	if [ -a ansible.cfg ] ; \
+	if [ -f ansible.cfg ] ; \
 	then \
 		echo "Using existing ansible.cfg"; \
 	else \
 		envsubst < files/ansible.cfg.template > ./ansible.cfg; \
 	fi;
-	if [ -a ansible-builder.log ] ; \
+	if [ -f ansible-builder.log ] ; \
 	then \
 		cp ansible-builder.log ansible-builder.bak.log ; \
 	fi;
-	ansible-builder introspect --sanitize --user-pip=files/requirements.txt --user-bindep=files/bindep.txt 2>&1 | tee ansible-builder.log; exit $${PIPESTATUS[0]}
+	ansible-builder introspect --sanitize --user-pip=files/requirements.txt --user-bindep=files/bindep.txt 2>&1 | tee ansible-builder.log || exit $$?
 	ansible-builder build \
 		--tag $(TARGET_NAME):$(TARGET_TAG) \
 		--verbosity $(VERBOSITY) \
-		--container-runtime $(CONTAINER_ENGINE) 2>&1 | tee -a ansible-builder.log; exit $${PIPESTATUS[0]}
+		--container-runtime $(CONTAINER_ENGINE) 2>&1 | tee -a ansible-builder.log || exit $$?
 
 scan: # Scan image for vulnerabilities https://www.redhat.com/sysadmin/using-quayio-scanner
 	@echo "\n\n***************************** Scanning... \n"
