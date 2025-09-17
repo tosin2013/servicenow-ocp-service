@@ -12,10 +12,14 @@ ansible-navigator:
     enable: false
   execution-environment:
     enabled: true
-    image: quay.io/takinosh/servicenow-ocp-ee:latest
+    image: quay.io/takinosh/servicenow-ocp-ee:57b53792501543564d5eec5e76c36d1ceb0978a5
     pull:
       policy: never
     container-engine: auto
+    volume-mounts:
+      - src: /home/ec2-user/servicenow-ocp-service
+        dest: /home/ec2-user/servicenow-ocp-service
+        options: Z
     environment-variables:
       pass:
         - ANSIBLE_ADMIN_USER

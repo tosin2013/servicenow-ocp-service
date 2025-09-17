@@ -23,7 +23,7 @@ fi
 filter_pkg_list() {
   # Remove packages that are not available or provided via tarball elsewhere
   # Currently filtering: openshift-clients
-  sed -E 's/(^| )openshift-clients( |$)/ /g'
+  sed -E 's/(^|[[:space:]]+)openshift-clients([[:space:]]+|$)/ /g' | sed 's/[[:space:]]\+/ /g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
 }
 
 if [ -f /output/bindep/run.txt ] ; then

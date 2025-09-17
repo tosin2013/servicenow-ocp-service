@@ -28,6 +28,8 @@ collections:
   - name: community.general
   - name: redhat.sso  # sso
   - name: ansible.utils  # general
+  - name: servicenow.itsm  # servicenow
+    version: 2.12.1
   # - name: community.windows  # windows
   # - name: ansible.windows  # windows
   # - name: ansible.scm  # git_publish, git_retrieve modules https://github.com/ansible-collections/ansible.scm
