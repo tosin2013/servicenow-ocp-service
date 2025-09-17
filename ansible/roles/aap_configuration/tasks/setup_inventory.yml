@@ -1,0 +1,12 @@
+---
+# ansible/roles/aap_configuration/tasks/setup_inventory.yml
+
+- name: Create Default Inventory
+  ansible.controller.inventory:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    validate_certs: "{{ controller_validate_certs | default(false) }}"
+    name: "Default Inventory"
+    organization: "Default"
+    state: present

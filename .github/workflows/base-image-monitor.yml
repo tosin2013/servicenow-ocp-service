@@ -1,0 +1,116 @@
+name: "Red Hat Base Image Monitor"
+
+on:
+  schedule:
+    # Check for updates twice daily (Red Hat typically releases updates during business hours)
+    - cron: '0 9,21 * * *'  # 9 AM and 9 PM UTC
+  workflow_dispatch:
+
+jobs:
+  monitor-base-image:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Check Red Hat Registry for updates
+      id: check_updates
+      run: |
+        BASE_IMAGE="registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8"
+        TAG="1.0.0-955"
+        
+        # Get current image manifest from our execution environment
+        CURRENT_MANIFEST=""
+        if [[ -f "execution-environment/.last-base-image-digest" ]]; then
+          CURRENT_MANIFEST=$(cat execution-environment/.last-base-image-digest)
+        fi
+        
+        # Check Red Hat Registry for latest manifest
+        echo "🔍 Checking Red Hat Registry for base image updates..."
+        
+        # Use skopeo to inspect the image without pulling
+        if command -v skopeo >/dev/null 2>&1; then
+          NEW_MANIFEST=$(skopeo inspect docker://${BASE_IMAGE}:${TAG} --format '{{.Digest}}' 2>/dev/null || echo "")
+        else
+          # Fallback: install skopeo
+          sudo apt-get update && sudo apt-get install -y skopeo
+          NEW_MANIFEST=$(skopeo inspect docker://${BASE_IMAGE}:${TAG} --format '{{.Digest}}' 2>/dev/null || echo "")
+        fi
+        
+        echo "Current manifest: ${CURRENT_MANIFEST}"
+        echo "New manifest: ${NEW_MANIFEST}"
+        
+        if [[ -n "${NEW_MANIFEST}" ]] && [[ "${CURRENT_MANIFEST}" != "${NEW_MANIFEST}" ]]; then
+          echo "🆕 Base image update detected!"
+          echo "update_available=true" >> $GITHUB_OUTPUT
+          echo "new_manifest=${NEW_MANIFEST}" >> $GITHUB_OUTPUT
+          
+          # Store the new manifest
+          echo "${NEW_MANIFEST}" > execution-environment/.last-base-image-digest
+        else
+          echo "✅ Base image is up to date"
+          echo "update_available=false" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Commit manifest update
+      if: steps.check_updates.outputs.update_available == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add execution-environment/.last-base-image-digest
+        git commit -m "chore: Update base image manifest digest
+
+        New Red Hat base image digest: ${{ steps.check_updates.outputs.new_manifest }}
+        
+        This triggers an automatic execution environment rebuild to incorporate
+        the latest Red Hat security updates and patches."
+        git push
+        
+    - name: Trigger execution environment rebuild
+      if: steps.check_updates.outputs.update_available == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'build-ee.yml',
+            ref: 'main',
+            inputs: {
+              reason: 'Red Hat base image update detected',
+              base_image_digest: '${{ steps.check_updates.outputs.new_manifest }}'
+            }
+          });
+          
+    - name: Create issue for manual review
+      if: steps.check_updates.outputs.update_available == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '🔄 Red Hat Base Image Update Detected',
+            body: `## Red Hat Base Image Update
+            
+            A new version of the Red Hat base image has been detected:
+            
+            **Base Image**: \`registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8:1.0.0-955\`
+            **New Digest**: \`${{ steps.check_updates.outputs.new_manifest }}\`
+            **Detection Time**: ${new Date().toISOString()}
+            
+            ### Automatic Actions Taken:
+            - ✅ Updated base image manifest digest
+            - ✅ Triggered execution environment rebuild
+            - ✅ Created this issue for tracking
+            
+            ### Manual Review Required:
+            - [ ] Verify the new execution environment build completes successfully
+            - [ ] Test the updated execution environment with AAP configuration
+            - [ ] Update any documentation if needed
+            - [ ] Close this issue once verification is complete
+            
+            The execution environment will be rebuilt automatically. Monitor the [Actions tab](${context.payload.repository.html_url}/actions) for build status.`,
+            labels: ['automation', 'base-image-update', 'security']
+          });

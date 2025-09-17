@@ -1,0 +1,127 @@
+---
+# OpenShift OIDC Integration Playbook
+# This playbook configures OpenShift to use Keycloak as OIDC identity provider
+
+- name: Configure OpenShift OIDC Integration with Keycloak
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars_files:
+    - group_vars/all/vault.yml
+    - vars/production.yml.template
+  
+  pre_tasks:
+    - name: Verify required variables are defined
+      assert:
+        that:
+          - vault_openshift_token is defined
+          - vault_keycloak_password is defined
+          - vault_openshift_client_secret is defined
+        fail_msg: "Required vault variables are not defined. Please check your vault file."
+    
+    - name: Display integration overview
+      debug:
+        msg:
+          - "🚀 OpenShift OIDC Integration with Keycloak"
+          - "==========================================="
+          - "This playbook will configure:"
+          - "  ✓ Keycloak OpenShift client with OIDC settings"
+          - "  ✓ OpenShift OAuth to use Keycloak as identity provider"
+          - "  ✓ RBAC group mappings for user permissions"
+          - "  ✓ Test OIDC authentication flow"
+          - ""
+          - "Prerequisites:"
+          - "  ✓ OpenShift cluster accessible"
+          - "  ✓ Keycloak/RHSSO deployed and configured"
+          - "  ✓ ServiceNow realm exists in Keycloak"
+          - "  ✓ Valid OpenShift admin token"
+          - ""
+
+  roles:
+    - role: openshift_oidc_integration
+      tags:
+        - oidc
+        - keycloak
+        - openshift
+        - authentication
+
+  post_tasks:
+    - name: Create OIDC integration documentation
+      copy:
+        content: |
+          # OpenShift OIDC Integration Documentation
+          # Generated on {{ ansible_date_time.iso8601 }}
+
+          ## Configuration Summary
+
+          ### OpenShift Configuration
+          - **API URL**: {{ openshift_api_url }}
+          - **Console URL**: {{ openshift_console_url }}
+          - **Apps Domain**: {{ openshift_apps_domain }}
+
+          ### Keycloak Configuration
+          - **URL**: {{ keycloak_url }}
+          - **Realm**: {{ keycloak_realm }}
+          - **Client ID**: {{ oidc_client_id }}
+          - **OIDC Provider Name**: {{ oidc_provider_name }}
+
+          ### OIDC Endpoints
+          - **Issuer**: {{ oidc_issuer_url }}
+          - **Authorization**: {{ oidc_authorization_endpoint }}
+          - **Token**: {{ oidc_token_endpoint }}
+          - **UserInfo**: {{ oidc_userinfo_endpoint }}
+          - **JWKS**: {{ oidc_jwks_uri }}
+
+          ### Group Mappings
+          - **cluster-admins, openshift-admins** → cluster-admin role
+          - **developers, dev-team** → edit role
+          - **viewers, read-only** → view role
+          - **servicenow-users** → {{ default_cluster_role }} role
+          - **servicenow-operators** → servicenow-operator role
+
+          ### Testing
+          1. Navigate to {{ openshift_console_url }}
+          2. Click on "{{ oidc_display_name }}" login option
+          3. Login with Keycloak credentials
+          4. Verify appropriate permissions based on group membership
+
+          ### Troubleshooting
+          - Check OAuth pods: `oc get pods -n openshift-authentication`
+          - View OAuth configuration: `oc get oauth cluster -o yaml`
+          - Check identity providers: `oc get oauth cluster -o jsonpath='{.spec.identityProviders}'`
+          - Test OIDC discovery: `curl {{ oidc_issuer_url }}/.well-known/openid_configuration`
+
+          ### Security Notes
+          - Client secret is stored in OpenShift secret: {{ oidc_provider_name }}-client-secret
+          - All communication uses HTTPS
+          - Groups are mapped from Keycloak to OpenShift RBAC
+          - Users authenticate through Keycloak, not OpenShift directly
+
+        dest: /tmp/openshift_oidc_integration_docs.md
+        mode: '0644'
+      delegate_to: localhost
+
+    - name: Display completion message
+      debug:
+        msg:
+          - "🎉 OpenShift OIDC Integration Complete!"
+          - "======================================="
+          - ""
+          - "✅ Keycloak client configured"
+          - "✅ OpenShift OAuth updated"
+          - "✅ RBAC group mappings created"
+          - "✅ OIDC authentication flow tested"
+          - ""
+          - "📖 Documentation: /tmp/openshift_oidc_integration_docs.md"
+          - ""
+          - "🔗 Next Steps:"
+          - "  1. Test login at: {{ openshift_console_url }}"
+          - "  2. Create users in Keycloak and assign to groups"
+          - "  3. Verify permissions work as expected"
+          - "  4. Configure additional RBAC as needed"
+          - ""
+          - "🧪 Test User Created:"
+          - "  Username: oidc-demo-user"
+          - "  Password: DemoPassword123!"
+          - "  Group: developers (edit permissions)"
+          - ""

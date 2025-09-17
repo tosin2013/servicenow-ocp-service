@@ -1,0 +1,152 @@
+---
+# ServiceNow OAuth Integration Test Playbook
+# This playbook tests the complete OAuth integration between ServiceNow and Keycloak
+
+- name: Test ServiceNow OAuth Integration
+  hosts: localhost
+  gather_facts: yes
+  vars_files:
+    - vars/production.yml  # Override with your actual vars file
+  
+  tasks:
+    - name: Test ServiceNow REST API OAuth Token Generation
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/oauth_entity_profile"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: oauth_profiles_test
+      failed_when: false
+
+    - name: Display OAuth Profiles Test Result
+      debug:
+        msg:
+          - "OAuth Profiles Query Status: {{ oauth_profiles_test.status }}"
+          - "Number of OAuth profiles found: {{ oauth_profiles_test.json.result | length if oauth_profiles_test.status == 200 else 'Error' }}"
+          - "Keycloak profile exists: {{ oauth_profiles_test.json.result | selectattr('name', 'equalto', 'keycloak_profile') | list | length > 0 if oauth_profiles_test.status == 200 else 'Error' }}"
+
+    - name: Test Application Registry Query
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/oauth_entity"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: app_registry_test
+      failed_when: false
+
+    - name: Display Application Registry Test Result
+      debug:
+        msg:
+          - "Application Registry Query Status: {{ app_registry_test.status }}"
+          - "Number of OAuth applications found: {{ app_registry_test.json.result | length if app_registry_test.status == 200 else 'Error' }}"
+          - "Keycloak app exists: {{ app_registry_test.json.result | selectattr('name', 'equalto', oauth_app_name | default('Keycloak SSO Integration')) | list | length > 0 if app_registry_test.status == 200 else 'Error' }}"
+
+    - name: Test Connection Aliases Query
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_alias"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: connection_aliases_test
+      failed_when: false
+
+    - name: Display Connection Aliases Test Result
+      debug:
+        msg:
+          - "Connection Aliases Query Status: {{ connection_aliases_test.status }}"
+          - "Number of connection aliases found: {{ connection_aliases_test.json.result | length if connection_aliases_test.status == 200 else 'Error' }}"
+          - "Keycloak connection exists: {{ connection_aliases_test.json.result | selectattr('name', 'equalto', 'keycloak_connection') | list | length > 0 if connection_aliases_test.status == 200 else 'Error' }}"
+          - "OpenShift connection exists: {{ connection_aliases_test.json.result | selectattr('name', 'equalto', 'openshift_connection') | list | length > 0 if connection_aliases_test.status == 200 else 'Error' }}"
+
+    - name: Test Credential Records Query
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_credential"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: credentials_test
+      failed_when: false
+
+    - name: Display Credentials Test Result
+      debug:
+        msg:
+          - "Credentials Query Status: {{ credentials_test.status }}"
+          - "Number of credentials found: {{ credentials_test.json.result | length if credentials_test.status == 200 else 'Error' }}"
+          - "OpenShift token credential exists: {{ credentials_test.json.result | selectattr('name', 'equalto', 'openshift_service_account_token') | list | length > 0 if credentials_test.status == 200 else 'Error' }}"
+
+    - name: OAuth Integration Test Summary
+      debug:
+        msg:
+          - "=== ServiceNow OAuth Integration Test Summary ==="
+          - "ServiceNow Instance: {{ servicenow_url }}"
+          - "OAuth Profiles API: {{ 'PASS' if oauth_profiles_test.status == 200 else 'FAIL' }}"
+          - "Application Registry API: {{ 'PASS' if app_registry_test.status == 200 else 'FAIL' }}"
+          - "Connection Aliases API: {{ 'PASS' if connection_aliases_test.status == 200 else 'FAIL' }}"
+          - "Credentials API: {{ 'PASS' if credentials_test.status == 200 else 'FAIL' }}"
+          - ""
+          - "Configuration Status:"
+          - "  Keycloak Profile: {{ 'EXISTS' if (oauth_profiles_test.status == 200 and oauth_profiles_test.json.result | selectattr('name', 'equalto', 'keycloak_profile') | list | length > 0) else 'MISSING' }}"
+          - "  OAuth Application: {{ 'EXISTS' if (app_registry_test.status == 200 and app_registry_test.json.result | selectattr('name', 'equalto', oauth_app_name | default('Keycloak SSO Integration')) | list | length > 0) else 'MISSING' }}"
+          - "  Keycloak Connection Alias: {{ 'EXISTS' if (connection_aliases_test.status == 200 and connection_aliases_test.json.result | selectattr('name', 'equalto', 'keycloak_connection') | list | length > 0) else 'MISSING' }}"
+          - "  OpenShift Connection Alias: {{ 'EXISTS' if (connection_aliases_test.status == 200 and connection_aliases_test.json.result | selectattr('name', 'equalto', 'openshift_connection') | list | length > 0) else 'MISSING' }}"
+          - "  OpenShift Credential Record: {{ 'EXISTS' if (credentials_test.status == 200 and credentials_test.json.result | selectattr('name', 'equalto', 'openshift_service_account_token') | list | length > 0) else 'MISSING' }}"
+          - ""
+          - "Next Steps:"
+          - "  1. Navigate to {{ servicenow_url }}/nav_to.do?uri=oauth_entity_list.do"
+          - "  2. Test OAuth flow with '{{ oauth_app_name | default('Keycloak SSO Integration') }}'"
+          - "  3. Verify token generation and refresh capabilities"
+          - "  4. Test OpenShift API connectivity using connection aliases"
+
+    - name: Save Test Results
+      copy:
+        content: |
+          # ServiceNow OAuth Integration Test Results
+          # Generated on {{ ansible_date_time.iso8601 }}
+          
+          ## Test Summary
+          - ServiceNow Instance: {{ servicenow_url }}
+          - OAuth Profiles API: {{ 'PASS' if oauth_profiles_test.status == 200 else 'FAIL' }}
+          - "Application Registry API: {{ 'PASS' if app_registry_test.status == 200 else 'FAIL' }}"
+          - "Connection Aliases API: {{ 'PASS' if connection_aliases_test.status == 200 else 'FAIL' }}"
+          - "Credentials API: {{ 'PASS' if credentials_test.status == 200 else 'FAIL' }}"
+          
+          ## Configuration Status
+          - "Keycloak Profile: {{ 'EXISTS' if (oauth_profiles_test.status == 200 and oauth_profiles_test.json.result | selectattr('name', 'equalto', 'keycloak_profile') | list | length > 0) else 'MISSING' }}"
+          - "OAuth Application: {{ 'EXISTS' if (app_registry_test.status == 200 and app_registry_test.json.result | selectattr('name', 'equalto', oauth_app_name | default('Keycloak SSO Integration')) | list | length > 0) else 'MISSING' }}"
+          - "Keycloak Connection Alias: {{ 'EXISTS' if (connection_aliases_test.status == 200 and connection_aliases_test.json.result | selectattr('name', 'equalto', 'keycloak_connection') | list | length > 0) else 'MISSING' }}"
+          - "OpenShift Connection Alias: {{ 'EXISTS' if (connection_aliases_test.status == 200 and connection_aliases_test.json.result | selectattr('name', 'equalto', 'openshift_connection') | list | length > 0) else 'MISSING' }}"
+          - "OpenShift Credential Record: {{ 'EXISTS' if (credentials_test.status == 200 and credentials_test.json.result | selectattr('name', 'equalto', 'openshift_service_account_token') | list | length > 0) else 'MISSING' }}"
+          
+          ## Manual Verification Steps
+          1. Navigate to ServiceNow: {{ servicenow_url }}
+          2. Go to System OAuth > Application Registry
+          3. Find "{{ oauth_app_name | default('Keycloak SSO Integration') }}"
+          4. Click "Get OAuth Token" to test the OAuth flow
+          5. Verify redirect to Keycloak: {{ rhsso_url }}
+          6. Complete authentication and verify token return
+          7. Test OpenShift API connectivity using the connection aliases
+          
+          ## API Endpoints for Manual Testing
+          - OAuth Profiles: {{ servicenow_url }}/api/now/table/oauth_entity_profile
+          - Application Registry: {{ servicenow_url }}/api/now/table/oauth_entity
+          - Connection Aliases: {{ servicenow_url }}/api/now/table/sys_alias
+          - Credentials: {{ servicenow_url }}/api/now/table/sys_credential
+        dest: /tmp/servicenow_oauth_test_results.md
+      delegate_to: localhost
+      run_once: true

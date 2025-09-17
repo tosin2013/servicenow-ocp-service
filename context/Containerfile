@@ -1,0 +1,120 @@
+ARG EE_BASE_IMAGE="registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8:1.0.0-955"
+ARG PYCMD="/usr/bin/python3"
+ARG PKGMGR_PRESERVE_CACHE=""
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS="--ignore-certs"
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS=""
+ARG ANSIBLE_INSTALL_REFS="ansible-core ansible-runner==2.4.1"
+ARG PKGMGR="/usr/bin/microdnf"
+
+# Base build stage
+FROM $EE_BASE_IMAGE as base
+USER root
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+ARG EE_BASE_IMAGE
+ARG PYCMD
+ARG PKGMGR_PRESERVE_CACHE
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS
+ARG ANSIBLE_INSTALL_REFS
+ARG PKGMGR
+
+COPY _build/scripts/ /output/scripts/
+COPY _build/scripts/entrypoint /opt/builder/bin/entrypoint
+RUN whoami
+RUN cat /etc/os-release
+RUN echo PKGMGR = $PKGMGR, PYCMD = $PYCMD
+RUN $PYCMD -m pip install --upgrade pip
+COPY _build/configs/optional /_extras/optional
+RUN OC_ENV="/_extras/optional/oc-install.env" ; \
+    if [ -f "$OC_ENV" ]; then set -a; . "$OC_ENV"; set +a; fi ; \
+    if [ -n "$OC_URL" ] || [ -n "$OC_VERSION" ]; then \
+      echo "==> Installing oc/kubectl from tarball" && \
+      URL="${OC_URL:-https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OC_VERSION}/openshift-client-linux.tar.gz}" && \
+      ($PKGMGR -y install curl tar || true) && \
+      curl -L -o /tmp/oc.tgz "$URL" && \
+      tar -C /usr/local/bin -xzf /tmp/oc.tgz oc kubectl && \
+      chmod +x /usr/local/bin/oc /usr/local/bin/kubectl && \
+      rm -f /tmp/oc.tgz ; \
+    else \
+      echo "==> Skipping oc/kubectl install (no OC_URL/OC_VERSION)" ; \
+    fi
+
+RUN /output/scripts/pip_install $PYCMD
+RUN $PYCMD -m pip install --no-cache-dir $ANSIBLE_INSTALL_REFS
+
+# Galaxy build stage
+FROM base as galaxy
+ARG EE_BASE_IMAGE
+ARG PYCMD
+ARG PKGMGR_PRESERVE_CACHE
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS
+ARG ANSIBLE_INSTALL_REFS
+ARG PKGMGR
+
+COPY _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+RUN /output/scripts/check_galaxy
+COPY _build /build
+WORKDIR /build
+
+RUN mkdir -p /usr/share/ansible
+RUN ansible-galaxy role install $ANSIBLE_GALAXY_CLI_ROLE_OPTS -r requirements.yml --roles-path "/usr/share/ansible/roles"
+RUN ANSIBLE_GALAXY_DISABLE_GPG_VERIFY=1 ansible-galaxy collection install $ANSIBLE_GALAXY_CLI_COLLECTION_OPTS -r requirements.yml --collections-path "/usr/share/ansible/collections"
+
+# Builder build stage
+FROM base as builder
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+WORKDIR /build
+ARG EE_BASE_IMAGE
+ARG PYCMD
+ARG PKGMGR_PRESERVE_CACHE
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS
+ARG ANSIBLE_INSTALL_REFS
+ARG PKGMGR
+
+RUN $PYCMD -m pip install --no-cache-dir bindep pyyaml packaging
+
+COPY --from=galaxy /usr/share/ansible /usr/share/ansible
+
+COPY _build/requirements.txt requirements.txt
+COPY _build/bindep.txt bindep.txt
+RUN $PYCMD /output/scripts/introspect.py introspect --user-pip=requirements.txt --user-bindep=bindep.txt --write-bindep=/tmp/src/bindep.txt --write-pip=/tmp/src/requirements.txt
+RUN /output/scripts/assemble
+
+# Final build stage
+FROM base as final
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+ARG EE_BASE_IMAGE
+ARG PYCMD
+ARG PKGMGR_PRESERVE_CACHE
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS
+ARG ANSIBLE_INSTALL_REFS
+ARG PKGMGR
+
+RUN /output/scripts/check_ansible $PYCMD
+
+COPY --from=galaxy /usr/share/ansible /usr/share/ansible
+
+COPY --from=builder /output/ /output/
+RUN /output/scripts/install-from-bindep && rm -rf /output/wheels
+RUN chmod ug+rw /etc/passwd
+RUN mkdir -p /runner && chgrp 0 /runner && chmod -R ug+rwx /runner
+WORKDIR /runner
+RUN $PYCMD -m pip install --no-cache-dir 'dumb-init==1.2.5'
+RUN pip3 check
+RUN if command -v subscription-manager >/dev/null 2>&1; then \
+      subscription-manager unregister || true && \
+      subscription-manager clean || true && \
+      rm -f /etc/yum.repos.d/redhat.repo && \
+      rm -rf /etc/rhsm/* ; \
+    fi
+
+RUN $PKGMGR update -y && $PKGMGR clean all && rm -rf /var/cache/{dnf,yum} && rm -rf /var/lib/dnf/history.* && rm -rf /var/log/*
+
+RUN rm -rf /output
+LABEL ansible-execution-environment=true
+USER 1000
+ENTRYPOINT ["/opt/builder/bin/entrypoint", "dumb-init"]
+CMD ["bash"]

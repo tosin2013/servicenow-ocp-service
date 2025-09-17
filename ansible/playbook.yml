@@ -1,0 +1,27 @@
+---
+# RHSSO ServiceNow Configuration Playbook
+#
+# This playbook configures Keycloak realms and clients for ServiceNow integration
+# 
+# USAGE EXAMPLES:
+#   # With variables file:
+#   ansible-playbook ansible/playbook.yml -e @ansible/vars/production.yml
+#
+#   # With vault-encrypted variables:
+#   ansible-playbook ansible/playbook.yml -e @ansible/vars/production.yml --ask-vault-pass
+#
+#   # With inline variables:
+#   ansible-playbook ansible/playbook.yml -e rhsso_external_url=https://keycloak.example.com
+#
+# REQUIRED VARIABLES:
+#   - rhsso_external_url: Keycloak external URL
+#   - rhsso_admin_username: Keycloak admin username
+#   - rhsso_admin_password: Keycloak admin password
+#   - servicenow_oauth_secret: ServiceNow OAuth client secret
+#   - openshift_oauth_secret: OpenShift OAuth client secret
+
+- name: Configure RHSSO for ServiceNow
+  hosts: localhost
+  connection: local
+  roles:
+    - rhsso_servicenow_config

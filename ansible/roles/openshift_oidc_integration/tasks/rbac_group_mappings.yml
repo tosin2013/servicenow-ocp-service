@@ -1,0 +1,187 @@
+---
+# RBAC and Group Mappings Configuration
+# This file configures role-based access control and group mappings for OIDC users
+
+- name: Create cluster admin group binding
+  kubernetes.core.k8s:
+    api_version: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    name: "oidc-cluster-admins"
+    definition:
+      metadata:
+        name: "oidc-cluster-admins"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+      subjects:
+        - apiGroup: rbac.authorization.k8s.io
+          kind: Group
+          name: "cluster-admins"
+        - apiGroup: rbac.authorization.k8s.io
+          kind: Group
+          name: "openshift-admins"
+    state: present
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: cluster_admin_binding
+  when: admin_groups | length > 0
+
+- name: Create developer group binding
+  kubernetes.core.k8s:
+    api_version: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    name: "oidc-developers"
+    definition:
+      metadata:
+        name: "oidc-developers"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: edit
+      subjects:
+        - apiGroup: rbac.authorization.k8s.io
+          kind: Group
+          name: "developers"
+        - apiGroup: rbac.authorization.k8s.io
+          kind: Group
+          name: "dev-team"
+    state: present
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: developer_binding
+
+- name: Create viewer group binding
+  kubernetes.core.k8s:
+    api_version: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    name: "oidc-viewers"
+    definition:
+      metadata:
+        name: "oidc-viewers"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: view
+      subjects:
+        - apiGroup: rbac.authorization.k8s.io
+          kind: Group
+          name: "viewers"
+        - apiGroup: rbac.authorization.k8s.io
+          kind: Group
+          name: "read-only"
+    state: present
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: viewer_binding
+
+- name: Create ServiceNow integration group binding
+  kubernetes.core.k8s:
+    api_version: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    name: "oidc-servicenow-users"
+    definition:
+      metadata:
+        name: "oidc-servicenow-users"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: "{{ default_cluster_role }}"
+      subjects:
+        - apiGroup: rbac.authorization.k8s.io
+          kind: Group
+          name: "servicenow-users"
+    state: present
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: servicenow_binding
+
+- name: Create custom ClusterRole for ServiceNow operations
+  kubernetes.core.k8s:
+    api_version: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    name: "servicenow-operator"
+    definition:
+      metadata:
+        name: "servicenow-operator"
+      rules:
+        - apiGroups: [""]
+          resources: ["namespaces", "projects"]
+          verbs: ["get", "list", "create", "update", "patch"]
+        - apiGroups: [""]
+          resources: ["resourcequotas", "limitranges"]
+          verbs: ["get", "list", "create", "update", "patch"]
+        - apiGroups: ["rbac.authorization.k8s.io"]
+          resources: ["rolebindings"]
+          verbs: ["get", "list", "create", "update", "patch"]
+        - apiGroups: ["user.openshift.io"]
+          resources: ["users", "groups"]
+          verbs: ["get", "list"]
+        - apiGroups: ["project.openshift.io"]
+          resources: ["projects"]
+          verbs: ["get", "list", "create", "update", "patch"]
+    state: present
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: servicenow_clusterrole
+
+- name: Create ServiceNow operator group binding
+  kubernetes.core.k8s:
+    api_version: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    name: "servicenow-operators"
+    definition:
+      metadata:
+        name: "servicenow-operators"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: "servicenow-operator"
+      subjects:
+        - apiGroup: rbac.authorization.k8s.io
+          kind: Group
+          name: "servicenow-operators"
+    state: present
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: servicenow_operator_binding
+
+- name: Verify cluster role bindings
+  kubernetes.core.k8s_info:
+    api_version: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    name: "{{ item }}"
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: binding_verification
+  loop:
+    - "oidc-cluster-admins"
+    - "oidc-developers"
+    - "oidc-viewers"
+    - "oidc-servicenow-users"
+    - "servicenow-operators"
+
+- name: Display RBAC configuration results
+  debug:
+    msg:
+      - "RBAC Group Mappings Configuration:"
+      - "Cluster Admin Binding: {{ 'Success' if cluster_admin_binding.changed else 'Already exists' }}"
+      - "Developer Binding: {{ 'Success' if developer_binding.changed else 'Already exists' }}"
+      - "Viewer Binding: {{ 'Success' if viewer_binding.changed else 'Already exists' }}"
+      - "ServiceNow User Binding: {{ 'Success' if servicenow_binding.changed else 'Already exists' }}"
+      - "ServiceNow Operator Role: {{ 'Success' if servicenow_clusterrole.changed else 'Already exists' }}"
+      - "ServiceNow Operator Binding: {{ 'Success' if servicenow_operator_binding.changed else 'Already exists' }}"
+      - ""
+      - "Group Mappings:"
+      - "  cluster-admins, openshift-admins → cluster-admin"
+      - "  developers, dev-team → edit"
+      - "  viewers, read-only → view"
+      - "  servicenow-users → {{ default_cluster_role }}"
+      - "  servicenow-operators → servicenow-operator"

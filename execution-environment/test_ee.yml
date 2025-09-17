@@ -1,0 +1,60 @@
+---
+- name: Test Custom Execution Environment
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Check for required Ansible collections
+      ansible.builtin.command: ansible-galaxy collection list
+      register: galaxy_list
+      changed_when: false
+
+    - name: Verify community.general collection is installed
+      ansible.builtin.assert:
+        that:
+          - "'community.general' in galaxy_list.stdout"
+        fail_msg: "The 'community.general' collection is not installed."
+
+    - name: Verify kubernetes.core collection is installed
+      ansible.builtin.assert:
+        that:
+          - "'kubernetes.core' in galaxy_list.stdout"
+        fail_msg: "The 'kubernetes.core' collection is not installed."
+
+    - name to Python interpreter path
+      ansible.builtin.command: which python
+      register: python_path
+      changed_when: false
+
+    - name: Verify Python interpreter exists
+      ansible.builtin.assert:
+        that:
+          - python_path.rc == 0
+        fail_msg: "Python interpreter not found in the execution environment."
+
+    - name: Check for openshift-client
+      ansible.builtin.command: which oc
+      register: oc_path
+      changed_when: false
+
+    - name: Verify oc client exists
+      ansible.builtin.assert:
+        that:
+          - oc_path.rc == 0
+        fail_msg: "The 'oc' client is not installed."
+
+    - name: Check for kubectl
+      ansible.builtin.command: which kubectl
+      register: kubectl_path
+      changed_when: false
+
+    - name: Verify kubectl client exists
+      ansible.builtin.assert:
+        that:
+          - kubectl_path.rc == 0
+        fail_msg: "The 'kubectl' client is not installed."
+
+    - name: Print success message
+      ansible.builtin.debug:
+        msg: "Execution Environment verification successful!"

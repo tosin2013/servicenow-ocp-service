@@ -1,0 +1,28 @@
+---
+# ServiceNow-Keycloak Integration Variables
+# This file contains the actual configuration values for the integration
+
+# Keycloak/RHSSO Configuration
+rhsso_url: "https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+rhsso_admin_user: "admin"
+rhsso_admin_password: "{{ vault_rhsso_admin_password }}"
+
+# ServiceNow Configuration
+servicenow_instance_url: "https://dev295398.service-now.com"
+servicenow_admin_user: "admin"
+servicenow_admin_password: "{{ vault_servicenow_admin_password }}"
+
+# OAuth Configuration
+servicenow_client_secret: "servicenow-secret-2025"
+openshift_client_secret: "openshift-secret-2025"
+openshift_cluster_domain: "apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+
+# Realm and Client Configuration
+servicenow_realm_name: "servicenow"
+servicenow_client_id: "servicenow-client"
+openshift_client_id: "openshift"
+
+# ServiceNow OAuth Application Details
+servicenow_oauth_app_name: "Keycloak SSO Integration"
+servicenow_oauth_app_description: "OAuth 2.0 integration with Red Hat SSO/Keycloak for seamless authentication"
+servicenow_oauth_redirect_url: "https://dev295398.service-now.com/oauth_redirect.do"

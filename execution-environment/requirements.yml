@@ -1,0 +1,17 @@
+---
+collections:
+  # Core OpenShift/Kubernetes automation
+  - name: kubernetes.core
+    version: ">=2.4.0"
+  - name: community.okd
+    version: ">=2.3.0"
+
+  # General utilities and HTTP operations
+  - name: community.general
+    version: ">=6.0.0"
+  - name: ansible.posix
+    version: ">=1.4.0"
+
+  # GitOps and Git operations
+  - name: community.crypto
+    version: ">=2.0.0"

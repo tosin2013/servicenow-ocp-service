@@ -1,0 +1,102 @@
+name: "Scheduled Execution Environment Rebuild"
+
+on:
+  schedule:
+    # Run every Monday at 6:00 AM UTC to catch weekly Red Hat updates
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force rebuild even if no changes detected'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  check-base-image:
+    runs-on: ubuntu-latest
+    outputs:
+      should_rebuild: ${{ steps.check.outputs.should_rebuild }}
+      base_image_digest: ${{ steps.check.outputs.base_image_digest }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Podman
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y podman
+        
+    - name: Login to Red Hat Registry
+      if: ${{ secrets.REDHAT_USERNAME && secrets.REDHAT_PASSWORD }}
+      run: |
+        echo "${{ secrets.REDHAT_PASSWORD }}" | podman login registry.redhat.io -u "${{ secrets.REDHAT_USERNAME }}" --password-stdin
+        
+    - name: Check for base image updates
+      id: check
+      run: |
+        BASE_IMAGE="registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8:1.0.0-955"
+        
+        # Get current base image digest
+        CURRENT_DIGEST=$(podman inspect --format='{{.Digest}}' "${BASE_IMAGE}" 2>/dev/null || echo "")
+        
+        # Pull latest to check for updates
+        podman pull "${BASE_IMAGE}" --quiet
+        NEW_DIGEST=$(podman inspect --format='{{.Digest}}' "${BASE_IMAGE}")
+        
+        echo "base_image_digest=${NEW_DIGEST}" >> $GITHUB_OUTPUT
+        
+        # Check if we should rebuild
+        if [[ "${{ github.event.inputs.force_rebuild }}" == "true" ]]; then
+          echo "should_rebuild=true" >> $GITHUB_OUTPUT
+          echo "🔄 Force rebuild requested"
+        elif [[ "${CURRENT_DIGEST}" != "${NEW_DIGEST}" ]] || [[ -z "${CURRENT_DIGEST}" ]]; then
+          echo "should_rebuild=true" >> $GITHUB_OUTPUT
+          echo "🆕 Base image updated: ${CURRENT_DIGEST} -> ${NEW_DIGEST}"
+        else
+          echo "should_rebuild=false" >> $GITHUB_OUTPUT
+          echo "✅ Base image unchanged: ${NEW_DIGEST}"
+        fi
+
+  rebuild-execution-environment:
+    runs-on: ubuntu-latest
+    needs: check-base-image
+    if: needs.check-base-image.outputs.should_rebuild == 'true'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Generate version tag
+      id: version
+      run: |
+        # Use timestamp for scheduled builds
+        VERSION="scheduled-$(date +%Y%m%d-%H%M%S)"
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Building scheduled version: ${VERSION}"
+        
+    - name: Trigger execution environment build
+      uses: ./.github/workflows/build-ee.yml
+      with:
+        version_tag: ${{ steps.version.outputs.version }}
+        base_image_digest: ${{ needs.check-base-image.outputs.base_image_digest }}
+        
+    - name: Create release for scheduled build
+      if: success()
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "ee-scheduled-${{ steps.version.outputs.version }}"
+        release_name: "Scheduled EE Build - ${{ steps.version.outputs.version }}"
+        body: |
+          ## 🔄 Scheduled Execution Environment Build
+          
+          **Base Image Digest**: `${{ needs.check-base-image.outputs.base_image_digest }}`
+          **Build Trigger**: Weekly scheduled rebuild
+          **Image**: `quay.io/takinosh/servicenow-ocp-ee:${{ steps.version.outputs.version }}`
+          
+          This build was automatically triggered to incorporate the latest Red Hat base image updates and security patches.
+        draft: false
+        prerelease: false

@@ -1,0 +1,194 @@
+---
+# ServiceNow Flow Designer Implementation Variables
+# This file contains all configuration variables for Flow Designer workflows
+
+# ServiceNow Configuration
+servicenow_url: "https://dev295398.service-now.com"
+servicenow_username: "admin"
+servicenow_password: "{{ vault_servicenow_password }}"
+
+# Keycloak/RHSSO Configuration
+rhsso_url: "https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+keycloak_username: "admin"
+keycloak_password: "{{ vault_keycloak_password }}"
+servicenow_realm_name: "servicenow"
+
+# OpenShift Configuration
+ocp_api_url: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+ocp_apps_domain: "apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+ocp_token: "{{ lookup('env', 'OCP_TOKEN') }}"  # Retrieved from environment variable
+
+# Flow Designer Workflow Names
+user_flow_name: "Keycloak User Provisioning"
+project_flow_name: "OpenShift Project Management"
+monitoring_flow_name: "OpenShift Monitoring Integration"
+
+# OAuth Configuration
+oauth_profile: "keycloak_profile"
+oauth_credentials: "keycloak_credentials"
+
+# Workflow Enablement
+enable_user_flow: true
+enable_project_flow: true
+enable_monitoring_flow: true
+
+# ServiceNow Tables
+user_table: "sc_request"
+project_table: "sc_req_item"
+incident_table: "incident"
+
+# Default OpenShift Roles
+default_openshift_roles:
+  - view
+  - edit
+  - admin
+
+# Default Project Templates
+default_project_templates:
+  - development
+  - staging
+  - production
+
+# Resource Quotas for OpenShift Projects
+default_resource_quotas:
+  requests_cpu: "4"
+  requests_memory: "8Gi"
+  limits_cpu: "8"
+  limits_memory: "16Gi"
+  pods: "10"
+  persistent_volume_claims: "5"
+
+# Alert Severity Mapping
+alert_severity_mapping:
+  critical:
+    priority: "1"
+    impact: "1"
+    urgency: "1"
+  warning:
+    priority: "3"
+    impact: "3"
+    urgency: "3"
+  info:
+    priority: "4"
+    impact: "3"
+    urgency: "3"
+
+# Email Configuration
+notification_emails:
+  openshift_ops: "openshift-ops@company.com"
+  admin: "admin@company.com"
+
+# Webhook Configuration
+webhook_endpoints:
+  openshift_alerts: "/api/now/webhook/openshift_alerts"
+  keycloak_events: "/api/now/webhook/keycloak_events"
+
+# Custom Field Definitions for ServiceNow
+custom_fields:
+  incident:
+    - name: "u_alert_name"
+      label: "Alert Name"
+      type: "string"
+      length: 255
+    - name: "u_namespace"
+      label: "OpenShift Namespace"
+      type: "string"
+      length: 100
+    - name: "u_pod"
+      label: "Pod Name"
+      type: "string"
+      length: 255
+    - name: "u_instance"
+      label: "Instance"
+      type: "string"
+      length: 255
+    - name: "u_severity"
+      label: "Alert Severity"
+      type: "string"
+      length: 50
+    - name: "u_openshift_url"
+      label: "OpenShift Console URL"
+      type: "url"
+      length: 500
+
+# Service Catalog Configuration
+catalog_items:
+  openshift_project:
+    name: "OpenShift Project Request"
+    short_description: "Request a new OpenShift project with automated setup"
+    category: "Software"
+    variables:
+      - name: "project_name"
+        question_text: "Project Name"
+        type: "string"
+        mandatory: true
+        help_text: "Enter a unique project name (lowercase, no spaces)"
+      - name: "display_name"
+        question_text: "Display Name"
+        type: "string"
+        mandatory: true
+        help_text: "Human-readable project name"
+      - name: "description"
+        question_text: "Project Description"
+        type: "string"
+        mandatory: true
+        help_text: "Brief description of the project purpose"
+      - name: "environment"
+        question_text: "Environment Type"
+        type: "choice"
+        choices: "development,staging,production"
+        mandatory: true
+        default_value: "development"
+      - name: "team"
+        question_text: "Team/Department"
+        type: "string"
+        mandatory: true
+        help_text: "Team or department responsible for this project"
+  
+  keycloak_user:
+    name: "Keycloak User Account Request"
+    short_description: "Request a new Keycloak user account"
+    category: "Software"
+    variables:
+      - name: "requested_for"
+        question_text: "User"
+        type: "reference"
+        reference: "sys_user"
+        mandatory: true
+        help_text: "Select the user who needs the account"
+      - name: "access_level"
+        question_text: "Access Level"
+        type: "choice"
+        choices: "basic,developer,admin"
+        mandatory: true
+        default_value: "basic"
+        help_text: "Select the appropriate access level"
+
+# REST Message Configurations
+rest_messages:
+  keycloak_user_creation:
+    name: "Keycloak User Creation"
+    description: "REST message for creating users in Keycloak"
+    authentication_type: "oauth2"
+    methods:
+      - name: "createUser"
+        http_method: "POST"
+        endpoint: "/auth/admin/realms/servicenow/users"
+      - name: "resetPassword"
+        http_method: "PUT"
+        endpoint: "/auth/admin/realms/servicenow/users/{user_id}/reset-password"
+  
+  openshift_project_management:
+    name: "OpenShift Project Management"
+    description: "REST messages for OpenShift project operations"
+    authentication_type: "bearer_token"
+    methods:
+      - name: "createNamespace"
+        http_method: "POST"
+        endpoint: "/api/v1/namespaces"
+      - name: "createRoleBinding"
+        http_method: "POST"
+        endpoint: "/apis/rbac.authorization.k8s.io/v1/namespaces/{namespace}/rolebindings"
+      - name: "createResourceQuota"
+        http_method: "POST"
+        endpoint: "/api/v1/namespaces/{namespace}/resourcequotas"

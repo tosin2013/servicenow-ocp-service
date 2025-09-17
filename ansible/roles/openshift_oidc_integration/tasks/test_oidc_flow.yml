@@ -1,0 +1,191 @@
+---
+# OIDC Authentication Flow Testing
+# This file tests the OIDC authentication flow between OpenShift and Keycloak
+
+- name: Test Keycloak OIDC discovery endpoint
+  uri:
+    url: "{{ oidc_issuer_url }}/.well-known/openid_configuration"
+    method: GET
+    validate_certs: false
+    status_code: [200]
+  register: oidc_discovery_test
+  failed_when: false
+
+- name: Test OpenShift login page for OIDC provider
+  uri:
+    url: "{{ openshift_console_url }}/auth/login"
+    method: GET
+    validate_certs: false
+    status_code: [200]
+  register: login_page_test
+  failed_when: false
+
+- name: Verify Keycloak realm exists
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+    validate_certs: false
+    status_code: [200, 404]
+  register: realm_check
+  failed_when: false
+
+- name: Display realm check result
+  debug:
+    msg:
+      - "Realm check status: {{ realm_check.status }}"
+      - "Realm URL: {{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name }}"
+      - "Realm exists: {{ 'Yes' if realm_check.status == 200 else 'No' }}"
+
+- name: Check if test user already exists
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name }}/users?username=oidc-demo-user"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+    validate_certs: false
+    status_code: [200]
+  register: existing_user_check
+  failed_when: false
+  when: realm_check.status == 200
+
+- name: Create test user in Keycloak using URI method
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name }}/users"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      username: "oidc-demo-user"
+      email: "oidc-demo@example.com"
+      firstName: "OIDC"
+      lastName: "Demo User"
+      enabled: true
+      emailVerified: true
+    validate_certs: false
+    status_code: [201, 409]  # 201 = created, 409 = already exists
+  register: test_user_creation
+  failed_when: false
+  when:
+    - realm_check.status == 200
+    - existing_user_check.json is defined and (existing_user_check.json | length == 0)
+
+- name: Get user ID for password and group assignment
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name }}/users?username=oidc-demo-user"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+    validate_certs: false
+  register: user_details
+  failed_when: false
+  when: realm_check.status == 200
+
+- name: Set user password
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name }}/users/{{ user_details.json[0].id }}/reset-password"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      type: "password"
+      value: "DemoPassword123!"
+      temporary: false
+    validate_certs: false
+    status_code: [204]
+  register: password_set_result
+  failed_when: false
+  when:
+    - realm_check.status == 200
+    - user_details.json is defined and (user_details.json | length > 0)
+
+- name: Get developers group ID
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name }}/groups?search=developers"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+    validate_certs: false
+  register: developers_group
+  failed_when: false
+  when: realm_check.status == 200
+
+- name: Add user to developers group
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name }}/users/{{ user_details.json[0].id }}/groups/{{ developers_group.json[0].id }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+    validate_certs: false
+    status_code: [204, 409]  # 204 = success, 409 = already member
+  register: group_assignment_result
+  failed_when: false
+  when:
+    - realm_check.status == 200
+    - user_details.json is defined and (user_details.json | length > 0)
+    - developers_group.json is defined and (developers_group.json | length > 0)
+
+
+
+- name: Set user creation result
+  set_fact:
+    user_creation_successful: "{{ test_user_creation.status == 201 if test_user_creation is defined and test_user_creation.status is defined else (existing_user_check.json | length > 0 if existing_user_check.json is defined else false) }}"
+  when: realm_check.status == 200
+
+- name: Debug test_user_creation variable
+  debug:
+    var: test_user_creation
+
+- name: Set user creation status
+  set_fact:
+    user_creation_status: >-
+      {%- if realm_check.status != 200 -%}
+      Skipped - Realm not found
+      {%- elif test_user_creation is defined and test_user_creation.status is defined and test_user_creation.status == 201 -%}
+      Success
+      {%- elif test_user_creation is defined and test_user_creation.status is defined and test_user_creation.status == 409 -%}
+      Already exists
+      {%- elif existing_user_check.json is defined and (existing_user_check.json | length > 0) -%}
+      Already exists
+      {%- elif user_details.json is defined and (user_details.json | length > 0) -%}
+      User configured
+      {%- else -%}
+      Failed
+      {%- endif -%}
+
+- name: Generate OIDC integration test summary
+  set_fact:
+    oidc_test_summary:
+      keycloak_discovery: "{{ 'Success' if oidc_discovery_test.status == 200 else 'Failed' }}"
+      openshift_login_page: "{{ 'Accessible' if login_page_test.status == 200 else 'Failed' }}"
+      realm_exists: "{{ 'Yes' if realm_check.status == 200 else 'No - Realm not found' }}"
+      test_user_created: "{{ user_creation_status }}"
+
+- name: Display OIDC integration test results
+  debug:
+    msg:
+      - "🧪 OIDC Integration Test Results"
+      - "==============================="
+      - "Keycloak OIDC Discovery: {{ oidc_test_summary.keycloak_discovery }}"
+      - "OpenShift Login Page: {{ oidc_test_summary.openshift_login_page }}"
+      - "Keycloak Realm Exists: {{ oidc_test_summary.realm_exists }}"
+      - "Test User Created: {{ oidc_test_summary.test_user_created }}"
+      - ""
+      - "🔗 Test URLs:"
+      - "  Keycloak OIDC Discovery: {{ oidc_issuer_url }}/.well-known/openid_configuration"
+      - "  OpenShift Console Login: {{ openshift_console_url }}/auth/login"
+      - "  Keycloak Realm: {{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name }}"
+      - "  Test User: oidc-demo-user / DemoPassword123!"
+      - ""
+      - "📋 Manual Testing Steps:"
+      - "  1. Navigate to {{ openshift_console_url }}"
+      - "  2. Click on '{{ oidc_display_name }}' login option"
+      - "  3. Login with: oidc-demo-user / DemoPassword123!"
+      - "  4. Verify user has 'edit' permissions (developers group)"
+      - ""
+      - "⚠️  Note: If realm doesn't exist, ensure the Keycloak realm setup completed successfully."

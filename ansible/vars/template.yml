@@ -1,0 +1,22 @@
+---
+# Variables template for RHSSO ServiceNow configuration
+# Copy this file and customize for your environment
+# Usage: ansible-playbook ansible/playbook.yml -e @ansible/vars/my-environment.yml
+
+# Keycloak/RHSSO Configuration
+rhsso_external_url: "https://keycloak-sso.apps.YOUR-CLUSTER-DOMAIN"
+rhsso_admin_username: "admin"
+rhsso_admin_password: "YOUR_KEYCLOAK_ADMIN_PASSWORD"
+
+# ServiceNow Configuration  
+servicenow_url: "https://YOUR-INSTANCE.service-now.com"
+servicenow_oauth_secret: "YOUR_SERVICENOW_CLIENT_SECRET"
+
+# OpenShift Configuration
+openshift_apps_domain: "apps.YOUR-CLUSTER-DOMAIN"
+openshift_oauth_secret: "YOUR_OPENSHIFT_CLIENT_SECRET"
+
+# Realm Configuration (optional overrides)
+realm_name: "servicenow"
+client_id: "servicenow-client"
+ocp_client_id: "openshift"

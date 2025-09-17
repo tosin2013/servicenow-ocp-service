@@ -1,0 +1,95 @@
+---
+# ServiceNow Flow Designer Validation Playbook
+# This playbook validates if Flow Designer implementation is complete
+
+- name: Validate ServiceNow Flow Designer Implementation
+  hosts: localhost
+  gather_facts: yes
+  vars_files:
+    - vars/production.yml
+  
+  tasks:
+    - name: Check if Flow Designer workflows exist
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_hub_flow"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: flow_check
+      failed_when: false
+
+    - name: Check for User Provisioning Flow
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_hub_flow?sysparm_query=name=Keycloak User Provisioning"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: user_flow_check
+      failed_when: false
+
+    - name: Check for Project Management Flow
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_hub_flow?sysparm_query=name=OpenShift Project Management"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: project_flow_check
+      failed_when: false
+
+    - name: Check for Monitoring Integration Flow
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_hub_flow?sysparm_query=name=OpenShift Monitoring Integration"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: monitoring_flow_check
+      failed_when: false
+
+    - name: Check Service Catalog Items
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_cat_item?sysparm_query=nameLIKEOpenShift^ORnameLIKEKeycloak"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: catalog_check
+      failed_when: false
+
+    - name: Flow Designer Implementation Validation Summary
+      debug:
+        msg:
+          - "🔍 ServiceNow Flow Designer Validation Results"
+          - "=============================================="
+          - ""
+          - "API Access Status: {{ 'SUCCESS' if flow_check.status == 200 else 'FAILED' }}"
+          - "Flow API Response Code: {{ flow_check.status | default('N/A') }}"
+          - ""
+          - "📊 Workflow Status:"
+          - "  User Provisioning Flow: {{ 'EXISTS' if user_flow_check.json.result | length > 0 else 'NOT FOUND' }}"
+          - "  Project Management Flow: {{ 'EXISTS' if project_flow_check.json.result | length > 0 else 'NOT FOUND' }}"
+          - "  Monitoring Integration Flow: {{ 'EXISTS' if monitoring_flow_check.json.result | length > 0 else 'NOT FOUND' }}"
+          - ""
+          - "📋 Service Catalog:"
+          - "  Catalog Items Found: {{ catalog_check.json.result | length if catalog_check.json is defined else 0 }}"
+          - ""
+          - "🎯 Implementation Status:"
+          - "  {{ '✅ COMPLETE' if (user_flow_check.json.result | length > 0 and project_flow_check.json.result | length > 0 and monitoring_flow_check.json.result | length > 0) else '❌ INCOMPLETE' }}"

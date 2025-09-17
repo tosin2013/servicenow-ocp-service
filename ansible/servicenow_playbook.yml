@@ -1,0 +1,29 @@
+---
+- name: Create ServiceNow Incident
+  hosts: localhost
+  connection: local
+  collections:
+    - servicenow.itsm
+
+  vars:
+    sn_host: "https://dev295398.service-now.com"
+    sn_username: "admin"
+    sn_password: "{{ vault_servicenow_password }}"
+
+  tasks:
+    - name: Create a new incident
+      incident:
+        instance:
+          host: "{{ sn_host }}"
+          username: "{{ sn_username }}"
+          password: "{{ sn_password }}"
+        state: new
+        caller: "admin"
+        short_description: "This is a test incident created by Ansible."
+        urgency: low
+        impact: low
+      register: new_incident
+
+    - name: Display new incident number
+      debug:
+        msg: "New incident created: {{ new_incident.record.number }}"

@@ -1,0 +1,15 @@
+# 03-role-binding.yaml
+# Binds the Role (permissions) to the ServiceAccount (identity).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind-secretstore-sa-to-reader-role
+  namespace: external-secrets-operator
+subjects:
+  - kind: ServiceAccount
+    name: eso-secretstore-sa # The "who"
+    namespace: external-secrets-operator
+roleRef:
+  kind: Role # Specifies that we are binding to a Role, not a ClusterRole
+  name: secretstore-reader-role # The "what"
+  apiGroup: rbac.authorization.k8s.io

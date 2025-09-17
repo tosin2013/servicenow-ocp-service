@@ -1,0 +1,156 @@
+[
+  {
+    "id": "6c858fa9-5f59-490f-9045-94fae976d2f0",
+    "created": "2025-09-17T02:38:38.682Z",
+    "lastModified": "2025-09-17T02:38:38.682Z",
+    "version": 1,
+    "confidence": 0.8999999999999999,
+    "relevance": 0.8,
+    "tags": [
+      "status:** proposed",
+      "tech:rust"
+    ],
+    "relationships": [],
+    "context": {
+      "projectPhase": "design",
+      "technicalStack": [
+        "rust"
+      ],
+      "environmentalFactors": [
+        "api-first",
+        "security-critical"
+      ],
+      "stakeholders": [
+        "end-users",
+        "business-stakeholders"
+      ]
+    },
+    "accessPattern": {
+      "lastAccessed": "2025-09-17T02:38:38.682Z",
+      "accessCount": 1,
+      "accessContext": [
+        "adr_transformation"
+      ]
+    },
+    "evolution": {
+      "origin": "discovered",
+      "transformations": [
+        {
+          "timestamp": "2025-09-17T02:38:38.682Z",
+          "type": "imported_from_adr",
+          "description": "Transformed from ADR: 001-three-tier-orchestration-architecture.md",
+          "agent": "MemoryTransformer"
+        }
+      ]
+    },
+    "validation": {
+      "isVerified": false
+    },
+    "type": "architectural_decision",
+    "title": "ADR-001: Three-Tier Orchestration Architecture",
+    "description": "The project requires a clear separation of concerns to manage the orchestration of OpenShift resources, handle user identities, and provision the actual infrastructure. This separation is crucial for maintainability, scalability, and security. The solution needs to leverage the strengths of each component in the technology stack.",
+    "decisionData": {
+      "status": "proposed",
+      "context": "The project requires a clear separation of concerns to manage the orchestration of OpenShift resources, handle user identities, and provision the actual infrastructure. This separation is crucial for maintainability, scalability, and security. The solution needs to leverage the strengths of each component in the technology stack.",
+      "decision": "The architecture will be implemented as a three-tier system:\n\n1.  **ServiceNow (Orchestration Tier):** Acts as the central orchestrator, hosting the master workflow, the Service Catalog item for initiating requests, and all associated business logic (approvals, notifications). It will be the single point of initiation for all provisioning activities.\n\n2.  **Keycloak (Identity Tier):** Serves as the source of truth for user identities. The ServiceNow workflow will create new user accounts in Keycloak, and OpenShift will be configured to trust Keycloak as an external OpenID Connect (OIDC) identity provider.\n\n3.  **OpenShift (Resource Tier):** Functions as the target platform where new projects are created. The ServiceNow workflow will interact with the OpenShift API to request new projects and to create RoleBindings that grant permissions to the users managed in Keycloak.",
+      "consequences": {
+        "positive": [
+          "**Clear Separation of Duties:** Each tier has a well-defined responsibility, which simplifies development, testing, and maintenance.",
+          "**Improved Scalability:** Each tier can be scaled independently to meet demand.",
+          "**Enhanced Security:** The separation of tiers allows for more granular security controls and reduces the attack surface of each component.",
+          "**Increased Complexity:** The three-tier architecture introduces additional complexity in terms of deployment and configuration."
+        ],
+        "negative": [],
+        "risks": []
+      },
+      "alternatives": [],
+      "implementationStatus": "not_started",
+      "implementationTasks": [],
+      "reviewHistory": [
+        {
+          "timestamp": "2025-09-05T00:00:00.000Z",
+          "reviewer": "system",
+          "decision": "revise",
+          "comments": "Original ADR status: ** proposed"
+        }
+      ]
+    }
+  },
+  {
+    "id": "09f77a84-5b4c-466a-8181-acd617ad96c9",
+    "created": "2025-09-17T02:40:23.835Z",
+    "lastModified": "2025-09-17T02:40:23.835Z",
+    "version": 1,
+    "confidence": 0.8999999999999999,
+    "relevance": 0.8,
+    "tags": [
+      "status:** proposed",
+      "tech:rust"
+    ],
+    "relationships": [],
+    "context": {
+      "projectPhase": "design",
+      "technicalStack": [
+        "rust"
+      ],
+      "environmentalFactors": [
+        "api-first",
+        "security-critical"
+      ],
+      "stakeholders": [
+        "end-users",
+        "business-stakeholders"
+      ]
+    },
+    "accessPattern": {
+      "lastAccessed": "2025-09-17T02:40:23.835Z",
+      "accessCount": 1,
+      "accessContext": [
+        "adr_transformation"
+      ]
+    },
+    "evolution": {
+      "origin": "discovered",
+      "transformations": [
+        {
+          "timestamp": "2025-09-17T02:40:23.835Z",
+          "type": "imported_from_adr",
+          "description": "Transformed from ADR: 001-three-tier-orchestration-architecture.md",
+          "agent": "MemoryTransformer"
+        }
+      ]
+    },
+    "validation": {
+      "isVerified": false
+    },
+    "type": "architectural_decision",
+    "title": "ADR-001: Three-Tier Orchestration Architecture",
+    "description": "The project requires a clear separation of concerns to manage the orchestration of OpenShift resources, handle user identities, and provision the actual infrastructure. This separation is crucial for maintainability, scalability, and security. The solution needs to leverage the strengths of each component in the technology stack.",
+    "decisionData": {
+      "status": "proposed",
+      "context": "The project requires a clear separation of concerns to manage the orchestration of OpenShift resources, handle user identities, and provision the actual infrastructure. This separation is crucial for maintainability, scalability, and security. The solution needs to leverage the strengths of each component in the technology stack.",
+      "decision": "The architecture will be implemented as a three-tier system:\n\n1.  **ServiceNow (Orchestration Tier):** Acts as the central orchestrator, hosting the master workflow, the Service Catalog item for initiating requests, and all associated business logic (approvals, notifications). It will be the single point of initiation for all provisioning activities.\n\n2.  **Keycloak (Identity Tier):** Serves as the source of truth for user identities. The ServiceNow workflow will create new user accounts in Keycloak, and OpenShift will be configured to trust Keycloak as an external OpenID Connect (OIDC) identity provider.\n\n3.  **OpenShift (Resource Tier):** Functions as the target platform where new projects are created. The ServiceNow workflow will interact with the OpenShift API to request new projects and to create RoleBindings that grant permissions to the users managed in Keycloak.",
+      "consequences": {
+        "positive": [
+          "**Clear Separation of Duties:** Each tier has a well-defined responsibility, which simplifies development, testing, and maintenance.",
+          "**Improved Scalability:** Each tier can be scaled independently to meet demand.",
+          "**Enhanced Security:** The separation of tiers allows for more granular security controls and reduces the attack surface of each component.",
+          "**Increased Complexity:** The three-tier architecture introduces additional complexity in terms of deployment and configuration."
+        ],
+        "negative": [],
+        "risks": []
+      },
+      "alternatives": [],
+      "implementationStatus": "not_started",
+      "implementationTasks": [],
+      "reviewHistory": [
+        {
+          "timestamp": "2025-09-05T00:00:00.000Z",
+          "reviewer": "system",
+          "decision": "revise",
+          "comments": "Original ADR status: ** proposed"
+        }
+      ]
+    }
+  }
+]

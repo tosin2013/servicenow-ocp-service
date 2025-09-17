@@ -1,0 +1,16 @@
+---
+# ansible/roles/aap_configuration/tasks/setup_project.yml
+
+- name: Create Git Project in AAP
+  ansible.controller.project:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    validate_certs: "{{ controller_validate_certs | default(false) }}"
+    name: "ServiceNow OpenShift Integration"
+    organization: "Default"
+    scm_type: "git"
+    scm_url: "https://github.com/tosin2013/servicenow-ocp-service.git"
+    scm_branch: "main"
+    scm_update_on_launch: true
+    state: present

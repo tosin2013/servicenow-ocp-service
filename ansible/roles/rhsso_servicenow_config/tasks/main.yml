@@ -1,0 +1,97 @@
+---
+- name: Get RHSSO Admin Token
+  uri:
+    url: "{{ rhsso_url }}/auth/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "{{ rhsso_admin_user }}"
+      password: "{{ rhsso_admin_password }}"
+      grant_type: password
+      client_id: admin-cli
+  register: rhsso_auth_response
+
+- name: Set RHSSO Auth Token Fact
+  set_fact:
+    rhsso_auth_token: "{{ rhsso_auth_response.json.access_token }}"
+
+- name: Create ServiceNow Realm
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ rhsso_auth_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      realm: servicenow
+      enabled: true
+      displayName: "ServiceNow Realm"
+    status_code: [201, 409]  # 201 = created, 409 = already exists
+  register: realm_result
+
+- name: Create ServiceNow Client
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/servicenow/clients"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ rhsso_auth_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      clientId: servicenow-client
+      secret: "{{ servicenow_client_secret }}"
+      protocol: openid-connect
+      publicClient: false
+      standardFlowEnabled: true
+      directAccessGrantsEnabled: true
+      serviceAccountsEnabled: true
+      redirectUris:
+        - "https://dev295398.service-now.com/oauth_redirect.do"
+      enabled: true
+    status_code: [201, 409]  # 201 = created, 409 = already exists
+  register: servicenow_client_result
+
+- name: Display ServiceNow Client Secret
+  debug:
+    msg: "ServiceNow Client Secret: {{ servicenow_client_secret }}"
+
+- name: Create OpenShift Client
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/servicenow/clients"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ rhsso_auth_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      clientId: openshift
+      secret: "{{ openshift_client_secret }}"
+      protocol: openid-connect
+      publicClient: false
+      standardFlowEnabled: true
+      redirectUris:
+        - "https://oauth-openshift.{{ openshift_cluster_domain }}/*"
+      enabled: true
+    status_code: [201, 409]  # 201 = created, 409 = already exists
+  register: openshift_client_result
+
+- name: Display OpenShift Client Secret
+  debug:
+    msg: "OpenShift Client Secret: {{ openshift_client_secret }}"
+
+# ServiceNow REST API Integration
+- name: Configure ServiceNow OAuth Integration
+  include_tasks: servicenow_api.yml
+  when: servicenow_instance_url is defined and servicenow_admin_user is defined
+
+- name: Display Integration Summary
+  debug:
+    msg:
+      - "=== ServiceNow-Keycloak Integration Summary ==="
+      - "Keycloak URL: {{ rhsso_url }}"
+      - "ServiceNow Realm: {{ servicenow_realm_name }}"
+      - "ServiceNow Client ID: {{ servicenow_client_id }}"
+      - "ServiceNow Instance: {{ servicenow_instance_url }}"
+      - "OAuth Redirect URL: {{ servicenow_oauth_redirect_url }}"
+      - "Integration Status: Complete"

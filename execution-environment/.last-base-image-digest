@@ -1,0 +1,7 @@
+# Red Hat Base Image Digest Tracking
+# This file tracks the digest of the Red Hat base image to detect updates
+# Updated automatically by base-image-monitor.yml workflow
+
+# Current base image: registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8:1.0.0-955
+# Last checked: Initial setup
+# Digest will be populated on first monitor run

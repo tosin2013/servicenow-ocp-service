@@ -1,0 +1,66 @@
+[
+  {
+    "id": "5a5f7d33-eb2b-42bc-a645-2690e6bcf527",
+    "entityId": "8b02b338-c929-46c1-bf88-21b9b4b27098",
+    "timestamp": "2025-09-17T02:40:23.923Z",
+    "eventType": "related",
+    "agent": "MemoryEntityManager",
+    "context": "Relationship relates_to from 9. Hybrid GitOps and Ansible Configuration for Post-Deployment Orchestration"
+  },
+  {
+    "id": "d11ed1b2-aa3a-4e5e-bae2-1d5ef767d372",
+    "entityId": "8b02b338-c929-46c1-bf88-21b9b4b27098",
+    "timestamp": "2025-09-17T02:40:23.924Z",
+    "eventType": "related",
+    "agent": "MemoryEntityManager",
+    "context": "Relationship relates_to from 9. Hybrid GitOps and Ansible Configuration for Post-Deployment Orchestration"
+  },
+  {
+    "id": "f4a709bc-06d8-4e48-a294-1303355032b5",
+    "entityId": "9aff7366-b9ae-4815-9a24-60bd13751db2",
+    "timestamp": "2025-09-17T02:40:23.925Z",
+    "eventType": "related",
+    "agent": "MemoryEntityManager",
+    "context": "Relationship relates_to from 9. Hybrid GitOps and Ansible Configuration for Post-Deployment Orchestration"
+  },
+  {
+    "id": "312b0841-ed32-41c0-85c1-519c3fde51ed",
+    "entityId": "8b02b338-c929-46c1-bf88-21b9b4b27098",
+    "timestamp": "2025-09-17T02:40:23.926Z",
+    "eventType": "related",
+    "agent": "MemoryEntityManager",
+    "context": "Relationship relates_to from ADR-010: Ansible Automation Platform Integration for ServiceNow-Driven Infrastructure Orchestration"
+  },
+  {
+    "id": "305501e4-293a-4ed8-8218-d66e773394da",
+    "entityId": "8b02b338-c929-46c1-bf88-21b9b4b27098",
+    "timestamp": "2025-09-17T02:40:23.927Z",
+    "eventType": "related",
+    "agent": "MemoryEntityManager",
+    "context": "Relationship relates_to from ADR-010: Ansible Automation Platform Integration for ServiceNow-Driven Infrastructure Orchestration"
+  },
+  {
+    "id": "edb44670-e3b3-4443-a434-7b52cc4c70cd",
+    "entityId": "9aff7366-b9ae-4815-9a24-60bd13751db2",
+    "timestamp": "2025-09-17T02:40:23.928Z",
+    "eventType": "related",
+    "agent": "MemoryEntityManager",
+    "context": "Relationship relates_to from ADR-010: Ansible Automation Platform Integration for ServiceNow-Driven Infrastructure Orchestration"
+  },
+  {
+    "id": "e8d45014-205d-4e5d-9a04-b8460246c829",
+    "entityId": "9aff7366-b9ae-4815-9a24-60bd13751db2",
+    "timestamp": "2025-09-17T02:40:23.930Z",
+    "eventType": "related",
+    "agent": "MemoryEntityManager",
+    "context": "Relationship relates_to from ADR-011: Custom Execution Environment for Ansible Automation Platform"
+  },
+  {
+    "id": "a8d57d5f-76b0-486d-b11e-fe18426bbf11",
+    "entityId": "9aff7366-b9ae-4815-9a24-60bd13751db2",
+    "timestamp": "2025-09-17T02:40:23.931Z",
+    "eventType": "related",
+    "agent": "MemoryEntityManager",
+    "context": "Relationship depends_on from ADR-011: Custom Execution Environment for Ansible Automation Platform"
+  }
+]

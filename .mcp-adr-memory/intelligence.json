@@ -1,0 +1,54 @@
+{
+  "contextAwareness": {
+    "currentContext": {
+      "lastEvent": "entity_updated",
+      "lastEventTime": "2025-09-17T02:40:23.850Z",
+      "entityId": "09f77a84-5b4c-466a-8181-acd617ad96c9",
+      "entityType": "architectural_decision"
+    },
+    "contextHistory": []
+  },
+  "patternRecognition": {
+    "discoveredPatterns": [],
+    "patternConfidence": {
+      "architectural_decision_update": 2
+    },
+    "emergentBehaviors": []
+  },
+  "relationshipInference": {
+    "suggestedRelationships": [
+      {
+        "sourceId": "6c858fa9-5f59-490f-9045-94fae976d2f0",
+        "targetId": "09f77a84-5b4c-466a-8181-acd617ad96c9",
+        "type": "relates_to",
+        "confidence": 0.6,
+        "reasoning": "Similar architectural_decision entities with overlapping tags"
+      },
+      {
+        "sourceId": "09f77a84-5b4c-466a-8181-acd617ad96c9",
+        "targetId": "6c858fa9-5f59-490f-9045-94fae976d2f0",
+        "type": "relates_to",
+        "confidence": 0.6,
+        "reasoning": "Similar architectural_decision entities with overlapping tags"
+      }
+    ],
+    "weakConnections": [],
+    "conflictDetection": []
+  },
+  "adaptiveRecommendations": {
+    "nextActions": [
+      {
+        "action": "Validate low-confidence entities",
+        "priority": 1,
+        "reasoning": "Several entities have confidence below 50%",
+        "requiredEntities": []
+      }
+    ],
+    "knowledgeGaps": [],
+    "optimizationOpportunities": [
+      "Consider consolidating similar entities",
+      "Review and strengthen weak relationships",
+      "Add more context to entities with generic descriptions"
+    ]
+  }
+}

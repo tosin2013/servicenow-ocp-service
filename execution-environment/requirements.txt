@@ -1,0 +1,28 @@
+# Keycloak Admin API client
+python-keycloak>=2.0.0
+
+# OpenShift/Kubernetes Python clients
+openshift>=0.13.0
+kubernetes>=24.0.0
+
+# HTTP and API utilities
+requests>=2.28.0
+urllib3>=1.26.0
+
+# YAML processing
+PyYAML>=6.0
+
+# ServiceNow API client
+pysnow>=0.7.0
+
+# Cryptography and security
+cryptography>=3.4.0
+pyOpenSSL>=22.0.0
+
+# JSON/data processing
+jq>=1.2.0
+jsonschema>=4.0.0
+
+# Logging and monitoring
+python-json-logger>=2.0.0
+prometheus-client>=0.14.0

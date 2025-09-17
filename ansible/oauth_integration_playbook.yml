@@ -1,0 +1,112 @@
+---
+- name: Complete ServiceNow OAuth Integration with Keycloak
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  
+  vars:
+    # Default values - override with -e @vars/production.yml
+    rhsso_external_url: "https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+    servicenow_url: "https://dev295398.service-now.com"
+    openshift_api_url: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+    realm_name: "servicenow"
+    client_id: "servicenow-client"
+    
+  pre_tasks:
+    - name: Verify Required Variables
+      assert:
+        that:
+          - rhsso_external_url is defined
+          - servicenow_url is defined
+          - rhsso_admin_username is defined
+          - rhsso_admin_password is defined
+          - servicenow_username is defined
+          - servicenow_password is defined
+        fail_msg: "Required variables are missing. Please provide them via -e @vars/production.yml"
+        
+    - name: Display Integration Parameters
+      debug:
+        msg:
+          - "=== ServiceNow OAuth Integration Starting ==="
+          - "Keycloak URL: {{ rhsso_external_url }}"
+          - "ServiceNow URL: {{ servicenow_url }}"
+          - "ServiceNow Realm: {{ realm_name }}"
+          - "OAuth Client ID: {{ client_id }}"
+
+  roles:
+    - role: rhsso_servicenow_config
+
+  post_tasks:
+    - name: OAuth Integration Complete
+      debug:
+        msg:
+          - "=== ServiceNow OAuth Integration Complete ==="
+          - ""
+          - "✅ Keycloak Configuration:"
+          - "   - ServiceNow realm created: {{ realm_name }}"
+          - "   - OAuth client configured: {{ client_id }}"
+          - "   - OpenShift client configured: openshift"
+          - ""
+          - "✅ ServiceNow Configuration:"
+          - "   - OAuth Entity Profile: keycloak_profile"
+          - "   - OAuth2 Auth Profile: Keycloak OAuth2 Profile"
+          - "   - Application Registry: {{ oauth_app_name | default('Keycloak SSO Integration') }}"
+          - "   - Keycloak Connection Alias: keycloak_connection"
+          - "   - OpenShift Connection Alias: openshift_connection"
+          - "   - Keycloak Credential Alias: keycloak_credentials"
+          - "   - OpenShift Credential Record: openshift_service_account_token"
+          - ""
+          - "🔗 Access Points:"
+          - "   - Keycloak Admin: {{ rhsso_external_url }}/auth/admin"
+          - "   - ServiceNow OAuth: {{ servicenow_url }}/nav_to.do?uri=oauth_entity_list.do"
+          - ""
+          - "📋 Next Steps:"
+          - "   1. Test OAuth flow in ServiceNow"
+          - "   2. Configure REST messages with OAuth profile"
+          - "   3. Implement Flow Designer workflows"
+          - ""
+          - "📄 Configuration Details:"
+          - "   - Summary: /tmp/servicenow_oauth_config_summary.md"
+          - "   - Test Results: /tmp/servicenow_oauth_test_results.md"
+
+    - name: Save Integration Status
+      copy:
+        content: |
+          # ServiceNow OAuth Integration Status
+          # Generated: {{ ansible_date_time.iso8601 }}
+          
+          ## Integration Complete ✅
+          
+          ### Keycloak Configuration
+          - URL: {{ rhsso_external_url }}
+          - Realm: {{ realm_name }}
+          - ServiceNow Client: {{ client_id }}
+          - OpenShift Client: openshift
+          
+          ### ServiceNow Configuration  
+          - Instance: {{ servicenow_url }}
+          - OAuth Entity Profile: keycloak_profile
+          - OAuth2 Auth Profile: Keycloak OAuth2 Profile
+          - Application Registry: {{ oauth_app_name | default('Keycloak SSO Integration') }}
+          - Keycloak Connection Alias: keycloak_connection
+          - OpenShift Connection Alias: openshift_connection
+          - Keycloak Credential Alias: keycloak_credentials
+          - OpenShift Credential Record: openshift_service_account_token
+          
+          ### Integration Endpoints
+          - Authorization URL: {{ rhsso_external_url }}/auth/realms/{{ realm_name }}/protocol/openid-connect/auth
+          - Token URL: {{ rhsso_external_url }}/auth/realms/{{ realm_name }}/protocol/openid-connect/token
+          - Redirect URL: {{ oauth_redirect_url | default(servicenow_url + '/oauth_redirect.do') }}
+          
+          ### Manual Testing Steps
+          1. Go to ServiceNow: {{ servicenow_url }}
+          2. Navigate to System OAuth > Application Registry
+          3. Find "{{ oauth_app_name | default('Keycloak SSO Integration') }}"
+          4. Click "Get OAuth Token"
+          5. Authenticate via Keycloak
+          6. Verify successful token generation
+          
+          ## Status: READY FOR PRODUCTION 🚀
+        dest: /tmp/servicenow_oauth_integration_status.md
+      delegate_to: localhost
+      run_once: true

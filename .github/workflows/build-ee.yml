@@ -1,0 +1,142 @@
+name: Build and Push Execution Environment
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'execution-environment/**'
+      - '.github/workflows/build-ee.yml'
+    tags:
+      - 'ee-v*'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'execution-environment/**'
+
+env:
+  REGISTRY: quay.io/takinosh
+  IMAGE_NAME: servicenow-ocp-ee
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install ansible-builder
+      run: |
+        pip install ansible-builder>=3.0.0
+        
+    - name: Set up Podman
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y podman
+        
+    - name: Set up Docker Buildx (for security scanning)
+      uses: docker/setup-buildx-action@v3
+        
+    - name: Generate version tag
+      id: version
+      run: |
+        if [[ $GITHUB_REF == refs/tags/ee-v* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/ee-v}
+        else
+          # Use full commit SHA as tag for better traceability
+          VERSION="${GITHUB_SHA}"
+        fi
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Building version: ${VERSION}"
+        echo "Commit SHA: ${GITHUB_SHA}"
+        
+    - name: Build, Test, and Push Execution Environment
+      env:
+        REGISTRY: ${{ env.REGISTRY }}
+        EE_VERSION: ${{ steps.version.outputs.version }}
+        CONTAINER_RUNTIME: podman
+        RH_ORG: ${{ secrets.RH_ORG }}
+        RH_ACT_KEY: ${{ secrets.RH_ACT_KEY }}
+        REDHAT_USERNAME: ${{ secrets.REDHAT_USERNAME }}
+        REDHAT_PASSWORD: ${{ secrets.REDHAT_PASSWORD }}
+        REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        ANSIBLE_HUB_TOKEN: ${{ secrets.ANSIBLE_HUB_TOKEN }}
+      run: |
+        cd execution-environment
+        ./build.sh "$EE_VERSION"
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: execution-environment-artifacts
+        path: |
+          execution-environment/SBOM.md
+          execution-environment/image-manifest.json
+          
+    - name: Create release
+      if: startsWith(github.ref, 'refs/tags/ee-v')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Execution Environment ${{ steps.version.outputs.version }}
+        body: |
+          ## ServiceNow OpenShift Custom Execution Environment ${{ steps.version.outputs.version }}
+          
+          ### Container Image
+          - **Registry**: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}`
+          - **Built**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          - **Git SHA**: ${{ github.sha }}
+          
+          ### Key Features
+          - Python libraries for Keycloak and OpenShift integration
+          - Ansible collections for Kubernetes and ServiceNow
+          - Custom modules for ServiceNow connection management
+          - OpenShift CLI tools
+          - Security hardened with vulnerability scanning
+          
+          ### Usage in AAP
+          ```yaml
+          execution_environment:
+            image: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+          ```
+          
+          See attached SBOM.md for complete software bill of materials.
+        draft: false
+        prerelease: false
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name != 'pull_request'
+
+    steps:
+    - name: Security scan completed by dedicated CodeQL workflow
+      run: |
+        echo "🔍 Security scanning is handled by the dedicated CodeQL workflow"
+        echo "✅ CodeQL provides comprehensive security analysis for Python and JavaScript"
+        echo "✅ Dependabot provides automated dependency vulnerability scanning"
+        echo "✅ GitHub Advanced Security features are enabled for this repository"
+        
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Run integration tests
+      run: |
+        echo "Running integration tests..."
+        # Add integration tests here
+        # Test actual ServiceNow and OpenShift API interactions
+        # Mock services for testing

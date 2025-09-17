@@ -1,0 +1,64 @@
+---
+# ansible/roles/aap_configuration/tasks/setup_job_template.yml
+
+- name: Create ServiceNow Execution Environment
+  ansible.controller.execution_environment:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    validate_certs: "{{ controller_validate_certs | default(false) }}"
+    name: "ServiceNow OpenShift EE"
+    image: "quay.io/takinosh/servicenow-ocp-ee:latest"
+    organization: "Default"
+    state: present
+
+- name: Create OpenShift Project Creation Job Template
+  ansible.controller.job_template:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    validate_certs: "{{ controller_validate_certs | default(false) }}"
+    name: "OpenShift Project Creation"
+    description: "Creates an OpenShift project based on a ServiceNow request."
+    project: "ServiceNow OpenShift Integration"
+    playbook: "servicenow_project_creation.yml"
+    inventory: "Default Inventory"
+    execution_environment: "quay.io/takinosh/servicenow-ocp-ee"
+    credentials:
+      - "OpenShift API Token"
+    survey_enabled: true
+    survey_spec:
+      name: ""
+      description: ""
+      spec:
+        - variable: project_name
+          question_name: "Project Name"
+          type: "text"
+          required: true
+        - variable: display_name
+          question_name: "Display Name"
+          type: "text"
+          required: true
+        - variable: description
+          question_name: "Description"
+          type: "textarea"
+          required: false
+        - variable: requestor
+          question_name: "Requestor"
+          type: "text"
+          required: true
+        - variable: servicenow_request_number
+          question_name: "ServiceNow Request Number"
+          type: "text"
+          required: true
+        - variable: environment
+          question_name: "Environment"
+          type: "text"
+          required: false
+          default: "development"
+        - variable: team
+          question_name: "Team"
+          type: "text"
+          required: false
+          default: "default"
+    state: present

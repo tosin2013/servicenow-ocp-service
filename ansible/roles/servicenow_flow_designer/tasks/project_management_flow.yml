@@ -1,0 +1,119 @@
+---
+# Project Management Flow Implementation
+# This file creates ServiceNow Flow Designer workflow for OpenShift project creation and management
+
+- name: Create Project Management Flow in ServiceNow
+  uri:
+    url: "{{ servicenow_instance_url }}/api/now/table/sys_hub_flow"
+    method: POST
+    user: "{{ servicenow_admin_user }}"
+    password: "{{ servicenow_admin_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    body_format: json
+    body:
+      name: "{{ project_management_flow_name }}"
+      description: "ServiceNow-initiated OpenShift project creation with automated permissions"
+      active: true
+      application: "Global"
+      category: "custom"
+      flow_designer: true
+      trigger_conditions: |
+        // Trigger when a project request is approved
+        if (current.state == '3' && current.approval == 'approved' && current.cat_item.name.indexOf('OpenShift Project') > -1) {
+          return true;
+        }
+        return false;
+      flow_definition: |
+        {
+          "trigger": {
+            "name": "Record Updated",
+            "table": "{{ project_request_table }}",
+            "conditions": "state=3^approval=approved^cat_item.nameLIKEOpenShift Project"
+          },
+          "actions": [
+            {
+              "name": "Extract Project Details",
+              "type": "script",
+              "script": "var projectDetails = {\n  projectName: current.variables.project_name || 'project-' + current.number.toLowerCase(),\n  displayName: current.variables.display_name || current.short_description,\n  description: current.variables.description || current.description,\n  requestor: current.requested_for.user_name,\n  environment: current.variables.environment || 'development',\n  team: current.variables.team || 'default'\n};\nflow.projectDetails = projectDetails;"
+            },
+            {
+              "name": "Trigger AAP Job for Project Creation",
+              "type": "include_tasks",
+              "file": "aap_project_creation_job.yml",
+              "vars": {
+                "project_details": "${flow.projectDetails}",
+                "servicenow_request": "${current}"
+              }
+            },
+            {
+              "name": "Update Request Status",
+              "type": "update_record",
+              "table": "{{ project_request_table }}",
+              "sys_id": "${current.sys_id}",
+              "fields": {
+                "state": "7",
+                "work_notes": "OpenShift project '${flow.projectDetails.projectName}' created successfully with admin access for ${flow.projectDetails.requestor}"
+              }
+            },
+            {
+              "name": "Create Project Record",
+              "type": "create_record",
+              "table": "u_openshift_projects",
+              "fields": {
+                "u_project_name": "${flow.projectDetails.projectName}",
+                "u_display_name": "${flow.projectDetails.displayName}",
+                "u_description": "${flow.projectDetails.description}",
+                "u_requestor": "${flow.projectDetails.requestor}",
+                "u_environment": "${flow.projectDetails.environment}",
+                "u_team": "${flow.projectDetails.team}",
+                "u_servicenow_request": "${current.number}",
+                "u_status": "active",
+                "u_created_date": "${gs.nowDateTime()}"
+              }
+            },
+            {
+              "name": "Send Project Details Email",
+              "type": "send_email",
+              "to": "${current.requested_for.email}",
+              "subject": "OpenShift Project Created: ${flow.projectDetails.displayName}",
+              "body": "Your OpenShift project has been created successfully.\n\nProject Details:\n- Name: ${flow.projectDetails.projectName}\n- Display Name: ${flow.projectDetails.displayName}\n- Environment: ${flow.projectDetails.environment}\n- Console URL: https://console-openshift-console.{{ openshift_apps_domain }}/k8s/cluster/projects/${flow.projectDetails.projectName}\n\nYou have admin access to this project."
+            }
+          ]
+        }
+    status_code: [201, 400]
+    validate_certs: false
+  register: project_management_flow_result
+  failed_when: 
+    - project_management_flow_result.status not in [201, 400]
+    - project_management_flow_result.status == 400 and 'already exists' not in (project_management_flow_result.json.error.message | default(''))
+
+- name: Create OpenShift Projects Custom Table
+  uri:
+    url: "{{ servicenow_instance_url }}/api/now/table/sys_db_object"
+    method: POST
+    user: "{{ servicenow_admin_user }}"
+    password: "{{ servicenow_admin_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    body_format: json
+    body:
+      name: "u_openshift_projects"
+      label: "OpenShift Projects"
+      is_extendable: false
+      access: "public"
+      create_access_controls: true
+    status_code: [201, 400]
+    validate_certs: false
+  register: projects_table_result
+  failed_when: false
+
+- name: Display Project Management Flow Creation Result
+  debug:
+    msg: 
+      - "Project Management Flow: {{ 'Success' if project_management_flow_result.status == 201 else 'Skipped or Failed' }}"
+      - "Projects Table: {{ 'Success' if projects_table_result.status == 201 else 'Skipped or Failed' }}"

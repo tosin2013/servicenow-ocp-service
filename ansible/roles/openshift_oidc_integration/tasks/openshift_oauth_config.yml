@@ -1,0 +1,144 @@
+---
+# OpenShift OAuth Configuration
+# This file configures OpenShift OAuth to use Keycloak as OIDC identity provider
+
+- name: Create OIDC client secret in OpenShift
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Secret
+    name: "{{ oidc_provider_name }}-client-secret"
+    namespace: openshift-config
+    definition:
+      metadata:
+        name: "{{ oidc_provider_name }}-client-secret"
+        namespace: openshift-config
+      type: Opaque
+      data:
+        clientSecret: "{{ oidc_client_secret | b64encode }}"
+    state: present
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: secret_creation_result
+
+- name: Get current OAuth cluster configuration
+  kubernetes.core.k8s_info:
+    api_version: config.openshift.io/v1
+    kind: OAuth
+    name: cluster
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: current_oauth_config
+
+- name: Prepare OIDC identity provider configuration
+  set_fact:
+    oidc_identity_provider:
+      name: "{{ oidc_provider_name }}"
+      type: OpenID
+      mappingMethod: claim
+      openID:
+        clientID: "{{ oidc_client_id }}"
+        clientSecret:
+          name: "{{ oidc_provider_name }}-client-secret"
+        issuer: "{{ oidc_issuer_url }}"
+        claims:
+          preferredUsername: "{{ oidc_claims.preferredUsername }}"
+          name: "{{ oidc_claims.name }}"
+          email: "{{ oidc_claims.email }}"
+          groups: "{{ oidc_claims.groups }}"
+        extraScopes: "{{ oidc_scopes[1:] }}"  # Exclude 'openid' as it's implicit
+
+- name: Prepare updated OAuth configuration
+  set_fact:
+    updated_oauth_config: "{{ current_oauth_config.resources[0] }}"
+
+- name: Remove existing OIDC provider if it exists
+  set_fact:
+    updated_oauth_config: "{{ updated_oauth_config | combine({'spec': {'identityProviders': (updated_oauth_config.spec.identityProviders | default([]) | rejectattr('name', 'equalto', oidc_provider_name) | list)}}, recursive=True) }}"
+
+- name: Add new OIDC identity provider to OAuth configuration
+  set_fact:
+    updated_oauth_config: "{{ updated_oauth_config | combine({'spec': {'identityProviders': (updated_oauth_config.spec.identityProviders | default([]) + [oidc_identity_provider])}}, recursive=True) }}"
+
+- name: Update OAuth cluster configuration
+  kubernetes.core.k8s:
+    api_version: config.openshift.io/v1
+    kind: OAuth
+    name: cluster
+    definition: "{{ updated_oauth_config }}"
+    state: present
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: oauth_update_result
+
+- name: Wait for OAuth pods to restart
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: openshift-authentication
+    label_selectors:
+      - app=oauth-openshift
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+    wait: true
+    wait_condition:
+      type: Ready
+      status: "True"
+    wait_timeout: 300
+  register: oauth_pods_ready
+  retries: 3
+  delay: 30
+
+- name: Verify OIDC configuration in OAuth
+  kubernetes.core.k8s_info:
+    api_version: config.openshift.io/v1
+    kind: OAuth
+    name: cluster
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  register: final_oauth_config
+
+- name: Check if OIDC provider is configured
+  set_fact:
+    oidc_provider_configured: "{{ final_oauth_config.resources[0].spec.identityProviders | default([]) | selectattr('name', 'equalto', oidc_provider_name) | list | length > 0 }}"
+
+- name: Display OpenShift OAuth configuration results
+  debug:
+    msg:
+      - "OpenShift OAuth Configuration:"
+      - "Secret Created: {{ 'Success' if secret_creation_result.changed else 'Already exists' }}"
+      - "OAuth Updated: {{ 'Success' if oauth_update_result.changed else 'No changes needed' }}"
+      - "OIDC Provider Configured: {{ 'Yes' if oidc_provider_configured else 'No' }}"
+      - "OAuth Pods Ready: {{ 'Yes' if oauth_pods_ready.resources | length > 0 else 'No' }}"
+      - "OIDC Issuer: {{ oidc_issuer_url }}"
+      - "Client ID: {{ oidc_client_id }}"
+
+- name: Create CA bundle ConfigMap for Keycloak (if needed)
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: ConfigMap
+    name: "{{ ca_bundle_configmap }}"
+    namespace: openshift-config
+    definition:
+      metadata:
+        name: "{{ ca_bundle_configmap }}"
+        namespace: openshift-config
+      data:
+        ca-bundle.crt: |
+          # Add your Keycloak CA certificate here if using custom CA
+          # This is optional for self-signed certificates
+    state: present
+    validate_certs: false
+    host: "{{ openshift_api_url }}"
+    api_key: "{{ openshift_token }}"
+  when: create_ca_configmap | bool
+  register: ca_configmap_result
+
+- name: Display CA ConfigMap creation result
+  debug:
+    msg: "CA Bundle ConfigMap: {{ 'Created' if ca_configmap_result.changed else 'Already exists' }}"
+  when: create_ca_configmap | bool

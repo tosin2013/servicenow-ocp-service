@@ -1,0 +1,54 @@
+---
+# ansible/aap_job_template.yml
+
+- name: OpenShift Project Creation
+  description: "Creates an OpenShift project based on a ServiceNow request."
+  execution_environment: "servicenow-ocp-ee"  # The name of our custom EE
+  playbook: "servicenow_project_creation.yml"
+  inventory: "Default Inventory"  # Assuming a default inventory
+  
+  credentials:
+    - "OpenShift API Token"  # The name of the Machine Credential in AAP
+
+  survey:
+    - variable: project_name
+      label: "Project Name"
+      type: "text"
+      required: true
+    - variable: display_name
+      label: "Display Name"
+      type: "text"
+      required: true
+    - variable: description
+      label: "Description"
+      type: "textarea"
+      required: false
+    - variable: requestor
+      label: "Requestor"
+      type: "text"
+      required: true
+    - variable: servicenow_request_number
+      label: "ServiceNow Request Number"
+      type: "text"
+      required: true
+    - variable: environment
+      label: "Environment"
+      type: "text"
+      required: false
+      default: "development"
+    - variable: team
+      label: "Team"
+      type: "text"
+      required: false
+      default: "default"
+
+  extra_vars:
+    # This section demonstrates how the survey variables are mapped
+    # to the playbook variables.
+    project_name: "{{ project_name }}"
+    display_name: "{{ display_name }}"
+    description: "{{ description }}"
+    requestor: "{{ requestor }}"
+    servicenow_request_number: "{{ servicenow_request_number }}"
+    environment: "{{ environment }}"
+    team: "{{ team }}"

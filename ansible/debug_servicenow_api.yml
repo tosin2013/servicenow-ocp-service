@@ -1,0 +1,68 @@
+---
+- name: Debug ServiceNow API Access
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  
+  vars:
+    servicenow_url: "https://dev295398.service-now.com"
+    servicenow_username: "admin"
+    servicenow_password: "{{ vault_servicenow_password | default('REPLACE_WITH_ACTUAL_PASSWORD') }}"
+  
+  tasks:
+    - name: Test Basic API Access
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_user?sysparm_limit=1"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: basic_test
+      failed_when: false
+      
+    - name: Display Basic Test Result
+      debug:
+        msg:
+          - "Status: {{ basic_test.status }}"
+          - "Response: {{ basic_test.json | default('No JSON response') }}"
+    
+    - name: Test OAuth Entity Profile Access
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/oauth_entity_profile"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: oauth_test
+      failed_when: false
+      
+    - name: Display OAuth Test Result
+      debug:
+        msg:
+          - "Status: {{ oauth_test.status }}"
+          - "Response: {{ oauth_test.json | default('No JSON response') }}"
+    
+    - name: Test sys_auth_profile_oauth2 Access
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_auth_profile_oauth2"
+        method: GET
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        force_basic_auth: yes
+        headers:
+          Accept: "application/json"
+        validate_certs: false
+      register: auth_profile_test
+      failed_when: false
+      
+    - name: Display Auth Profile Test Result
+      debug:
+        msg:
+          - "Status: {{ auth_profile_test.status }}"
+          - "Response: {{ auth_profile_test.json | default('No JSON response') }}"
