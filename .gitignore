@@ -1,6 +1,7 @@
 # Project-specific documentation and tracking files
 TODO.md
 PRD.md
+service-now-info.md
 
 # MCP and cache directories
 .mcp-adr-cache/
