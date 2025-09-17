@@ -56,11 +56,11 @@ build: # Build the execution environment image
 	then \
 		cp ansible-builder.log ansible-builder.bak.log ; \
 	fi;
-	ansible-builder introspect --sanitize --user-pip=files/requirements.txt --user-bindep=files/bindep.txt 2>&1 | tee ansible-builder.log
+	ansible-builder introspect --sanitize --user-pip=files/requirements.txt --user-bindep=files/bindep.txt 2>&1 | tee ansible-builder.log; exit $${PIPESTATUS[0]}
 	ansible-builder build \
 		--tag $(TARGET_NAME):$(TARGET_TAG) \
 		--verbosity $(VERBOSITY) \
-		--container-runtime $(CONTAINER_ENGINE) 2>&1 | tee -a ansible-builder.log
+		--container-runtime $(CONTAINER_ENGINE) 2>&1 | tee -a ansible-builder.log; exit $${PIPESTATUS[0]}
 
 scan: # Scan image for vulnerabilities https://www.redhat.com/sysadmin/using-quayio-scanner
 	@echo "\n\n***************************** Scanning... \n"

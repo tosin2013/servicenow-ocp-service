@@ -102,13 +102,23 @@ echo "🔨 Building execution environment using Makefile..."
 export TARGET_NAME="${REGISTRY}/${IMAGE_NAME}"
 export TARGET_TAG="${EE_VERSION}"
 export CONTAINER_ENGINE="${CONTAINER_RUNTIME}"
-make build
 
-if [[ $? -eq 0 ]]; then
+# Run make build and capture both output and exit code
+set +e  # Don't exit on error, we want to handle it ourselves
+make build
+BUILD_EXIT_CODE=$?
+set -e  # Re-enable exit on error
+
+if [[ $BUILD_EXIT_CODE -eq 0 ]]; then
     echo "✅ Build completed successfully!"
 else
-    echo "❌ Build failed!"
-    exit 1
+    echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+    echo "🔍 Checking ansible-builder.log for details..."
+    if [[ -f "ansible-builder.log" ]]; then
+        echo "📋 Last 20 lines of build log:"
+        tail -20 ansible-builder.log
+    fi
+    exit $BUILD_EXIT_CODE
 fi
 
 # Generate SBOM (Software Bill of Materials)
