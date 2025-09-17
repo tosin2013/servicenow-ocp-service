@@ -5,3 +5,7 @@ repos:
     rev: v8.18.3 # Use a specific version for stability
     hooks:
       - id: gitleaks
+  - repo: https://github.com/mpalmer/action-validator
+    rev: v0.7.0  # Use the latest version
+    hooks:
+      - id: action-validator
