@@ -69,7 +69,7 @@ jobs:
         
     - name: Trigger execution environment rebuild
       if: steps.check_updates.outputs.update_available == 'true'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           github.rest.actions.createWorkflowDispatch({
@@ -85,7 +85,7 @@ jobs:
           
     - name: Create issue for manual review
       if: steps.check_updates.outputs.update_available == 'true'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           github.rest.issues.create({
