@@ -15,6 +15,14 @@
       - "Team Members: {{ team_members | default([]) | length }} users"
       - ""
 
+- name: Check if Keycloak credentials are available
+  set_fact:
+    keycloak_credentials_available: "{{ (keycloak_admin_password is defined) or (vault_keycloak_password is defined) }}"
+
+- name: Display Keycloak credentials status
+  debug:
+    msg: "Keycloak credentials available: {{ keycloak_credentials_available }}"
+
 - name: Get Keycloak admin token
   uri:
     url: "{{ keycloak_url | default(rhsso_url) }}/auth/realms/master/protocol/openid-connect/token"
@@ -28,11 +36,16 @@
     validate_certs: false
     status_code: [200]
   register: keycloak_token_result
+  when: keycloak_credentials_available | bool
   no_log: true
 
 - name: Set Keycloak admin token fact
   set_fact:
     keycloak_admin_token: "{{ keycloak_token_result.json.access_token }}"
+  when:
+    - keycloak_credentials_available | bool
+    - keycloak_token_result is defined
+    - keycloak_token_result.json is defined
   no_log: true
 
 - name: Verify ServiceNow realm exists
@@ -44,12 +57,21 @@
     validate_certs: false
     status_code: [200, 404]
   register: realm_check
+  when:
+    - keycloak_credentials_available | bool
+    - keycloak_admin_token is defined
   failed_when: false
+
+- name: Display realm check result
+  debug:
+    msg: "ServiceNow realm check: {{ 'Success' if (realm_check is defined and realm_check.status == 200) else 'Skipped or Failed' }}"
 
 - name: Fail if ServiceNow realm doesn't exist
   fail:
     msg: "ServiceNow realm '{{ servicenow_realm | default('servicenow') }}' not found in Keycloak. Please run the OIDC setup playbook first."
-  when: realm_check.status != 200
+  when:
+    - realm_check is defined
+    - realm_check.status != 200
 
 - name: Check if requestor user already exists
   uri:
@@ -60,7 +82,12 @@
     validate_certs: false
     status_code: [200]
   register: existing_requestor_check
-  when: requestor is defined
+  when:
+    - requestor is defined
+    - keycloak_credentials_available | bool
+    - keycloak_admin_token is defined
+    - realm_check is defined
+    - realm_check.status == 200
 
 - name: Create requestor user in ServiceNow realm
   uri:
@@ -86,6 +113,10 @@
   register: requestor_user_result
   when:
     - requestor is defined
+    - keycloak_credentials_available | bool
+    - keycloak_admin_token is defined
+    - realm_check is defined
+    - realm_check.status == 200
     - existing_requestor_check.json is defined and (existing_requestor_check.json | length == 0)
 
 - name: Get requestor user ID for password setting
@@ -171,13 +202,17 @@
     msg:
       - "✅ Keycloak User Creation Summary"
       - "================================"
-      - "Requestor User: {{ requestor | default('N/A') }} - {{ 'Created' if (requestor_user_result.status == 201 if requestor_user_result is defined else false) else 'Already exists or skipped' }}"
+      - "Credentials Available: {{ keycloak_credentials_available | default(false) }}"
+      - "ServiceNow Realm Status: {{ 'Available' if (realm_check is defined and realm_check.status == 200) else 'Not Available' }}"
+      - "Requestor User: {{ requestor | default('N/A') }} - {{ 'Created' if (requestor_user_result is defined and requestor_user_result.status == 201) else ('Already exists' if (requestor_user_result is defined and requestor_user_result.status == 409) else 'Skipped') }}"
       - "Team Members: {{ team_members | default([]) | length }} users processed"
       - "Default Password: {{ temp_password | default('TempPass123!') }}"
       - "Realm: {{ servicenow_realm | default('servicenow') }}"
       - ""
-      - "🔐 Login Information:"
+      - "🔐 Login Information (if user was created):"
       - "  Username: {{ requestor | default('N/A') }}"
       - "  Password: {{ temp_password | default('TempPass123!') }}"
       - "  Keycloak URL: {{ keycloak_url | default(rhsso_url) }}"
+      - ""
+      - "⚠️  Note: If credentials not available, ensure vault variables are loaded in AAP"
       - ""
