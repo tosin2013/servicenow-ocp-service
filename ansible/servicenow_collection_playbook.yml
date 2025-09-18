@@ -1,0 +1,285 @@
+---
+- name: ServiceNow OpenShift Integration using ServiceNow Collection
+  hosts: localhost
+  gather_facts: false
+  vars:
+    servicenow_instance:
+      host: "{{ servicenow_instance_url }}"
+      username: "{{ servicenow_username }}"
+      password: "{{ servicenow_admin_password }}"
+      validate_certs: false
+
+  tasks:
+    - name: Display ServiceNow Collection Integration Banner
+      debug:
+        msg:
+          - "🚀 ServiceNow Collection Integration"
+          - "===================================="
+          - "Using official servicenow.itsm collection"
+          - "Creating catalog items with proper workflows"
+          - "Integrating with OpenShift project creation"
+          - ""
+
+    # Step 1: Create ServiceNow Template for OpenShift Projects
+    - name: Create OpenShift Project Template
+      servicenow.itsm.api:
+        instance: "{{ servicenow_instance }}"
+        resource: sys_template
+        action: post
+        data:
+          name: "OpenShift Project Request Template"
+          short_description: "Template for OpenShift project requests"
+          table: "sc_req_item"
+          template: "short_description=OpenShift Project: ${project_name}^description=Project: ${project_name} (${display_name})\\nDescription: ${description}\\nRequestor: ${requestor}\\nEnvironment: ${environment}\\nTeam: ${team}^active=true^EQ"
+          active: true
+      register: openshift_template_result
+      failed_when: false
+
+    - name: Set OpenShift template sys_id
+      set_fact:
+        openshift_template_sys_id: "{{ openshift_template_result.record.sys_id }}"
+      when: openshift_template_result.record is defined
+
+    - name: Debug OpenShift Template Creation
+      debug:
+        msg:
+          - "OpenShift Template Status: {{ 'Success' if openshift_template_result.record is defined else 'Failed' }}"
+          - "Template Sys ID: {{ openshift_template_sys_id | default('Not created') }}"
+
+    # Step 2: Create ServiceNow Catalog Item for OpenShift Projects
+    - name: Create OpenShift Project Catalog Item
+      servicenow.itsm.api:
+        instance: "{{ servicenow_instance }}"
+        resource: sc_cat_item
+        action: post
+        data:
+          name: "OpenShift Project Request"
+          short_description: "Request a new OpenShift project with automated setup"
+          description: "This catalog item allows users to request new OpenShift projects with automated provisioning, role binding, and resource quotas."
+          category: "2809952237b1300054b6a3549dbe5dd4"  # Software category
+          active: true
+          template: "{{ openshift_template_sys_id | default('') }}"
+          sc_catalogs: "e0d08b13c3330100c8b837659bba8fb4"  # Service Catalog
+      register: openshift_catalog_result
+      failed_when: false
+      when: openshift_template_sys_id is defined
+
+    - name: Set OpenShift catalog sys_id
+      set_fact:
+        openshift_catalog_sys_id: "{{ openshift_catalog_result.record.sys_id }}"
+      when: openshift_catalog_result.record is defined
+
+    - name: Debug OpenShift Catalog Creation
+      debug:
+        msg:
+          - "OpenShift Catalog Status: {{ 'Success' if openshift_catalog_result.record is defined else 'Failed' }}"
+          - "Catalog Sys ID: {{ openshift_catalog_sys_id | default('Not created') }}"
+
+    # Step 3: Create Form Variables for OpenShift Project Request
+    - name: Create OpenShift Project Form Variables
+      servicenow.itsm.api:
+        instance: "{{ servicenow_instance }}"
+        resource: item_option_new
+        action: post
+        data:
+          cat_item: "{{ openshift_catalog_sys_id }}"
+          name: "{{ item.name }}"
+          question_text: "{{ item.question_text }}"
+          type: "{{ item.type }}"
+          mandatory: "{{ item.mandatory }}"
+          order: "{{ item.order }}"
+          help_text: "{{ item.help_text | default('') }}"
+          default_value: "{{ item.default_value | default('') }}"
+          choice_field: "{{ item.choice_field | default('') }}"
+      register: variable_creation_result
+      failed_when: false
+      when: openshift_catalog_sys_id is defined
+      loop:
+        - name: "project_name"
+          question_text: "Project Name"
+          type: "8"  # Single Line Text
+          mandatory: true
+          order: "100"
+          help_text: "Enter the name for your OpenShift project (lowercase, no spaces)"
+        - name: "display_name"
+          question_text: "Display Name"
+          type: "8"  # Single Line Text
+          mandatory: true
+          order: "200"
+          help_text: "Human-readable display name for the project"
+        - name: "description"
+          question_text: "Project Description"
+          type: "9"  # Multi Line Text
+          mandatory: false
+          order: "300"
+          help_text: "Brief description of the project purpose"
+        - name: "requestor"
+          question_text: "Requestor"
+          type: "8"  # Single Line Text
+          mandatory: true
+          order: "400"
+          help_text: "Name of the person requesting this project"
+        - name: "environment"
+          question_text: "Environment"
+          type: "3"  # Choice
+          mandatory: false
+          order: "500"
+          help_text: "Target environment for the project"
+          default_value: "development"
+          choice_field: "development,staging,production"
+        - name: "team"
+          question_text: "Team"
+          type: "8"  # Single Line Text
+          mandatory: false
+          order: "600"
+          help_text: "Team or department that will use this project"
+          default_value: "default"
+
+    - name: Debug Form Variables Creation
+      debug:
+        msg:
+          - "Form Variables Created: {{ variable_creation_result.results | selectattr('record', 'defined') | list | length }}/6"
+          - "Variables Status: {{ 'Success' if (variable_creation_result.results | selectattr('record', 'defined') | list | length) == 6 else 'Partial/Failed' }}"
+
+    # Step 4: Create Business Rule to Trigger OpenShift Project Creation
+    - name: Create Business Rule for OpenShift Project Creation
+      servicenow.itsm.api:
+        instance: "{{ servicenow_instance }}"
+        resource: sys_script
+        action: post
+        data:
+          name: "OpenShift Project Creation Trigger"
+          table: "sc_req_item"
+          when: "after"
+          order: "100"
+          active: true
+          condition: "current.approval == 'approved' && current.cat_item == '{{ openshift_catalog_sys_id }}'"
+          script: |
+            // OpenShift Project Creation Business Rule
+            (function executeRule(current, previous /*null when async*/) {
+                
+                // Log the trigger
+                gs.log("OpenShift Project Creation triggered for: " + current.number);
+                
+                // Extract variables from the request item
+                var projectName = current.variables.project_name || 'default-project';
+                var displayName = current.variables.display_name || 'Default Project';
+                var description = current.variables.description || 'Automated project creation';
+                var requestor = current.variables.requestor || 'admin';
+                var environment = current.variables.environment || 'development';
+                var team = current.variables.team || 'default';
+                
+                // Log project details
+                gs.log("Creating OpenShift project: " + projectName);
+                gs.log("Display Name: " + displayName);
+                gs.log("Environment: " + environment);
+                
+                // Create REST message to call OpenShift API or webhook
+                try {
+                    var rm = new sn_ws.RESTMessageV2();
+                    rm.setEndpoint('{{ openshift_webhook_url | default("https://webhook.example.com/openshift/create") }}');
+                    rm.setHttpMethod('POST');
+                    rm.setRequestHeader('Content-Type', 'application/json');
+                    rm.setRequestHeader('Authorization', 'Bearer {{ openshift_token | default("") }}');
+                    
+                    var requestBody = {
+                        project_name: projectName,
+                        display_name: displayName,
+                        description: description,
+                        requestor: requestor,
+                        environment: environment,
+                        team: team,
+                        request_item: current.number.toString()
+                    };
+                    
+                    rm.setRequestBody(JSON.stringify(requestBody));
+                    
+                    var response = rm.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    
+                    gs.log("OpenShift API Response Status: " + httpStatus);
+                    gs.log("OpenShift API Response: " + responseBody);
+                    
+                    if (httpStatus == 200 || httpStatus == 201) {
+                        // Update request item with success
+                        current.work_notes = "OpenShift project creation initiated successfully";
+                        current.state = 3; // Closed Complete
+                        current.update();
+                        gs.log("OpenShift project creation successful for: " + projectName);
+                    } else {
+                        // Update request item with failure
+                        current.work_notes = "OpenShift project creation failed. Status: " + httpStatus + ", Response: " + responseBody;
+                        current.state = 4; # Closed Incomplete
+                        current.update();
+                        gs.log("OpenShift project creation failed for: " + projectName);
+                    }
+                    
+                } catch (ex) {
+                    gs.log("Error in OpenShift project creation: " + ex.message);
+                    current.work_notes = "OpenShift project creation error: " + ex.message;
+                    current.state = 4; // Closed Incomplete
+                    current.update();
+                }
+                
+            })(current, previous);
+      register: business_rule_result
+      failed_when: false
+      when: openshift_catalog_sys_id is defined
+
+    - name: Debug Business Rule Creation
+      debug:
+        msg:
+          - "Business Rule Status: {{ 'Success' if business_rule_result.record is defined else 'Failed' }}"
+          - "Business Rule Sys ID: {{ business_rule_result.record.sys_id | default('Not created') }}"
+
+    # Step 5: Test the Integration
+    - name: Create Test OpenShift Project Request
+      servicenow.itsm.catalog_request:
+        instance: "{{ servicenow_instance }}"
+        state: present
+        requested_for: "admin"
+        requested_by: "admin"
+        short_description: "Test OpenShift Project Request"
+        description: "Testing the automated OpenShift project creation workflow"
+        priority: "3"
+        urgency: "3"
+        impact: "3"
+        other:
+          cat_item: "{{ openshift_catalog_sys_id }}"
+          variables:
+            project_name: "test-ansible-collection"
+            display_name: "Test Ansible Collection Project"
+            description: "Testing ServiceNow collection integration"
+            requestor: "admin"
+            environment: "development"
+            team: "testing"
+      register: test_request_result
+      failed_when: false
+      when: openshift_catalog_sys_id is defined
+
+    - name: Debug Test Request Creation
+      debug:
+        msg:
+          - "Test Request Status: {{ 'Success' if test_request_result.record is defined else 'Failed' }}"
+          - "Test Request Number: {{ test_request_result.record.number | default('Not created') }}"
+          - "Test Request Sys ID: {{ test_request_result.record.sys_id | default('Not created') }}"
+
+    # Step 6: Summary
+    - name: ServiceNow Collection Integration Summary
+      debug:
+        msg:
+          - "🎯 ServiceNow Collection Integration Complete"
+          - "============================================="
+          - "✅ OpenShift Template: {{ 'Created' if openshift_template_sys_id is defined else 'Failed' }}"
+          - "✅ Catalog Item: {{ 'Created' if openshift_catalog_sys_id is defined else 'Failed' }}"
+          - "✅ Form Variables: {{ (variable_creation_result.results | selectattr('record', 'defined') | list | length) if variable_creation_result is defined else 0 }}/6"
+          - "✅ Business Rule: {{ 'Created' if business_rule_result.record is defined else 'Failed' }}"
+          - "✅ Test Request: {{ 'Created' if test_request_result.record is defined else 'Failed' }}"
+          - ""
+          - "🔗 ServiceNow URLs:"
+          - "  Catalog Item: https://{{ servicenow_instance_url.split('//')[1] }}/nav_to.do?uri=sc_cat_item.do?sys_id={{ openshift_catalog_sys_id | default('') }}"
+          - "  Service Catalog: https://{{ servicenow_instance_url.split('//')[1] }}/nav_to.do?uri=catalog_home.do"
+          - "  Test Request: https://{{ servicenow_instance_url.split('//')[1] }}/nav_to.do?uri=sc_request.do?sys_id={{ test_request_result.record.sys_id | default('') }}"
+          - ""
+          - "🚀 Ready for Testing!"

@@ -144,11 +144,11 @@
     validate_certs: false
   register: rest_method_result
   failed_when: false
-  when: rest_message_result.status == 201
+  when: (rest_message_result.status | default(0)) == 201
 
 - name: Display User Provisioning Flow Creation Result
   debug:
-    msg: 
-      - "User Provisioning Flow: {{ 'Success' if user_provisioning_flow_result.status == 201 else 'Skipped or Failed' }}"
-      - "REST Message: {{ 'Success' if rest_message_result.status == 201 else 'Skipped or Failed' }}"
-      - "REST Method: {{ 'Success' if rest_method_result.status == 201 else 'Skipped or Failed' }}"
+    msg:
+      - "User Provisioning Flow: {{ 'Success' if (user_provisioning_flow_result.status | default(0)) == 201 else 'Skipped or Failed' }}"
+      - "REST Message: {{ 'Success' if (rest_message_result.status | default(0)) == 201 else 'Skipped or Failed' }}"
+      - "REST Method: {{ 'Success' if (rest_method_result.status | default(0)) == 201 else 'Skipped or Failed' }}"

@@ -111,6 +111,9 @@ podman run --rm quay.io/takinosh/servicenow-ocp-ee:latest ansible-doc redhat.sso
 # Test community.general keycloak modules
 podman run --rm quay.io/takinosh/servicenow-ocp-ee:latest ansible-doc community.general.keycloak_user
 
+# Test servicenow.itsm collection
+podman run --rm quay.io/takinosh/servicenow-ocp-ee:latest ansible-doc servicenow.itsm.incident
+
 # List all available collections
 podman run --rm quay.io/takinosh/servicenow-ocp-ee:latest ansible-galaxy collection list
 ```

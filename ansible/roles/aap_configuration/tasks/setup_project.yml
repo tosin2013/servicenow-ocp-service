@@ -14,3 +14,13 @@
     scm_branch: "main"
     scm_update_on_launch: true
     state: present
+
+- name: Sync Git Project to ensure playbooks are available
+  ansible.controller.project_update:
+    controller_host: "{{ controller_host }}"
+    controller_username: "{{ controller_username }}"
+    controller_password: "{{ controller_password }}"
+    validate_certs: "{{ controller_validate_certs | default(false) }}"
+    project: "ServiceNow OpenShift Integration"
+    wait: true
+    timeout: 300

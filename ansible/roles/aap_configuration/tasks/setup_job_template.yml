@@ -21,11 +21,17 @@
     name: "OpenShift Project Creation"
     description: "Creates an OpenShift project based on a ServiceNow request."
     project: "ServiceNow OpenShift Integration"
-    playbook: "servicenow_project_creation.yml"
+    playbook: "ansible/servicenow_project_creation.yml"
     inventory: "Default Inventory"
-    execution_environment: "quay.io/takinosh/servicenow-ocp-ee"
+    execution_environment: "ServiceNow OpenShift EE"
     credentials:
       - "OpenShift API Token"
+      - "ServiceNow-OpenShift Vault"
+    extra_vars:
+      rhsso_url: "{{ rhsso_url }}"
+      vault_keycloak_password: "{{ vault_keycloak_password }}"
+      keycloak_admin_username: "admin"
+      servicenow_realm: "servicenow"
     survey_enabled: true
     survey_spec:
       name: ""
@@ -61,4 +67,29 @@
           type: "text"
           required: false
           default: "default"
+        - variable: manage_keycloak_users
+          question_name: "Create Keycloak Users"
+          type: "multiplechoice"
+          required: false
+          default: "true"
+          choices:
+            - "true"
+            - "false"
+        - variable: requestor_email
+          question_name: "Requestor Email"
+          type: "text"
+          required: false
+        - variable: requestor_first_name
+          question_name: "Requestor First Name"
+          type: "text"
+          required: false
+        - variable: requestor_last_name
+          question_name: "Requestor Last Name"
+          type: "text"
+          required: false
+        - variable: temp_password
+          question_name: "Temporary Password"
+          type: "password"
+          required: false
+          default: "TempPass123!"
     state: present
