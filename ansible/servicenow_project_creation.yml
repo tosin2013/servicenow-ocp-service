@@ -18,6 +18,11 @@
     team: "example-team"
 
   tasks:
+    - name: Handle environment variable conflict (Ansible reserved name)
+      set_fact:
+        project_environment: "{{ environment | default('development') }}"
+      when: project_environment is not defined
+
     - name: Set OpenShift API authentication facts
       set_fact:
         openshift_auth:
