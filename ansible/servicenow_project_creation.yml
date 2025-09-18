@@ -35,77 +35,31 @@
         host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
         api_key: "{{ openshift_auth.api_key }}"
         validate_certs: false
-        api_version: v1
-        kind: Namespace
-        name: "{{ project_name }}"
-        definition:
-          metadata:
-            labels:
-              servicenow-request: "{{ servicenow_request_number }}"
-              environment: "{{ environment }}"
-              team: "{{ team }}"
-              managed-by: "servicenow-aap"
-            annotations:
-              openshift.io/display-name: "{{ display_name }}"
-              openshift.io/description: "{{ description }}"
-              openshift.io/requestor: "{{ requestor }}"
+        definition: "{{ lookup('template', 'namespace.yaml.j2') | from_yaml }}"
 
-    - name: Create Project Role Binding
+    - name: Apply RBAC Permissions
       kubernetes.core.k8s:
         state: present
         host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
         api_key: "{{ openshift_auth.api_key }}"
         validate_certs: false
-        definition:
-          apiVersion: rbac.authorization.k8s.io/v1
-          kind: RoleBinding
-          metadata:
-            name: "{{ requestor }}-admin"
-            namespace: "{{ project_name }}"
-          subjects:
-            - kind: User
-              name: "{{ requestor }}"
-              apiGroup: rbac.authorization.k8s.io
-          roleRef:
-            kind: ClusterRole
-            name: admin
-            apiGroup: rbac.authorization.k8s.io
+        definition: "{{ item }}"
+      loop: "{{ lookup('template', 'rbac-permissions.yaml.j2') | from_yaml_all | list }}"
 
-    - name: Create Resource Quotas
+    - name: Apply Resource Quotas and Limits
       kubernetes.core.k8s:
         state: present
         host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
         api_key: "{{ openshift_auth.api_key }}"
         validate_certs: false
-        definition:
-          apiVersion: v1
-          kind: ResourceQuota
-          metadata:
-            name: "compute-quota"
-            namespace: "{{ project_name }}"
-          spec:
-            hard:
-              requests.cpu: "4"
-              requests.memory: "8Gi"
-              limits.cpu: "8"
-              limits.memory: "16Gi"
-              pods: "10"
-              persistentvolumeclaims: "5"
+        definition: "{{ item }}"
+      loop: "{{ lookup('template', 'resource-quotas.yaml.j2') | from_yaml_all | list }}"
 
-    - name: Create default-deny Network Policy
+    - name: Apply Network Policies
       kubernetes.core.k8s:
         state: present
         host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
         api_key: "{{ openshift_auth.api_key }}"
         validate_certs: false
-        definition:
-          apiVersion: networking.k8s.io/v1
-          kind: NetworkPolicy
-          metadata:
-            name: "default-deny-all"
-            namespace: "{{ project_name }}"
-          spec:
-            podSelector: {}
-            policyTypes:
-              - Ingress
-              - Egress
+        definition: "{{ item }}"
+      loop: "{{ lookup('template', 'network-policies.yaml.j2') | from_yaml_all | list }}"

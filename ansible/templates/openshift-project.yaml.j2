@@ -1,0 +1,53 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "{{ project_name }}"
+  labels:
+    servicenow-request: "{{ servicenow_request_number }}"
+    environment: "{{ environment }}"
+    team: "{{ team }}"
+    managed-by: "servicenow-aap"
+  annotations:
+    openshift.io/display-name: "{{ display_name }}"
+    openshift.io/description: "{{ project_description | default(description) }}"
+    openshift.io/requestor: "{{ requestor }}"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "{{ requestor }}-admin"
+  namespace: "{{ project_name }}"
+subjects:
+  - kind: User
+    name: "{{ requestor }}"
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: "compute-quota"
+  namespace: "{{ project_name }}"
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: "8Gi"
+    limits.cpu: "8"
+    limits.memory: "16Gi"
+    pods: "10"
+    persistentvolumeclaims: "5"
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: "default-deny-all"
+  namespace: "{{ project_name }}"
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress

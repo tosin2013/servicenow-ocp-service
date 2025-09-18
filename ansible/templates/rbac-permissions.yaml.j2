@@ -1,0 +1,73 @@
+---
+# Admin Role Binding for Project Requestor
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "{{ requestor }}-admin"
+  namespace: "{{ project_name }}"
+  labels:
+    servicenow-request: "{{ servicenow_request_number }}"
+    managed-by: "servicenow-aap"
+subjects:
+  - kind: User
+    name: "{{ requestor }}"
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Team Role Binding (if team members are specified)
+{% if team_members is defined and team_members | length > 0 %}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "{{ team }}-developers"
+  namespace: "{{ project_name }}"
+  labels:
+    servicenow-request: "{{ servicenow_request_number }}"
+    managed-by: "servicenow-aap"
+subjects:
+{% for member in team_members %}
+  - kind: User
+    name: "{{ member }}"
+    apiGroup: rbac.authorization.k8s.io
+{% endfor %}
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
+{% endif %}
+
+---
+# Service Account for CI/CD (if requested)
+{% if enable_cicd | default(false) %}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "{{ project_name }}-cicd"
+  namespace: "{{ project_name }}"
+  labels:
+    servicenow-request: "{{ servicenow_request_number }}"
+    managed-by: "servicenow-aap"
+    purpose: "cicd"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "{{ project_name }}-cicd-binding"
+  namespace: "{{ project_name }}"
+  labels:
+    servicenow-request: "{{ servicenow_request_number }}"
+    managed-by: "servicenow-aap"
+subjects:
+  - kind: ServiceAccount
+    name: "{{ project_name }}-cicd"
+    namespace: "{{ project_name }}"
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
+{% endif %}
