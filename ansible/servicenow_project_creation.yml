@@ -41,7 +41,7 @@
         definition:
           metadata:
             labels:
-              servicenow.request: "{{ servicenow_request_number }}"
+              servicenow-request: "{{ servicenow_request_number }}"
               environment: "{{ environment }}"
               team: "{{ team }}"
               managed-by: "servicenow-aap"
