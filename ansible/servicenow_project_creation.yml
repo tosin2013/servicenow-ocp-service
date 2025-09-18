@@ -21,12 +21,12 @@
     - name: Set OpenShift API authentication facts
       set_fact:
         openshift_auth:
-          api_key: "{{ lookup('env', 'OPENSHIFT_API_TOKEN') }}"
+          api_key: "{{ lookup('env', 'OPENSHIFT_API_TOKEN') | default(vault_openshift_token, true) }}"
       no_log: true
 
-    - name: Fail if OPENSHIFT_API_TOKEN is not set
+    - name: Fail if OpenShift API token is not available
       fail:
-        msg: "The OPENSHIFT_API_TOKEN environment variable is not set. This playbook requires an OpenShift API token for authentication."
+        msg: "OpenShift API token is not available. Set OPENSHIFT_API_TOKEN environment variable or ensure vault_openshift_token is defined."
       when: openshift_auth.api_key is not defined or openshift_auth.api_key == ""
 
     - name: Create OpenShift Project (Namespace)
@@ -63,3 +63,86 @@
         validate_certs: false
         definition: "{{ item }}"
       loop: "{{ lookup('template', 'network-policies.yaml.j2') | from_yaml_all | list }}"
+
+    # Keycloak User Management for ServiceNow Realm
+    - name: Get Keycloak admin token
+      uri:
+        url: "{{ keycloak_url | default('https://keycloak.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com') }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          grant_type: "client_credentials"
+          client_id: "{{ keycloak_admin_client | default('admin-cli') }}"
+          client_secret: "{{ keycloak_admin_secret }}"
+        validate_certs: false
+      register: keycloak_token_result
+      when:
+        - manage_keycloak_users | default(true)
+        - keycloak_admin_secret is defined
+      no_log: true
+
+    - name: Set Keycloak admin token fact
+      set_fact:
+        keycloak_admin_token: "{{ keycloak_token_result.json.access_token }}"
+      when:
+        - manage_keycloak_users | default(true)
+        - keycloak_token_result is defined
+        - keycloak_token_result.json is defined
+      no_log: true
+
+    - name: Create requestor user in ServiceNow realm
+      uri:
+        url: "{{ keycloak_url | default('https://keycloak.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com') }}/admin/realms/{{ servicenow_realm | default('servicenow') }}/users"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ keycloak_admin_token }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          username: "{{ requestor }}"
+          email: "{{ requestor_email | default(requestor + '@' + default_email_domain | default('example.com')) }}"
+          firstName: "{{ requestor_first_name | default(requestor | title) }}"
+          lastName: "{{ requestor_last_name | default('User') }}"
+          enabled: true
+          emailVerified: true
+          attributes:
+            servicenow_user: ["true"]
+            project_access: ["{{ project_name }}"]
+            created_by: ["servicenow-aap-integration"]
+            request_number: ["{{ servicenow_request_number }}"]
+        status_code: [201, 409]  # 201 = created, 409 = already exists
+        validate_certs: false
+      register: requestor_user_result
+      when:
+        - manage_keycloak_users | default(true)
+        - keycloak_admin_token is defined
+
+    - name: Create team member users in ServiceNow realm
+      uri:
+        url: "{{ keycloak_url | default('https://keycloak.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com') }}/admin/realms/{{ servicenow_realm | default('servicenow') }}/users"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ keycloak_admin_token }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          username: "{{ item }}"
+          email: "{{ item }}@{{ default_email_domain | default('example.com') }}"
+          firstName: "{{ item | title }}"
+          lastName: "Team Member"
+          enabled: true
+          emailVerified: true
+          attributes:
+            servicenow_user: ["true"]
+            project_access: ["{{ project_name }}"]
+            created_by: ["servicenow-aap-integration"]
+            request_number: ["{{ servicenow_request_number }}"]
+            team: ["{{ team }}"]
+        status_code: [201, 409]  # 201 = created, 409 = already exists
+        validate_certs: false
+      loop: "{{ team_members | default([]) }}"
+      when:
+        - manage_keycloak_users | default(true)
+        - keycloak_admin_token is defined
+        - team_members is defined
+        - team_members | length > 0

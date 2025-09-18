@@ -41,6 +41,19 @@ This directory contains Jinja2 templates for creating OpenShift projects through
 - `storage_class` - Storage class for quotas
 - `max_services` / `max_secrets` / `max_configmaps` - Object count limits
 
+### Keycloak Integration Variables
+For ServiceNow realm user management:
+- `keycloak_url` - Keycloak server URL (default: auto-detected)
+- `keycloak_admin_secret` - Keycloak admin client secret (required for user creation)
+- `servicenow_realm` - Keycloak realm name (default: 'servicenow')
+- `manage_keycloak_users` - Enable/disable user creation (default: true)
+- `default_email_domain` - Default email domain for created users (default: 'example.com')
+- `requestor_email` - Email address for the requestor (optional)
+- `requestor_first_name` - First name of requestor (optional)
+- `requestor_last_name` - Last name of requestor (optional)
+
+**Note**: When Keycloak integration is enabled, users will be created in the ServiceNow realm and granted appropriate RBAC permissions using the format `servicenow:username`.
+
 ## Usage in Playbooks
 
 ```yaml

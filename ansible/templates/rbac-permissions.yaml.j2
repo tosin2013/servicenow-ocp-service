@@ -1,5 +1,5 @@
 ---
-# Admin Role Binding for Project Requestor
+# Admin Role Binding for Project Requestor (Keycloak User)
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -8,7 +8,14 @@ metadata:
   labels:
     servicenow-request: "{{ servicenow_request_number }}"
     managed-by: "servicenow-aap"
+  annotations:
+    description: "Admin access for project requestor via Keycloak authentication"
 subjects:
+  # ServiceNow realm users in Keycloak format
+  - kind: User
+    name: "{{ servicenow_realm | default('servicenow') }}:{{ requestor }}"
+    apiGroup: rbac.authorization.k8s.io
+  # Also add the plain username for compatibility
   - kind: User
     name: "{{ requestor }}"
     apiGroup: rbac.authorization.k8s.io
@@ -16,6 +23,31 @@ roleRef:
   kind: ClusterRole
   name: admin
   apiGroup: rbac.authorization.k8s.io
+
+---
+# Keycloak Group Role Binding (if team groups are specified)
+{% if keycloak_groups is defined and keycloak_groups | length > 0 %}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "{{ team }}-group-developers"
+  namespace: "{{ project_name }}"
+  labels:
+    servicenow-request: "{{ servicenow_request_number }}"
+    managed-by: "servicenow-aap"
+  annotations:
+    description: "Developer access for Keycloak groups"
+subjects:
+{% for group in keycloak_groups %}
+  - kind: Group
+    name: "{{ group }}"
+    apiGroup: rbac.authorization.k8s.io
+{% endfor %}
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
+{% endif %}
 
 ---
 # Team Role Binding (if team members are specified)
@@ -28,8 +60,15 @@ metadata:
   labels:
     servicenow-request: "{{ servicenow_request_number }}"
     managed-by: "servicenow-aap"
+  annotations:
+    description: "Developer access for individual team members via Keycloak"
 subjects:
 {% for member in team_members %}
+  # ServiceNow realm user format
+  - kind: User
+    name: "{{ servicenow_realm | default('servicenow') }}:{{ member }}"
+    apiGroup: rbac.authorization.k8s.io
+  # Plain username for compatibility
   - kind: User
     name: "{{ member }}"
     apiGroup: rbac.authorization.k8s.io
