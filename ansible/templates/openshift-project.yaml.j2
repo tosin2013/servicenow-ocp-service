@@ -6,7 +6,7 @@ metadata:
   labels:
     servicenow-request: "{{ servicenow_request_number }}"
     environment: "{{ environment }}"
-    team: "{{ team }}"
+    team: "{{ team | replace(',', '-') | replace(' ', '') }}"
     managed-by: "servicenow-aap"
   annotations:
     openshift.io/display-name: "{{ display_name }}"
