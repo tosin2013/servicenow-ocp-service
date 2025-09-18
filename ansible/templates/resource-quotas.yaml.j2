@@ -12,22 +12,22 @@ metadata:
 spec:
   hard:
     # CPU and Memory limits based on environment
-    {% if environment == 'production' %}
+{% if project_environment == 'production' %}
     requests.cpu: "{{ cpu_requests | default('8') }}"
     requests.memory: "{{ memory_requests | default('16Gi') }}"
     limits.cpu: "{{ cpu_limits | default('16') }}"
     limits.memory: "{{ memory_limits | default('32Gi') }}"
-    {% elif environment == 'staging' %}
+{% elif project_environment == 'staging' %}
     requests.cpu: "{{ cpu_requests | default('4') }}"
     requests.memory: "{{ memory_requests | default('8Gi') }}"
     limits.cpu: "{{ cpu_limits | default('8') }}"
     limits.memory: "{{ memory_limits | default('16Gi') }}"
-    {% else %}
+{% else %}
     requests.cpu: "{{ cpu_requests | default('2') }}"
     requests.memory: "{{ memory_requests | default('4Gi') }}"
     limits.cpu: "{{ cpu_limits | default('4') }}"
     limits.memory: "{{ memory_limits | default('8Gi') }}"
-    {% endif %}
+{% endif %}
     
     # Pod and storage limits
     pods: "{{ max_pods | default('10') }}"
@@ -39,9 +39,9 @@ spec:
     secrets: "{{ max_secrets | default('20') }}"
     configmaps: "{{ max_configmaps | default('20') }}"
 
----
 # Storage Resource Quota (if storage class is specified)
 {% if storage_class is defined %}
+---
 apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -71,35 +71,35 @@ spec:
   limits:
     - type: Container
       default:
-        {% if environment == 'production' %}
+{% if project_environment == 'production' %}
         cpu: "2"
         memory: "4Gi"
-        {% elif environment == 'staging' %}
+{% elif project_environment == 'staging' %}
         cpu: "1"
         memory: "2Gi"
-        {% else %}
+{% else %}
         cpu: "500m"
         memory: "1Gi"
-        {% endif %}
+{% endif %}
       defaultRequest:
-        {% if environment == 'production' %}
+{% if project_environment == 'production' %}
         cpu: "500m"
         memory: "1Gi"
-        {% elif environment == 'staging' %}
+{% elif project_environment == 'staging' %}
         cpu: "250m"
         memory: "512Mi"
-        {% else %}
+{% else %}
         cpu: "100m"
         memory: "256Mi"
-        {% endif %}
+{% endif %}
       max:
-        {% if environment == 'production' %}
+{% if project_environment == 'production' %}
         cpu: "4"
         memory: "8Gi"
-        {% elif environment == 'staging' %}
+{% elif project_environment == 'staging' %}
         cpu: "2"
         memory: "4Gi"
-        {% else %}
+{% else %}
         cpu: "1"
         memory: "2Gi"
-        {% endif %}
+{% endif %}

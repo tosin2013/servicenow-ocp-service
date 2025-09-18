@@ -67,9 +67,9 @@ spec:
               name: "{{ project_name }}"
 {% endif %}
 
----
 # Allow OpenShift Ingress (if web services are enabled)
 {% if enable_web_services | default(false) %}
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
