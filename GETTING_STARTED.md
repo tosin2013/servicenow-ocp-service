@@ -21,7 +21,7 @@ The core components (Ansible Automation Platform, RH-SSO, External Secrets Opera
 Before applying any configuration, run the pre-flight check playbook to verify connectivity and authentication to all three tiers: OpenShift, Keycloak (RH-SSO), and ServiceNow.
 
 ```bash
-./run_playbook.sh ansible/preflight_checks.yml -e @ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/preflight_checks.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file ../.vault_pass -m stdout
 ```
 
 ## 4. Prerequisite: Configure Base RH-SSO Realms and Clients
@@ -29,7 +29,7 @@ Before applying any configuration, run the pre-flight check playbook to verify c
 This is the first and most critical configuration playbook. It sets up the foundational realms and clients in RH-SSO (Keycloak) that are required by both OpenShift and ServiceNow.
 
 ```bash
-./run_playbook.sh ansible/playbook.yml -e @ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/playbook.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
 ```
 
 ## 5. Configure OpenShift OIDC with Keycloak (RH-SSO)
@@ -37,7 +37,7 @@ This is the first and most critical configuration playbook. It sets up the found
 This playbook configures OpenShift to use the Keycloak realms you just created as its OIDC identity provider.
 
 ```bash
-./run_playbook.sh ansible/openshift_oidc_playbook.yml -e @ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/openshift_oidc_playbook.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
 ```
 
 ## 6. Configure ServiceNow and Keycloak OAuth Integration
@@ -45,7 +45,7 @@ This playbook configures OpenShift to use the Keycloak realms you just created a
 This playbook sets up the OAuth relationship between ServiceNow and Keycloak, allowing them to securely communicate.
 
 ```bash
-./run_playbook.sh ansible/oauth_integration_playbook.yml -e @ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/oauth_integration_playbook.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
 ```
 
 ## 7. Configure Ansible Automation Platform (AAP)
@@ -53,7 +53,7 @@ This playbook sets up the OAuth relationship between ServiceNow and Keycloak, al
 This playbook configures AAP with the necessary projects, credentials, and job templates for the ServiceNow integration.
 
 ```bash
-./run_playbook.sh ansible/configure_aap.yml -e @ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/configure_aap.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
 ```
 
 ## 8. ServiceNow Integration Phase 1: Catalog Infrastructure
@@ -77,7 +77,7 @@ podman run --rm quay.io/takinosh/servicenow-ocp-ee:latest ansible-doc servicenow
 Create professional catalog items for OpenShift services using the servicenow.itsm collection:
 
 ```bash
-./run_playbook.sh ansible/servicenow_catalog_setup.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/servicenow_catalog_setup.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 ```
 
 ### 8.3 Configure ServiceNow Business Rules
@@ -85,7 +85,7 @@ Create professional catalog items for OpenShift services using the servicenow.it
 Set up business rules that trigger AAP job templates when catalog requests are submitted:
 
 ```bash
-./run_playbook.sh ansible/servicenow_business_rules.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/servicenow_business_rules.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 ```
 
 ## 9. ServiceNow Integration Phase 2: CMDB and Incident Management
@@ -95,7 +95,7 @@ Set up business rules that trigger AAP job templates when catalog requests are s
 Configure ServiceNow CMDB to track OpenShift resources as configuration items:
 
 ```bash
-./run_playbook.sh ansible/servicenow_cmdb_setup.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/servicenow_cmdb_setup.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 ```
 
 ### 9.2 Configure Incident Management Integration
@@ -103,7 +103,7 @@ Configure ServiceNow CMDB to track OpenShift resources as configuration items:
 Set up automated incident creation for failed provisioning attempts:
 
 ```bash
-./run_playbook.sh ansible/servicenow_incident_setup.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/servicenow_incident_setup.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 ```
 
 ## 10. ServiceNow Integration Phase 3: Testing and Validation
@@ -114,13 +114,13 @@ Test each ServiceNow integration component individually:
 
 ```bash
 # Test catalog item creation
-./run_playbook.sh ansible/test_servicenow_catalog.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/test_servicenow_catalog.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 
 # Test business rule integration
-./run_playbook.sh ansible/test_servicenow_business_rules.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/test_servicenow_business_rules.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 
 # Test CMDB integration
-./run_playbook.sh ansible/test_servicenow_cmdb.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/test_servicenow_cmdb.yml -e @../ansible//group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 ```
 
 ### 10.2 End-to-End Integration Testing
@@ -128,7 +128,7 @@ Test each ServiceNow integration component individually:
 Test the complete ServiceNow → AAP → OpenShift → Keycloak workflow:
 
 ```bash
-./run_playbook.sh ansible/test_end_to_end_integration.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/test_end_to_end_integration.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 ```
 
 ### 10.3 Manual AAP Job Template Testing
@@ -161,7 +161,7 @@ curl -s -k -u "admin:${AAP_PASSWORD}" -X POST \
 Deploy the catalog items and business rules to the production ServiceNow instance:
 
 ```bash
-./run_playbook.sh ansible/servicenow_production_deployment.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/servicenow_production_deployment.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 ```
 
 ### 11.2 Set Up Monitoring and Reporting
@@ -169,7 +169,7 @@ Deploy the catalog items and business rules to the production ServiceNow instanc
 Configure ServiceNow reports and dashboards for operational visibility:
 
 ```bash
-./run_playbook.sh ansible/servicenow_monitoring_setup.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/servicenow_monitoring_setup.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
 ```
 
 ## 12. Verify the Complete Integration

@@ -1,0 +1,374 @@
+---
+# Pre-flight Checks for ServiceNow OCP Integration
+# Tests connectivity and authentication to all three tiers: OpenShift, Keycloak (RH-SSO), ServiceNow, and AAP
+#
+# Usage:
+# ./run_playbook.sh ansible/preflight_checks.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+
+- name: Pre-flight Checks for ServiceNow OCP Integration
+  hosts: localhost
+  gather_facts: true
+  vars:
+    # ServiceNow instance configuration
+    servicenow_instance:
+      host: "{{ servicenow_url }}"
+      username: "{{ servicenow_username }}"
+      password: "{{ vault_servicenow_password }}"
+      timeout: 30
+      validate_certs: false
+
+  tasks:
+    - name: Display Pre-flight Check Information
+      debug:
+        msg: |
+          🚀 ServiceNow-OpenShift Integration Pre-flight Checks
+          =====================================================
+          
+          📋 Testing connectivity and authentication to:
+          🔹 ServiceNow: {{ servicenow_url }}
+          🔹 Keycloak/RH-SSO: {{ rhsso_url }}
+          🔹 OpenShift: {{ openshift_api_url }}
+          🔹 AAP Controller: {{ aap_url }}
+          
+          🎯 Goal: Verify all services are accessible and credentials are valid
+          📅 Test Date: {{ ansible_date_time.iso8601 }}
+
+    # =============================================================================
+    # TEST 1: SERVICENOW CONNECTIVITY AND AUTHENTICATION
+    # =============================================================================
+    
+    - name: "TEST 1: ServiceNow API Connectivity"
+      servicenow.itsm.api_info:
+        instance: "{{ servicenow_instance }}"
+        resource: "sys_user"
+        query:
+          - user_name: "{{ servicenow_username }}"
+      register: servicenow_test
+      failed_when: false
+      tags: [servicenow]
+
+    - name: "TEST 1: ServiceNow Catalog Access"
+      servicenow.itsm.service_catalog_info:
+        instance: "{{ servicenow_instance }}"
+      register: servicenow_catalog_test
+      failed_when: false
+      tags: [servicenow]
+
+    - name: "TEST 1: Display ServiceNow Results"
+      debug:
+        msg: |
+          🔍 TEST 1: ServiceNow Connectivity
+          {{ '✅ PASS' if servicenow_test.records is defined else '❌ FAIL' }} - API Authentication
+          {{ '✅ PASS' if servicenow_catalog_test.records is defined else '❌ FAIL' }} - Service Catalog Access
+          
+          📊 Details:
+          🔹 Instance: {{ servicenow_url }}
+          🔹 User: {{ servicenow_username }}
+          🔹 User Records: {{ servicenow_test.records | length if servicenow_test.records is defined else 0 }}
+          🔹 Catalog Items: {{ servicenow_catalog_test.records | length if servicenow_catalog_test.records is defined else 0 }}
+      tags: [servicenow]
+
+    # =============================================================================
+    # TEST 2: KEYCLOAK/RH-SSO CONNECTIVITY AND AUTHENTICATION
+    # =============================================================================
+    
+    - name: "TEST 2: Keycloak Admin API Access"
+      uri:
+        url: "{{ rhsso_url }}/auth/admin/realms"
+        method: GET
+        user: "{{ rhsso_admin_username }}"
+        password: "{{ vault_keycloak_password }}"
+        force_basic_auth: true
+        validate_certs: false
+        status_code: [200, 401, 403]
+      register: keycloak_admin_test
+      failed_when: false
+      tags: [keycloak]
+
+    - name: "TEST 2: Keycloak ServiceNow Realm Check"
+      uri:
+        url: "{{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm_name | default('servicenow') }}"
+        method: GET
+        user: "{{ rhsso_admin_username }}"
+        password: "{{ vault_keycloak_password }}"
+        force_basic_auth: true
+        validate_certs: false
+        status_code: [200, 404, 401, 403]
+      register: keycloak_realm_test
+      failed_when: false
+      tags: [keycloak]
+
+    - name: "TEST 2: Display Keycloak Results"
+      debug:
+        msg: |
+          🔍 TEST 2: Keycloak/RH-SSO Connectivity
+          {{ '✅ PASS' if keycloak_admin_test.status == 200 else '❌ FAIL' }} - Admin API Access ({{ keycloak_admin_test.status | default('N/A') }})
+          {{ '✅ PASS' if keycloak_realm_test.status == 200 else '⚠️ WARN' if keycloak_realm_test.status == 404 else '❌ FAIL' }} - ServiceNow Realm ({{ keycloak_realm_test.status | default('N/A') }})
+          
+          📊 Details:
+          🔹 Instance: {{ rhsso_url }}
+          🔹 Admin User: {{ rhsso_admin_username }}
+          🔹 Realm Status: {{ 'Exists' if keycloak_realm_test.status == 200 else 'Not Found' if keycloak_realm_test.status == 404 else 'Error' }}
+      tags: [keycloak]
+
+    # =============================================================================
+    # TEST 3: OPENSHIFT CONNECTIVITY AND AUTHENTICATION
+    # =============================================================================
+    
+    - name: "TEST 3: OpenShift API Connectivity"
+      uri:
+        url: "{{ openshift_api_url }}/api/v1/namespaces"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vault_openshift_token }}"
+        validate_certs: false
+        status_code: [200, 401, 403]
+      register: openshift_api_test
+      failed_when: false
+      tags: [openshift]
+
+    - name: "TEST 3: OpenShift Project List"
+      shell: oc get projects --no-headers | wc -l
+      register: openshift_projects_test
+      failed_when: false
+      tags: [openshift]
+
+    - name: "TEST 3: Display OpenShift Results"
+      debug:
+        msg: |
+          🔍 TEST 3: OpenShift Connectivity
+          {{ '✅ PASS' if openshift_api_test.status == 200 else '❌ FAIL' }} - API Access ({{ openshift_api_test.status | default('N/A') }})
+          {{ '✅ PASS' if openshift_projects_test.rc == 0 else '❌ FAIL' }} - CLI Access
+          
+          📊 Details:
+          🔹 API URL: {{ openshift_api_url }}
+          🔹 Apps Domain: {{ openshift_apps_domain }}
+          🔹 Projects Count: {{ openshift_projects_test.stdout | default('N/A') }}
+          🔹 CLI Status: {{ 'Connected' if openshift_projects_test.rc == 0 else 'Not Connected' }}
+      tags: [openshift]
+
+    # =============================================================================
+    # TEST 4: AAP CONTROLLER CONNECTIVITY AND AUTHENTICATION
+    # =============================================================================
+    
+    - name: "TEST 4: AAP Controller API Access"
+      uri:
+        url: "{{ aap_url }}/api/v2/ping/"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vault_aap_token }}"
+        validate_certs: false
+        status_code: [200, 401, 403]
+      register: aap_ping_test
+      failed_when: false
+      tags: [aap]
+
+    - name: "TEST 4: AAP Job Templates Access"
+      uri:
+        url: "{{ aap_url }}/api/v2/job_templates/"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vault_aap_token }}"
+        validate_certs: false
+        status_code: [200, 401, 403]
+      register: aap_templates_test
+      failed_when: false
+      tags: [aap]
+
+    # =============================================================================
+    # TEST 5: NETWORK CONNECTIVITY TESTS
+    # =============================================================================
+
+    - name: "TEST 5: DNS Resolution Tests"
+      shell: |
+        echo "ServiceNow: $(nslookup {{ servicenow_url | regex_replace('https?://') }} | grep -c 'Address')"
+        echo "Keycloak: $(nslookup {{ rhsso_url | regex_replace('https?://') }} | grep -c 'Address')"
+        echo "OpenShift: $(nslookup {{ openshift_api_url | regex_replace('https?://') | regex_replace(':6443') }} | grep -c 'Address')"
+        echo "AAP: $(nslookup {{ aap_url | regex_replace('https?://') }} | grep -c 'Address')"
+      register: dns_test
+      failed_when: false
+      tags: [network]
+
+    - name: "TEST 5: Display Network Results"
+      debug:
+        msg: |
+          🔍 TEST 5: Network Connectivity
+          🌐 DNS Resolution Tests:
+          {{ dns_test.stdout_lines | join('\n') if dns_test.stdout_lines is defined else 'DNS test failed' }}
+
+          📊 Network Status: {{ 'All services resolvable' if dns_test.rc == 0 else 'DNS issues detected' }}
+      tags: [network]
+
+    # =============================================================================
+    # TEST 6: INTEGRATION READINESS CHECKS
+    # =============================================================================
+
+    - name: "TEST 6: Check Required Collections"
+      shell: ansible-galaxy collection list | grep -E "(servicenow.itsm|kubernetes.core|community.general)"
+      register: collections_test
+      failed_when: false
+      tags: [integration]
+
+    - name: "TEST 6: Check OpenShift CLI"
+      shell: oc version --client
+      register: oc_version_test
+      failed_when: false
+      tags: [integration]
+
+    - name: "TEST 6: Display Integration Readiness"
+      debug:
+        msg: |
+          🔍 TEST 6: Integration Readiness
+          {{ '✅ PASS' if collections_test.rc == 0 else '❌ FAIL' }} - Required Ansible Collections
+          {{ '✅ PASS' if oc_version_test.rc == 0 else '❌ FAIL' }} - OpenShift CLI Available
+
+          📊 Details:
+          🔹 Collections Found: {{ collections_test.stdout_lines | length if collections_test.stdout_lines is defined else 0 }}
+          🔹 OC Version: {{ oc_version_test.stdout.split('\n')[0] if oc_version_test.stdout is defined else 'Not Available' }}
+      tags: [integration]
+
+    # =============================================================================
+    # COMPREHENSIVE TEST SUMMARY
+    # =============================================================================
+
+    - name: Generate Pre-flight Check Summary
+      debug:
+        msg: |
+          🎯 PRE-FLIGHT CHECKS SUMMARY
+          ============================
+
+          📅 Test Date: {{ ansible_date_time.iso8601 }}
+          🖥️  Test Host: {{ ansible_hostname }}
+
+          🔍 SERVICE CONNECTIVITY RESULTS:
+
+          1️⃣  ServiceNow ({{ servicenow_url }})
+             {{ '✅ PASS' if servicenow_test.records is defined else '❌ FAIL' }} - API Authentication
+             {{ '✅ PASS' if servicenow_catalog_test.records is defined else '❌ FAIL' }} - Service Catalog Access
+             📊 Status: {{ 'Ready for Integration' if (servicenow_test.records is defined and servicenow_catalog_test.records is defined) else 'Configuration Required' }}
+
+          2️⃣  Keycloak/RH-SSO ({{ rhsso_url }})
+             {{ '✅ PASS' if keycloak_admin_test.status == 200 else '❌ FAIL' }} - Admin API Access
+             {{ '✅ PASS' if keycloak_realm_test.status == 200 else '⚠️ WARN' if keycloak_realm_test.status == 404 else '❌ FAIL' }} - ServiceNow Realm
+             📊 Status: {{ 'Ready for Integration' if keycloak_admin_test.status == 200 else 'Configuration Required' }}
+
+          3️⃣  OpenShift ({{ openshift_api_url }})
+             {{ '✅ PASS' if openshift_api_test.status == 200 else '❌ FAIL' }} - API Access
+             {{ '✅ PASS' if openshift_projects_test.rc == 0 else '❌ FAIL' }} - CLI Access
+             📊 Status: {{ 'Ready for Integration' if (openshift_api_test.status == 200 and openshift_projects_test.rc == 0) else 'Configuration Required' }}
+
+          4️⃣  AAP Controller ({{ aap_url }})
+             {{ '✅ PASS' if aap_ping_test.status == 200 else '❌ FAIL' }} - Controller API
+             {{ '✅ PASS' if aap_templates_test.status == 200 else '❌ FAIL' }} - Job Templates Access
+             📊 Status: {{ 'Ready for Integration' if (aap_ping_test.status == 200 and aap_templates_test.status == 200) else 'Configuration Required' }}
+
+          🌐 NETWORK & INTEGRATION:
+             {{ '✅ PASS' if dns_test.rc == 0 else '❌ FAIL' }} - DNS Resolution
+             {{ '✅ PASS' if collections_test.rc == 0 else '❌ FAIL' }} - Ansible Collections
+             {{ '✅ PASS' if oc_version_test.rc == 0 else '❌ FAIL' }} - OpenShift CLI
+
+          🎯 OVERALL STATUS: {{ 'READY FOR INTEGRATION' if (servicenow_test.records is defined and keycloak_admin_test.status == 200 and openshift_api_test.status == 200 and aap_ping_test.status == 200) else 'CONFIGURATION REQUIRED' }}
+
+          📋 NEXT STEPS:
+          {% if (servicenow_test.records is defined and keycloak_admin_test.status == 200 and openshift_api_test.status == 200 and aap_ping_test.status == 200) %}
+          ✅ All services are accessible - proceed with integration setup:
+          1. Run Keycloak realm setup: ./run_playbook.sh ansible/openshift_oidc_playbook.yml
+          2. Configure ServiceNow OAuth: ./run_playbook.sh ansible/oauth_integration_playbook.yml
+          3. Set up AAP job templates: ./run_playbook.sh ansible/configure_aap.yml
+          4. Test end-to-end workflow: ./run_playbook.sh ansible/end_to_end_test.yml
+          {% else %}
+          ⚠️  Some services need configuration - address the following:
+          {% if servicenow_test.records is not defined %}
+          🔹 ServiceNow: Check credentials and network connectivity
+          {% endif %}
+          {% if keycloak_admin_test.status != 200 %}
+          🔹 Keycloak: Verify admin credentials and service availability
+          {% endif %}
+          {% if openshift_api_test.status != 200 %}
+          🔹 OpenShift: Check API token and cluster connectivity
+          {% endif %}
+          {% if aap_ping_test.status != 200 %}
+          🔹 AAP: Verify API token and controller accessibility
+          {% endif %}
+          {% endif %}
+
+    - name: Save Pre-flight Check Results
+      copy:
+        content: |
+          # ServiceNow-OpenShift Integration Pre-flight Check Results
+
+          **Test Date**: {{ ansible_date_time.iso8601 }}
+          **Test Host**: {{ ansible_hostname }}
+
+          ## Service Connectivity Results
+
+          | Service | Component | Status | Details |
+          |---------|-----------|--------|---------|
+          | ServiceNow | API Authentication | {{ 'PASS' if servicenow_test.records is defined else 'FAIL' }} | {{ servicenow_test.records | length if servicenow_test.records is defined else 0 }} user records |
+          | ServiceNow | Service Catalog | {{ 'PASS' if servicenow_catalog_test.records is defined else 'FAIL' }} | {{ servicenow_catalog_test.records | length if servicenow_catalog_test.records is defined else 0 }} catalog items |
+          | Keycloak | Admin API | {{ 'PASS' if keycloak_admin_test.status == 200 else 'FAIL' }} | HTTP {{ keycloak_admin_test.status | default('N/A') }} |
+          | Keycloak | ServiceNow Realm | {{ 'PASS' if keycloak_realm_test.status == 200 else 'WARN' if keycloak_realm_test.status == 404 else 'FAIL' }} | HTTP {{ keycloak_realm_test.status | default('N/A') }} |
+          | OpenShift | API Access | {{ 'PASS' if openshift_api_test.status == 200 else 'FAIL' }} | HTTP {{ openshift_api_test.status | default('N/A') }} |
+          | OpenShift | CLI Access | {{ 'PASS' if openshift_projects_test.rc == 0 else 'FAIL' }} | {{ openshift_projects_test.stdout | default('N/A') }} projects |
+          | AAP | Controller API | {{ 'PASS' if aap_ping_test.status == 200 else 'FAIL' }} | HTTP {{ aap_ping_test.status | default('N/A') }} |
+          | AAP | Job Templates | {{ 'PASS' if aap_templates_test.status == 200 else 'FAIL' }} | {{ aap_templates_test.json.count if aap_templates_test.json is defined else 'N/A' }} templates |
+
+          ## Network and Integration Readiness
+
+          | Component | Status | Details |
+          |-----------|--------|---------|
+          | DNS Resolution | {{ 'PASS' if dns_test.rc == 0 else 'FAIL' }} | All services resolvable |
+          | Ansible Collections | {{ 'PASS' if collections_test.rc == 0 else 'FAIL' }} | {{ collections_test.stdout_lines | length if collections_test.stdout_lines is defined else 0 }} required collections |
+          | OpenShift CLI | {{ 'PASS' if oc_version_test.rc == 0 else 'FAIL' }} | {{ oc_version_test.stdout.split('\n')[0] if oc_version_test.stdout is defined else 'Not Available' }} |
+
+          ## Overall Status
+
+          **Integration Readiness**: {{ 'READY' if (servicenow_test.records is defined and keycloak_admin_test.status == 200 and openshift_api_test.status == 200 and aap_ping_test.status == 200) else 'CONFIGURATION REQUIRED' }}
+
+          ## Service URLs
+
+          - **ServiceNow**: {{ servicenow_url }}
+          - **Keycloak/RH-SSO**: {{ rhsso_url }}
+          - **OpenShift API**: {{ openshift_api_url }}
+          - **AAP Controller**: {{ aap_url }}
+
+          ## Next Steps
+
+          {% if (servicenow_test.records is defined and keycloak_admin_test.status == 200 and openshift_api_test.status == 200 and aap_ping_test.status == 200) %}
+          All services are accessible. Proceed with integration setup:
+
+          1. Configure Keycloak realms and clients
+          2. Set up ServiceNow OAuth integration
+          3. Configure AAP job templates
+          4. Test end-to-end workflow
+          {% else %}
+          Address the following issues before proceeding:
+
+          {% if servicenow_test.records is not defined %}
+          - **ServiceNow**: Check credentials and network connectivity
+          {% endif %}
+          {% if keycloak_admin_test.status != 200 %}
+          - **Keycloak**: Verify admin credentials and service availability
+          {% endif %}
+          {% if openshift_api_test.status != 200 %}
+          - **OpenShift**: Check API token and cluster connectivity
+          {% endif %}
+          {% if aap_ping_test.status != 200 %}
+          - **AAP**: Verify API token and controller accessibility
+          {% endif %}
+          {% endif %}
+        dest: "./preflight_checks_results.md"
+      tags: [documentation]
+
+    - name: "TEST 4: Display AAP Results"
+      debug:
+        msg: |
+          🔍 TEST 4: AAP Controller Connectivity
+          {{ '✅ PASS' if aap_ping_test.status == 200 else '❌ FAIL' }} - Controller API ({{ aap_ping_test.status | default('N/A') }})
+          {{ '✅ PASS' if aap_templates_test.status == 200 else '❌ FAIL' }} - Job Templates Access ({{ aap_templates_test.status | default('N/A') }})
+          
+          📊 Details:
+          🔹 Controller URL: {{ aap_url }}
+          🔹 API Version: {{ aap_ping_test.json.version if aap_ping_test.json is defined else 'N/A' }}
+          🔹 Job Templates: {{ aap_templates_test.json.count if aap_templates_test.json is defined else 'N/A' }}
+      tags: [aap]
