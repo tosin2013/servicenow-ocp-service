@@ -1,0 +1,278 @@
+---
+# ServiceNow Catalog Setup Playbook
+# Creates professional catalog items for OpenShift services using servicenow.itsm collection
+#
+# Usage:
+# ./run_playbook.sh ansible/servicenow_catalog_setup.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+
+- name: Configure ServiceNow Service Catalog for OpenShift Integration
+  hosts: localhost
+  gather_facts: false
+  vars:
+    servicenow_instance:
+      host: "{{ servicenow_url }}"
+      username: "{{ servicenow_username }}"
+      password: "{{ vault_servicenow_password }}"
+      timeout: 30
+
+  tasks:
+    - name: Display ServiceNow Integration Status
+      debug:
+        msg: |
+          🚀 ServiceNow Catalog Setup Starting
+          📋 ServiceNow Instance: {{ servicenow_url }}
+          👤 Username: {{ servicenow_username }}
+          🎯 Goal: Create OpenShift service catalog items using servicenow.itsm collection
+
+    # Phase 1: Create Service Catalog Categories
+    - name: Create OpenShift Services Category
+      servicenow.itsm.service_catalog:
+        instance: "{{ servicenow_instance }}"
+        state: present
+        title: "OpenShift Services"
+        description: "Self-service catalog for OpenShift project provisioning and management"
+        category: "Infrastructure Services"
+        short_description: "Request OpenShift projects, databases, and development environments"
+        active: true
+        other:
+          sc_catalog: "Service Catalog"
+          availability: "internal"
+          type: "catalog"
+      register: openshift_category
+      tags: [catalog, categories]
+
+    # Phase 2: Create Catalog Items for Different OpenShift Services
+    - name: Create Standard OpenShift Project Catalog Item
+      servicenow.itsm.service_catalog:
+        instance: "{{ servicenow_instance }}"
+        state: present
+        title: "Standard OpenShift Project"
+        description: |
+          Request a standard OpenShift development project with:
+          - Namespace with resource quotas
+          - RBAC permissions for your team
+          - Keycloak user account for SSO access
+          - Basic monitoring and logging
+          - Network policies for security
+        category: "OpenShift Services"
+        short_description: "Standard development project with basic resources"
+        active: true
+        other:
+          sc_catalog: "Service Catalog"
+          availability: "internal"
+          type: "item"
+          workflow: "OpenShift Project Provisioning"
+          # Variables for the catalog item form
+          variables:
+            - name: "project_name"
+              label: "Project Name"
+              type: "string"
+              mandatory: true
+              help_text: "Unique name for your OpenShift project (lowercase, no spaces)"
+            - name: "display_name"
+              label: "Display Name"
+              type: "string"
+              mandatory: true
+              help_text: "Human-readable name for your project"
+            - name: "requestor_first_name"
+              label: "First Name"
+              type: "string"
+              mandatory: true
+            - name: "requestor_last_name"
+              label: "Last Name"
+              type: "string"
+              mandatory: true
+            - name: "requestor_role"
+              label: "Role"
+              type: "choice"
+              mandatory: true
+              choices: ["Developer", "DevOps Engineer", "QA Engineer", "Product Manager", "Architect"]
+            - name: "temp_password"
+              label: "Temporary Password"
+              type: "password"
+              mandatory: true
+              help_text: "Initial password for your Keycloak account (you can change this later)"
+            - name: "environment"
+              label: "Environment Type"
+              type: "choice"
+              mandatory: true
+              choices: ["development", "staging", "production"]
+              default: "development"
+            - name: "team_members"
+              label: "Additional Team Members"
+              type: "string"
+              mandatory: false
+              help_text: "Comma-separated list of usernames to add to the project"
+      register: standard_project_item
+      tags: [catalog, items]
+
+    - name: Create OpenShift Project with Database Catalog Item
+      servicenow.itsm.service_catalog:
+        instance: "{{ servicenow_instance }}"
+        state: present
+        title: "OpenShift Project with Database"
+        description: |
+          Request an OpenShift project with integrated database services:
+          - Everything from Standard Project
+          - PostgreSQL or MySQL database instance
+          - Database connection secrets
+          - Backup and monitoring for database
+          - Database administration tools
+        category: "OpenShift Services"
+        short_description: "Development project with integrated database services"
+        active: true
+        other:
+          sc_catalog: "Service Catalog"
+          availability: "internal"
+          type: "item"
+          workflow: "OpenShift Project with Database Provisioning"
+          variables:
+            - name: "project_name"
+              label: "Project Name"
+              type: "string"
+              mandatory: true
+            - name: "display_name"
+              label: "Display Name"
+              type: "string"
+              mandatory: true
+            - name: "requestor_first_name"
+              label: "First Name"
+              type: "string"
+              mandatory: true
+            - name: "requestor_last_name"
+              label: "Last Name"
+              type: "string"
+              mandatory: true
+            - name: "requestor_role"
+              label: "Role"
+              type: "choice"
+              mandatory: true
+              choices: ["Developer", "DevOps Engineer", "QA Engineer", "Product Manager", "Architect"]
+            - name: "temp_password"
+              label: "Temporary Password"
+              type: "password"
+              mandatory: true
+            - name: "database_type"
+              label: "Database Type"
+              type: "choice"
+              mandatory: true
+              choices: ["postgresql", "mysql", "mongodb"]
+              default: "postgresql"
+            - name: "database_size"
+              label: "Database Storage Size"
+              type: "choice"
+              mandatory: true
+              choices: ["1Gi", "5Gi", "10Gi", "20Gi"]
+              default: "5Gi"
+      register: database_project_item
+      tags: [catalog, items]
+
+    - name: Create OpenShift Virtualization Workspace Catalog Item
+      servicenow.itsm.service_catalog:
+        instance: "{{ servicenow_instance }}"
+        state: present
+        title: "OpenShift Virtualization Workspace"
+        description: |
+          Request an OpenShift project with virtualization capabilities:
+          - Everything from Standard Project
+          - OpenShift Virtualization operator access
+          - VM templates for common operating systems
+          - Virtual machine management tools
+          - Enhanced resource quotas for VMs
+          - Network configuration for VM access
+        category: "OpenShift Services"
+        short_description: "Development workspace with virtual machine capabilities"
+        active: true
+        other:
+          sc_catalog: "Service Catalog"
+          availability: "internal"
+          type: "item"
+          workflow: "OpenShift Virtualization Provisioning"
+          variables:
+            - name: "project_name"
+              label: "Project Name"
+              type: "string"
+              mandatory: true
+            - name: "display_name"
+              label: "Display Name"
+              type: "string"
+              mandatory: true
+            - name: "requestor_first_name"
+              label: "First Name"
+              type: "string"
+              mandatory: true
+            - name: "requestor_last_name"
+              label: "Last Name"
+              type: "string"
+              mandatory: true
+            - name: "requestor_role"
+              label: "Role"
+              type: "choice"
+              mandatory: true
+              choices: ["Developer", "DevOps Engineer", "QA Engineer", "Product Manager", "Architect"]
+            - name: "temp_password"
+              label: "Temporary Password"
+              type: "password"
+              mandatory: true
+            - name: "vm_templates"
+              label: "VM Templates Needed"
+              type: "multiple_choice"
+              mandatory: false
+              choices: ["rhel8", "rhel9", "ubuntu20", "ubuntu22", "windows2019", "windows2022"]
+            - name: "vm_resources"
+              label: "VM Resource Allocation"
+              type: "choice"
+              mandatory: true
+              choices: ["small (2 CPU, 4GB RAM)", "medium (4 CPU, 8GB RAM)", "large (8 CPU, 16GB RAM)"]
+              default: "medium (4 CPU, 8GB RAM)"
+      register: virtualization_item
+      tags: [catalog, items]
+
+    # Phase 3: Display Results
+    - name: Display Catalog Setup Results
+      debug:
+        msg: |
+          ✅ ServiceNow Catalog Setup Complete!
+          
+          📋 Created Catalog Items:
+          🔹 Standard OpenShift Project: {{ standard_project_item.record.sys_id if standard_project_item.record is defined else 'Created' }}
+          🔹 OpenShift Project with Database: {{ database_project_item.record.sys_id if database_project_item.record is defined else 'Created' }}
+          🔹 OpenShift Virtualization Workspace: {{ virtualization_item.record.sys_id if virtualization_item.record is defined else 'Created' }}
+          
+          🎯 Next Steps:
+          1. Configure business rules to trigger AAP job templates
+          2. Test catalog item requests
+          3. Set up CMDB integration for tracking resources
+          
+          📖 Access your ServiceNow catalog at:
+          {{ servicenow_url }}/nav_to.do?uri=sc_catalog.do
+      tags: [results]
+
+    - name: Save Catalog Item Information
+      copy:
+        content: |
+          # ServiceNow Catalog Items Created
+          
+          ## Standard OpenShift Project
+          - **Sys ID**: {{ standard_project_item.record.sys_id if standard_project_item.record is defined else 'N/A' }}
+          - **Title**: Standard OpenShift Project
+          - **Category**: OpenShift Services
+          
+          ## OpenShift Project with Database
+          - **Sys ID**: {{ database_project_item.record.sys_id if database_project_item.record is defined else 'N/A' }}
+          - **Title**: OpenShift Project with Database
+          - **Category**: OpenShift Services
+          
+          ## OpenShift Virtualization Workspace
+          - **Sys ID**: {{ virtualization_item.record.sys_id if virtualization_item.record is defined else 'N/A' }}
+          - **Title**: OpenShift Virtualization Workspace
+          - **Category**: OpenShift Services
+          
+          ## AAP Job Template Integration
+          - **Job Template ID**: 9
+          - **Job Template Name**: OpenShift Project Creation
+          - **AAP URL**: {{ aap_url }}
+          
+          Generated on: {{ ansible_date_time.iso8601 }}
+        dest: "./servicenow_catalog_items.md"
+      tags: [documentation]

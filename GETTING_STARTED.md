@@ -56,20 +56,128 @@ This playbook configures AAP with the necessary projects, credentials, and job t
 ./run_playbook.sh ansible/configure_aap.yml -e @ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
 ```
 
-## 8. Configure ServiceNow Flow Designer Workflows
+## 8. ServiceNow Integration Phase 1: Catalog Infrastructure
 
-This final configuration playbook sets up the orchestration tier in ServiceNow, creating the Flow Designer workflows that will trigger the automation.
+### 8.1 Explore ServiceNow ITSM Collection Modules
+
+First, explore the available ServiceNow modules in the execution environment:
 
 ```bash
-./run_playbook.sh ansible/flow_designer_playbook.yml -e @ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+# List all ServiceNow ITSM modules
+podman run --rm quay.io/takinosh/servicenow-ocp-ee:latest ansible-doc servicenow.itsm -l
+
+# Get detailed documentation for specific modules
+podman run --rm quay.io/takinosh/servicenow-ocp-ee:latest ansible-doc servicenow.itsm.service_catalog
+podman run --rm quay.io/takinosh/servicenow-ocp-ee:latest ansible-doc servicenow.itsm.catalog_request
+podman run --rm quay.io/takinosh/servicenow-ocp-ee:latest ansible-doc servicenow.itsm.configuration_item
 ```
 
-## 9. Verify the Integration
+### 8.2 Create ServiceNow Catalog Items
 
-Use the verification script to test the end-to-end integration and ensure that all components are communicating correctly.
+Create professional catalog items for OpenShift services using the servicenow.itsm collection:
 
 ```bash
-./verify_servicenow_integration.sh
+./run_playbook.sh ansible/servicenow_catalog_setup.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+```
+
+### 8.3 Configure ServiceNow Business Rules
+
+Set up business rules that trigger AAP job templates when catalog requests are submitted:
+
+```bash
+./run_playbook.sh ansible/servicenow_business_rules.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+```
+
+## 9. ServiceNow Integration Phase 2: CMDB and Incident Management
+
+### 9.1 Set Up Configuration Management Database (CMDB)
+
+Configure ServiceNow CMDB to track OpenShift resources as configuration items:
+
+```bash
+./run_playbook.sh ansible/servicenow_cmdb_setup.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+```
+
+### 9.2 Configure Incident Management Integration
+
+Set up automated incident creation for failed provisioning attempts:
+
+```bash
+./run_playbook.sh ansible/servicenow_incident_setup.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+```
+
+## 10. ServiceNow Integration Phase 3: Testing and Validation
+
+### 10.1 Test Individual ServiceNow Modules
+
+Test each ServiceNow integration component individually:
+
+```bash
+# Test catalog item creation
+./run_playbook.sh ansible/test_servicenow_catalog.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+
+# Test business rule integration
+./run_playbook.sh ansible/test_servicenow_business_rules.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+
+# Test CMDB integration
+./run_playbook.sh ansible/test_servicenow_cmdb.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+```
+
+### 10.2 End-to-End Integration Testing
+
+Test the complete ServiceNow → AAP → OpenShift → Keycloak workflow:
+
+```bash
+./run_playbook.sh ansible/test_end_to_end_integration.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+```
+
+### 10.3 Manual AAP Job Template Testing
+
+Test the AAP job template directly to ensure it works with ServiceNow variables:
+
+```bash
+# Test with sample ServiceNow catalog request data
+curl -s -k -u "admin:${AAP_PASSWORD}" -X POST \
+  "https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com/api/v2/job_templates/9/launch/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "extra_vars": {
+      "project_name": "test-servicenow-integration",
+      "display_name": "Test ServiceNow Integration",
+      "requestor": "testuser",
+      "servicenow_request_number": "REQ0000028",
+      "requestor_first_name": "Test",
+      "requestor_last_name": "User",
+      "requestor_role": "Developer",
+      "temp_password": "TestPass123!"
+    }
+  }'
+```
+
+## 11. Production Deployment and Monitoring
+
+### 11.1 Deploy to Production ServiceNow Instance
+
+Deploy the catalog items and business rules to the production ServiceNow instance:
+
+```bash
+./run_playbook.sh ansible/servicenow_production_deployment.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+```
+
+### 11.2 Set Up Monitoring and Reporting
+
+Configure ServiceNow reports and dashboards for operational visibility:
+
+```bash
+./run_playbook.sh ansible/servicenow_monitoring_setup.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+```
+
+## 12. Verify the Complete Integration
+
+Use the comprehensive verification script to test all integration components:
+
+```bash
+./verify_complete_servicenow_integration.sh
 ```
 
 ## Troubleshooting

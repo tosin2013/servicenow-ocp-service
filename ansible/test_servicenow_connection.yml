@@ -1,0 +1,230 @@
+---
+# ServiceNow Connection Test Playbook
+# Tests basic connectivity and explores servicenow.itsm collection capabilities
+#
+# Usage:
+# ./run_playbook.sh ansible/test_servicenow_connection.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+
+- name: Test ServiceNow Connection and Explore ITSM Collection
+  hosts: localhost
+  gather_facts: false
+  vars:
+    servicenow_instance:
+      host: "{{ servicenow_url }}"
+      username: "{{ servicenow_username }}"
+      password: "{{ vault_servicenow_password }}"
+      timeout: 30
+
+  tasks:
+    - name: Display Test Information
+      debug:
+        msg: |
+          🧪 ServiceNow Connection Test Starting
+          📋 ServiceNow Instance: {{ servicenow_url }}
+          👤 Username: {{ servicenow_username }}
+          🎯 Goal: Test connection and explore servicenow.itsm collection
+
+    # Test 1: Basic API Connectivity
+    - name: Test ServiceNow API Connectivity
+      servicenow.itsm.api_info:
+        instance: "{{ servicenow_instance }}"
+        resource: "sys_user"
+        query:
+          - user_name: "{{ servicenow_username }}"
+      register: api_test
+      tags: [connectivity]
+
+    - name: Display API Test Results
+      debug:
+        msg: |
+          ✅ ServiceNow API Connection: {{ 'SUCCESS' if api_test.records is defined else 'FAILED' }}
+          📊 User Records Found: {{ api_test.records | length if api_test.records is defined else 0 }}
+          👤 Current User: {{ api_test.records[0].name if api_test.records is defined and api_test.records | length > 0 else 'Unknown' }}
+      tags: [connectivity]
+
+    # Test 2: List Existing Service Catalog Items
+    - name: List Existing Service Catalog Items
+      servicenow.itsm.service_catalog_info:
+        instance: "{{ servicenow_instance }}"
+      register: existing_catalog
+      tags: [catalog_info]
+
+    - name: Display Existing Catalog Items
+      debug:
+        msg: |
+          📋 Existing Service Catalog Items: {{ existing_catalog.records | length if existing_catalog.records is defined else 0 }}
+          {% if existing_catalog.records is defined and existing_catalog.records | length > 0 %}
+          🔹 Sample Items:
+          {% for item in existing_catalog.records[:3] %}
+          - {{ item.title | default('Untitled') }} ({{ item.sys_id }})
+          {% endfor %}
+          {% endif %}
+      tags: [catalog_info]
+
+    # Test 3: List Recent Catalog Requests
+    - name: List Recent Catalog Requests
+      servicenow.itsm.catalog_request_info:
+        instance: "{{ servicenow_instance }}"
+      register: recent_requests
+      tags: [request_info]
+
+    - name: Display Recent Catalog Requests
+      debug:
+        msg: |
+          📋 Recent Catalog Requests: {{ recent_requests.records | length if recent_requests.records is defined else 0 }}
+          {% if recent_requests.records is defined and recent_requests.records | length > 0 %}
+          🔹 Latest Requests:
+          {% for request in recent_requests.records[:3] %}
+          - {{ request.short_description | default('No description') }} ({{ request.number }}) - {{ request.request_state | default('unknown') }}
+          {% endfor %}
+          {% endif %}
+      tags: [request_info]
+
+    # Test 4: Check Configuration Items (CMDB)
+    - name: List Configuration Items
+      servicenow.itsm.configuration_item_info:
+        instance: "{{ servicenow_instance }}"
+        query:
+          - name: LIKE OpenShift
+      register: config_items
+      ignore_errors: true
+      tags: [cmdb_info]
+
+    - name: Display Configuration Items
+      debug:
+        msg: |
+          📋 OpenShift Configuration Items: {{ config_items.records | length if config_items.records is defined else 0 }}
+          {% if config_items.records is defined and config_items.records | length > 0 %}
+          🔹 Found Items:
+          {% for item in config_items.records[:3] %}
+          - {{ item.name | default('Unnamed') }} ({{ item.sys_class_name | default('Unknown Type') }})
+          {% endfor %}
+          {% endif %}
+      tags: [cmdb_info]
+
+    # Test 5: Create a Test Catalog Request
+    - name: Create Test Catalog Request
+      servicenow.itsm.catalog_request:
+        instance: "{{ servicenow_instance }}"
+        state: present
+        requested_for: "{{ servicenow_username }}"
+        requested_by: "{{ servicenow_username }}"
+        short_description: "Test OpenShift Project Request - {{ ansible_date_time.epoch }}"
+        description: |
+          This is a test catalog request created by the ServiceNow-OpenShift integration setup.
+          
+          Test Details:
+          - Created by: Ansible automation
+          - Purpose: Verify servicenow.itsm.catalog_request module
+          - Timestamp: {{ ansible_date_time.iso8601 }}
+          
+          This request can be safely closed or deleted.
+        priority: "3"
+        urgency: "3"
+        impact: "3"
+        other:
+          business_justification: "Integration testing and validation"
+          special_instructions: "This is a test request - no action required"
+      register: test_request
+      tags: [test_request]
+
+    - name: Display Test Request Results
+      debug:
+        msg: |
+          ✅ Test Catalog Request Created
+          📋 Request Number: {{ test_request.record.number if test_request.record is defined else 'Unknown' }}
+          🆔 Sys ID: {{ test_request.record.sys_id if test_request.record is defined else 'Unknown' }}
+          📊 State: {{ test_request.record.request_state if test_request.record is defined else 'Unknown' }}
+          
+          🔗 View Request: {{ servicenow_url }}/nav_to.do?uri=sc_request.do?sys_id={{ test_request.record.sys_id if test_request.record is defined else '' }}
+      tags: [test_request]
+
+    # Test 6: Update the Test Request
+    - name: Update Test Catalog Request
+      servicenow.itsm.catalog_request:
+        instance: "{{ servicenow_instance }}"
+        state: present
+        sys_id: "{{ test_request.record.sys_id }}"
+        request_state: "closed_complete"
+        work_notes: |
+          Test completed successfully at {{ ansible_date_time.iso8601 }}.
+          
+          ServiceNow ITSM Collection Test Results:
+          ✅ API connectivity working
+          ✅ Catalog request creation working
+          ✅ Catalog request updates working
+          
+          Integration test completed - request can be archived.
+      when: test_request.record is defined and test_request.record.sys_id is defined
+      register: updated_request
+      tags: [test_request]
+
+    # Test 7: Summary and Next Steps
+    - name: Display Test Summary
+      debug:
+        msg: |
+          🎉 ServiceNow Connection Test Complete!
+          
+          ✅ Test Results:
+          🔹 API Connectivity: {{ 'PASS' if api_test.records is defined else 'FAIL' }}
+          🔹 Service Catalog Access: {{ 'PASS' if existing_catalog.records is defined else 'FAIL' }}
+          🔹 Catalog Request Creation: {{ 'PASS' if test_request.record is defined else 'FAIL' }}
+          🔹 Catalog Request Updates: {{ 'PASS' if updated_request.record is defined else 'FAIL' }}
+          
+          📊 Environment Status:
+          🔹 ServiceNow Instance: {{ servicenow_url }}
+          🔹 Current User: {{ api_test.records[0].name if api_test.records is defined and api_test.records | length > 0 else 'Unknown' }}
+          🔹 Existing Catalog Items: {{ existing_catalog.records | length if existing_catalog.records is defined else 0 }}
+          🔹 Recent Requests: {{ recent_requests.records | length if recent_requests.records is defined else 0 }}
+          
+          🎯 Ready for Next Steps:
+          1. ✅ ServiceNow connection verified
+          2. ➡️  Create OpenShift service catalog items
+          3. ➡️  Configure business rules for AAP integration
+          4. ➡️  Set up CMDB tracking
+          
+          📖 Test Request Created: {{ test_request.record.number if test_request.record is defined else 'None' }}
+      tags: [summary]
+
+    - name: Save Test Results
+      copy:
+        content: |
+          # ServiceNow Connection Test Results
+          
+          **Test Date**: {{ ansible_date_time.iso8601 }}
+          **ServiceNow Instance**: {{ servicenow_url }}
+          **Test User**: {{ servicenow_username }}
+          
+          ## Test Results
+          
+          | Test | Status | Details |
+          |------|--------|---------|
+          | API Connectivity | {{ 'PASS' if api_test.records is defined else 'FAIL' }} | {{ api_test.records | length if api_test.records is defined else 0 }} user records found |
+          | Service Catalog Access | {{ 'PASS' if existing_catalog.records is defined else 'FAIL' }} | {{ existing_catalog.records | length if existing_catalog.records is defined else 0 }} catalog items found |
+          | Catalog Request Creation | {{ 'PASS' if test_request.record is defined else 'FAIL' }} | Request {{ test_request.record.number if test_request.record is defined else 'N/A' }} created |
+          | Catalog Request Updates | {{ 'PASS' if updated_request.record is defined else 'FAIL' }} | Request updated and closed |
+          
+          ## Environment Information
+          
+          - **Current User**: {{ api_test.records[0].name if api_test.records is defined and api_test.records | length > 0 else 'Unknown' }}
+          - **Existing Catalog Items**: {{ existing_catalog.records | length if existing_catalog.records is defined else 0 }}
+          - **Recent Catalog Requests**: {{ recent_requests.records | length if recent_requests.records is defined else 0 }}
+          - **OpenShift Config Items**: {{ config_items.records | length if config_items.records is defined else 0 }}
+          
+          ## Next Steps
+          
+          1. Create OpenShift service catalog items using `servicenow_catalog_setup.yml`
+          2. Configure business rules for AAP integration
+          3. Set up CMDB tracking for OpenShift resources
+          4. Test end-to-end workflow
+          
+          ## Test Request Details
+          
+          {% if test_request.record is defined %}
+          - **Request Number**: {{ test_request.record.number }}
+          - **Sys ID**: {{ test_request.record.sys_id }}
+          - **Final State**: {{ updated_request.record.request_state if updated_request.record is defined else test_request.record.request_state }}
+          - **URL**: {{ servicenow_url }}/nav_to.do?uri=sc_request.do?sys_id={{ test_request.record.sys_id }}
+          {% endif %}
+        dest: "./servicenow_connection_test_results.md"
+      tags: [documentation]
