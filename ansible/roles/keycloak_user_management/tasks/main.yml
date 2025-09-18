@@ -1,0 +1,183 @@
+---
+# Keycloak User Management Role
+# Reusable role for creating users in Keycloak ServiceNow realm
+# Based on the working logic from openshift_oidc_integration role
+
+- name: Display Keycloak User Management Banner
+  debug:
+    msg:
+      - "👤 Keycloak User Management"
+      - "========================="
+      - "Creating users in ServiceNow realm"
+      - "Keycloak URL: {{ keycloak_url | default(rhsso_url) }}"
+      - "Realm: {{ servicenow_realm | default('servicenow') }}"
+      - "Requestor: {{ requestor | default('N/A') }}"
+      - "Team Members: {{ team_members | default([]) | length }} users"
+      - ""
+
+- name: Get Keycloak admin token
+  uri:
+    url: "{{ keycloak_url | default(rhsso_url) }}/auth/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: "password"
+      client_id: "admin-cli"
+      username: "{{ keycloak_admin_username | default('admin') }}"
+      password: "{{ keycloak_admin_password | default(vault_keycloak_password) }}"
+    validate_certs: false
+    status_code: [200]
+  register: keycloak_token_result
+  no_log: true
+
+- name: Set Keycloak admin token fact
+  set_fact:
+    keycloak_admin_token: "{{ keycloak_token_result.json.access_token }}"
+  no_log: true
+
+- name: Verify ServiceNow realm exists
+  uri:
+    url: "{{ keycloak_url | default(rhsso_url) }}/auth/admin/realms/{{ servicenow_realm | default('servicenow') }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+    validate_certs: false
+    status_code: [200, 404]
+  register: realm_check
+  failed_when: false
+
+- name: Fail if ServiceNow realm doesn't exist
+  fail:
+    msg: "ServiceNow realm '{{ servicenow_realm | default('servicenow') }}' not found in Keycloak. Please run the OIDC setup playbook first."
+  when: realm_check.status != 200
+
+- name: Check if requestor user already exists
+  uri:
+    url: "{{ keycloak_url | default(rhsso_url) }}/auth/admin/realms/{{ servicenow_realm | default('servicenow') }}/users?username={{ requestor }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+    validate_certs: false
+    status_code: [200]
+  register: existing_requestor_check
+  when: requestor is defined
+
+- name: Create requestor user in ServiceNow realm
+  uri:
+    url: "{{ keycloak_url | default(rhsso_url) }}/auth/admin/realms/{{ servicenow_realm | default('servicenow') }}/users"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      username: "{{ requestor }}"
+      email: "{{ requestor_email | default(requestor + '@' + (default_email_domain | default('example.com'))) }}"
+      firstName: "{{ requestor_first_name | default(requestor | title) }}"
+      lastName: "{{ requestor_last_name | default('User') }}"
+      enabled: true
+      emailVerified: true
+      attributes:
+        servicenow_request: ["{{ servicenow_request_number | default('') }}"]
+        project_name: ["{{ project_name | default('') }}"]
+        team: ["{{ team | default('') }}"]
+    validate_certs: false
+    status_code: [201, 409]  # 201 = created, 409 = already exists
+  register: requestor_user_result
+  when:
+    - requestor is defined
+    - existing_requestor_check.json is defined and (existing_requestor_check.json | length == 0)
+
+- name: Get requestor user ID for password setting
+  uri:
+    url: "{{ keycloak_url | default(rhsso_url) }}/auth/admin/realms/{{ servicenow_realm | default('servicenow') }}/users?username={{ requestor }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+    validate_certs: false
+  register: requestor_user_details
+  when: requestor is defined
+
+- name: Set requestor user password
+  uri:
+    url: "{{ keycloak_url | default(rhsso_url) }}/auth/admin/realms/{{ servicenow_realm | default('servicenow') }}/users/{{ requestor_user_details.json[0].id }}/reset-password"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      type: "password"
+      value: "{{ temp_password | default('TempPass123!') }}"
+      temporary: false
+    validate_certs: false
+    status_code: [204]
+  register: requestor_password_result
+  when:
+    - requestor is defined
+    - requestor_user_details.json is defined and (requestor_user_details.json | length > 0)
+
+- name: Create team member users in ServiceNow realm
+  uri:
+    url: "{{ keycloak_url | default(rhsso_url) }}/auth/admin/realms/{{ servicenow_realm | default('servicenow') }}/users"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      username: "{{ item }}"
+      email: "{{ item }}@{{ default_email_domain | default('example.com') }}"
+      firstName: "{{ item | title }}"
+      lastName: "Developer"
+      enabled: true
+      emailVerified: true
+      attributes:
+        servicenow_request: ["{{ servicenow_request_number | default('') }}"]
+        project_name: ["{{ project_name | default('') }}"]
+        team: ["{{ team | default('') }}"]
+    validate_certs: false
+    status_code: [201, 409]  # 201 = created, 409 = already exists
+  loop: "{{ team_members | default([]) }}"
+  register: team_user_results
+  when:
+    - team_members is defined
+    - team_members | length > 0
+
+- name: Set team member passwords
+  uri:
+    url: "{{ keycloak_url | default(rhsso_url) }}/auth/admin/realms/{{ servicenow_realm | default('servicenow') }}/users/{{ item.username }}/reset-password"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ keycloak_admin_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      type: "password"
+      value: "{{ temp_password | default('TempPass123!') }}"
+      temporary: false
+    validate_certs: false
+    status_code: [204]
+  loop: "{{ team_members | default([]) }}"
+  loop_control:
+    loop_var: item
+    extended: yes
+  when:
+    - team_members is defined
+    - team_members | length > 0
+
+- name: Display user creation summary
+  debug:
+    msg:
+      - "✅ Keycloak User Creation Summary"
+      - "================================"
+      - "Requestor User: {{ requestor | default('N/A') }} - {{ 'Created' if (requestor_user_result.status == 201 if requestor_user_result is defined else false) else 'Already exists or skipped' }}"
+      - "Team Members: {{ team_members | default([]) | length }} users processed"
+      - "Default Password: {{ temp_password | default('TempPass123!') }}"
+      - "Realm: {{ servicenow_realm | default('servicenow') }}"
+      - ""
+      - "🔐 Login Information:"
+      - "  Username: {{ requestor | default('N/A') }}"
+      - "  Password: {{ temp_password | default('TempPass123!') }}"
+      - "  Keycloak URL: {{ keycloak_url | default(rhsso_url) }}"
+      - ""

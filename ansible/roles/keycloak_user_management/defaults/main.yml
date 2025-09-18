@@ -1,0 +1,20 @@
+---
+# Default variables for Keycloak User Management Role
+
+# Keycloak Configuration
+keycloak_admin_username: "admin"
+servicenow_realm: "servicenow"
+default_email_domain: "example.com"
+
+# User Configuration
+temp_password: "TempPass123!"
+requestor_first_name: "{{ requestor | title if requestor is defined else 'User' }}"
+requestor_last_name: "User"
+
+# Team Configuration
+team_members: []
+
+# ServiceNow Integration
+servicenow_request_number: ""
+project_name: ""
+team: ""
