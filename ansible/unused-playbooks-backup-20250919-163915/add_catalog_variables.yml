@@ -1,0 +1,385 @@
+---
+- name: Add Catalog Variables to OpenShift Catalog Items
+  hosts: localhost
+  gather_facts: true
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+    # Catalog item IDs from our previous creation
+    openshift_basic_item_id: "1a3b56b1470cfa50292cc82f316d4378"
+    openshift_database_item_id: "aa3b1e75470cfa50292cc82f316d43e2"
+
+  tasks:
+    - name: Display Catalog Variables Setup
+      debug:
+        msg: |
+          🔧 Adding Catalog Variables to OpenShift Items
+          📋 Instance: {{ sn_host }}
+          🎯 Goal: Create user input forms for OpenShift project requests
+          
+          📝 Variables to Add:
+          - Project Name (required)
+          - Display Name
+          - Environment (dev/staging/prod)
+          - Requestor Information
+          - Team Members
+          - Database Type (for database item)
+          - Business Justification
+
+    # Create variables for Basic OpenShift Project Request
+    - name: Create Project Name Variable
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_basic_item_id }}"
+          name: "project_name"
+          question_text: "Project Name"
+          type: "8"  # Single Line Text
+          mandatory: true
+          order: "100"
+          help_text: "Enter the OpenShift project name (lowercase, no spaces, alphanumeric and hyphens only)"
+          default_value: ""
+          max_length: "40"
+        status_code: [201, 200]
+        return_content: yes
+      register: project_name_var
+      ignore_errors: true
+
+    - name: Create Display Name Variable
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_basic_item_id }}"
+          name: "display_name"
+          question_text: "Display Name"
+          type: "8"  # Single Line Text
+          mandatory: false
+          order: "200"
+          help_text: "Human-readable project name (will default to project name if not provided)"
+          default_value: ""
+          max_length: "100"
+        status_code: [201, 200]
+        return_content: yes
+      register: display_name_var
+      ignore_errors: true
+
+    - name: Create Environment Variable
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_basic_item_id }}"
+          name: "environment"
+          question_text: "Environment"
+          type: "3"  # Select Box
+          mandatory: true
+          order: "300"
+          help_text: "Select the target environment for this project"
+          default_value: "development"
+          lookup_table: ""
+          lookup_value: ""
+          choice_field: "development,staging,production"
+          choice_table: ""
+        status_code: [201, 200]
+        return_content: yes
+      register: environment_var
+      ignore_errors: true
+
+    - name: Create Requestor First Name Variable
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_basic_item_id }}"
+          name: "requestor_first_name"
+          question_text: "Requestor First Name"
+          type: "8"  # Single Line Text
+          mandatory: true
+          order: "400"
+          help_text: "Your first name (will be used for Keycloak username)"
+          default_value: ""
+          max_length: "40"
+        status_code: [201, 200]
+        return_content: yes
+      register: first_name_var
+      ignore_errors: true
+
+    - name: Create Requestor Last Name Variable
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_basic_item_id }}"
+          name: "requestor_last_name"
+          question_text: "Requestor Last Name"
+          type: "8"  # Single Line Text
+          mandatory: true
+          order: "500"
+          help_text: "Your last name (will be used for Keycloak username)"
+          default_value: ""
+          max_length: "40"
+        status_code: [201, 200]
+        return_content: yes
+      register: last_name_var
+      ignore_errors: true
+
+    - name: Create Team Members Variable
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_basic_item_id }}"
+          name: "team_members"
+          question_text: "Team Members"
+          type: "8"  # Single Line Text
+          mandatory: false
+          order: "600"
+          help_text: "Comma-separated list of team member usernames (e.g., user1,user2,user3)"
+          default_value: ""
+          max_length: "255"
+        status_code: [201, 200]
+        return_content: yes
+      register: team_members_var
+      ignore_errors: true
+
+    - name: Create Business Justification Variable
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_basic_item_id }}"
+          name: "business_justification"
+          question_text: "Business Justification"
+          type: "9"  # Multi Line Text
+          mandatory: true
+          order: "700"
+          help_text: "Explain the business need for this OpenShift project"
+          default_value: ""
+          max_length: "1000"
+        status_code: [201, 200]
+        return_content: yes
+      register: justification_var
+      ignore_errors: true
+
+    # Add Database-specific variables to the Database catalog item
+    - name: Create Database Type Variable (Database Item)
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_database_item_id }}"
+          name: "database_type"
+          question_text: "Database Type"
+          type: "3"  # Select Box
+          mandatory: true
+          order: "800"
+          help_text: "Select the type of database to provision"
+          default_value: "postgresql"
+          choice_field: "postgresql,mysql,mongodb"
+        status_code: [201, 200]
+        return_content: yes
+      register: db_type_var
+      ignore_errors: true
+
+    - name: Create Database Size Variable (Database Item)
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_database_item_id }}"
+          name: "database_size"
+          question_text: "Database Storage Size"
+          type: "3"  # Select Box
+          mandatory: true
+          order: "900"
+          help_text: "Select the storage size for the database"
+          default_value: "5Gi"
+          choice_field: "1Gi,5Gi,10Gi,20Gi,50Gi"
+        status_code: [201, 200]
+        return_content: yes
+      register: db_size_var
+      ignore_errors: true
+
+    # Copy basic variables to database item as well
+    - name: Copy Project Name to Database Item
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          cat_item: "{{ openshift_database_item_id }}"
+          name: "project_name"
+          question_text: "Project Name"
+          type: "8"
+          mandatory: true
+          order: "100"
+          help_text: "Enter the OpenShift project name (lowercase, no spaces, alphanumeric and hyphens only)"
+          max_length: "40"
+        status_code: [201, 200]
+        return_content: yes
+      register: db_project_name_var
+      ignore_errors: true
+
+    - name: Display Variable Creation Results
+      debug:
+        msg: |
+          🎯 Catalog Variables Creation Results:
+          
+          📝 Basic OpenShift Project Variables:
+          {% if not project_name_var.failed %}
+          ✅ Project Name: Created (ID: {{ project_name_var.json.result.sys_id | default('N/A') }})
+          {% else %}
+          ❌ Project Name: Failed - {{ project_name_var.msg | default('Unknown error') }}
+          {% endif %}
+          
+          {% if not display_name_var.failed %}
+          ✅ Display Name: Created (ID: {{ display_name_var.json.result.sys_id | default('N/A') }})
+          {% else %}
+          ❌ Display Name: Failed - {{ display_name_var.msg | default('Unknown error') }}
+          {% endif %}
+          
+          {% if not environment_var.failed %}
+          ✅ Environment: Created (ID: {{ environment_var.json.result.sys_id | default('N/A') }})
+          {% else %}
+          ❌ Environment: Failed - {{ environment_var.msg | default('Unknown error') }}
+          {% endif %}
+          
+          {% if not first_name_var.failed %}
+          ✅ Requestor First Name: Created (ID: {{ first_name_var.json.result.sys_id | default('N/A') }})
+          {% else %}
+          ❌ Requestor First Name: Failed - {{ first_name_var.msg | default('Unknown error') }}
+          {% endif %}
+          
+          🗄️ Database Project Variables:
+          {% if not db_type_var.failed %}
+          ✅ Database Type: Created (ID: {{ db_type_var.json.result.sys_id | default('N/A') }})
+          {% else %}
+          ❌ Database Type: Failed - {{ db_type_var.msg | default('Unknown error') }}
+          {% endif %}
+          
+          {% if not db_size_var.failed %}
+          ✅ Database Size: Created (ID: {{ db_size_var.json.result.sys_id | default('N/A') }})
+          {% else %}
+          ❌ Database Size: Failed - {{ db_size_var.msg | default('Unknown error') }}
+          {% endif %}
+
+    - name: Save Variable Creation Report
+      copy:
+        content: |
+          # ServiceNow Catalog Variables Creation Report
+          
+          Generated: {{ ansible_date_time.iso8601 }}
+          Instance: {{ sn_host }}
+          
+          ## Catalog Items Updated
+          
+          ### Basic OpenShift Project Request
+          - **Item ID**: {{ openshift_basic_item_id }}
+          - **URL**: {{ sn_host }}/nav_to.do?uri=sc_cat_item.do?sys_id={{ openshift_basic_item_id }}
+          
+          **Variables Added:**
+          {% if not project_name_var.failed %}
+          - ✅ **Project Name** (ID: {{ project_name_var.json.result.sys_id | default('N/A') }}) - Required text field
+          {% endif %}
+          {% if not display_name_var.failed %}
+          - ✅ **Display Name** (ID: {{ display_name_var.json.result.sys_id | default('N/A') }}) - Optional text field
+          {% endif %}
+          {% if not environment_var.failed %}
+          - ✅ **Environment** (ID: {{ environment_var.json.result.sys_id | default('N/A') }}) - Select: dev/staging/prod
+          {% endif %}
+          {% if not first_name_var.failed %}
+          - ✅ **Requestor First Name** (ID: {{ first_name_var.json.result.sys_id | default('N/A') }}) - Required
+          {% endif %}
+          {% if not last_name_var.failed %}
+          - ✅ **Requestor Last Name** (ID: {{ last_name_var.json.result.sys_id | default('N/A') }}) - Required
+          {% endif %}
+          {% if not team_members_var.failed %}
+          - ✅ **Team Members** (ID: {{ team_members_var.json.result.sys_id | default('N/A') }}) - Comma-separated list
+          {% endif %}
+          {% if not justification_var.failed %}
+          - ✅ **Business Justification** (ID: {{ justification_var.json.result.sys_id | default('N/A') }}) - Multi-line text
+          {% endif %}
+          
+          ### OpenShift Project with Database
+          - **Item ID**: {{ openshift_database_item_id }}
+          - **URL**: {{ sn_host }}/nav_to.do?uri=sc_cat_item.do?sys_id={{ openshift_database_item_id }}
+          
+          **Additional Variables:**
+          {% if not db_type_var.failed %}
+          - ✅ **Database Type** (ID: {{ db_type_var.json.result.sys_id | default('N/A') }}) - Select: postgresql/mysql/mongodb
+          {% endif %}
+          {% if not db_size_var.failed %}
+          - ✅ **Database Size** (ID: {{ db_size_var.json.result.sys_id | default('N/A') }}) - Select: 1Gi/5Gi/10Gi/20Gi/50Gi
+          {% endif %}
+          
+          ## Next Steps
+          
+          1. **Test the Forms**: Visit the catalog item URLs and verify the input fields appear
+          2. **Order a Test Project**: Try submitting a request with the new form fields
+          3. **Link to Business Rules**: Connect form data to our AAP integration business rules
+          4. **Add Validation**: Implement client-side validation for project names
+          
+          ## ServiceNow Variable Types Reference
+          
+          - **Type 3**: Select Box (dropdown)
+          - **Type 8**: Single Line Text
+          - **Type 9**: Multi Line Text
+          - **Type 5**: Multiple Choice
+          - **Type 7**: Check Box
+        dest: "./catalog_variables_report.md"

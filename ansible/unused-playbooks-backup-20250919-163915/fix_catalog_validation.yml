@@ -1,0 +1,338 @@
+---
+# Fix ServiceNow Catalog Variable Validation Issues
+- name: Fix ServiceNow Catalog Variable Validation
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+    basic_catalog_item_id: "1a3b56b1470cfa50292cc82f316d4378"
+    database_catalog_item_id: "aa3b1e75470cfa50292cc82f316d43e2"
+
+  tasks:
+    - name: Get current catalog variables for basic project
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: form-urlencoded
+        body:
+          sysparm_query: "cat_item={{ basic_catalog_item_id }}"
+        status_code: 200
+        return_content: yes
+      register: current_variables
+
+    - name: Delete existing problematic variables
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new/{{ item.sys_id }}"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: DELETE
+        force_basic_auth: yes
+        validate_certs: false
+        status_code: [200, 204]
+      loop: "{{ current_variables.json.result }}"
+      when: item.name in ['project_name', 'display_name', 'environment', 'requestor_first_name', 'requestor_last_name', 'team_members', 'business_justification']
+      ignore_errors: true
+
+    - name: Create Project Name variable (fixed)
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          cat_item: "{{ basic_catalog_item_id }}"
+          name: "project_name"
+          question_text: "Project Name"
+          type: "string"
+          mandatory: true
+          order: 100
+          active: true
+          visible_guide: true
+          visible_standalone: true
+          visible_summary: true
+          help_text: "Enter a unique project name (lowercase, hyphens only)"
+          example_text: "my-web-app-dev"
+          validate_regex: ""
+          reference: ""
+          reference_qual: ""
+          choice_table: ""
+          choice_field: ""
+          default_value: ""
+        status_code: 201
+        return_content: yes
+      register: project_name_var
+
+    - name: Create Display Name variable (fixed)
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          cat_item: "{{ basic_catalog_item_id }}"
+          name: "display_name"
+          question_text: "Display Name"
+          type: "string"
+          mandatory: false
+          order: 200
+          active: true
+          visible_guide: true
+          visible_standalone: true
+          visible_summary: true
+          help_text: "Human-readable project name"
+          example_text: "My Web Application"
+          validate_regex: ""
+          reference: ""
+          reference_qual: ""
+          choice_table: ""
+          choice_field: ""
+          default_value: ""
+        status_code: 201
+        return_content: yes
+      register: display_name_var
+
+    - name: Create Environment variable (choice list)
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          cat_item: "{{ basic_catalog_item_id }}"
+          name: "environment"
+          question_text: "Environment"
+          type: "choice"
+          mandatory: true
+          order: 300
+          active: true
+          visible_guide: true
+          visible_standalone: true
+          visible_summary: true
+          help_text: "Select deployment environment"
+          validate_regex: ""
+          reference: ""
+          reference_qual: ""
+          choice_table: ""
+          choice_field: ""
+          default_value: "development"
+        status_code: 201
+        return_content: yes
+      register: environment_var
+
+    - name: Add environment choices
+      uri:
+        url: "{{ sn_host }}/api/now/table/question_choice"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          question: "{{ environment_var.json.result.sys_id }}"
+          text: "{{ item.text }}"
+          value: "{{ item.value }}"
+          order: "{{ item.order }}"
+        status_code: 201
+        return_content: yes
+      loop:
+        - { text: "Development", value: "development", order: "100" }
+        - { text: "Staging", value: "staging", order: "200" }
+        - { text: "Production", value: "production", order: "300" }
+      ignore_errors: true
+
+    - name: Create Requestor First Name variable (fixed)
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          cat_item: "{{ basic_catalog_item_id }}"
+          name: "requestor_first_name"
+          question_text: "Requestor First Name"
+          type: "string"
+          mandatory: true
+          order: 400
+          active: true
+          visible_guide: true
+          visible_standalone: true
+          visible_summary: true
+          help_text: "Your first name for Keycloak account"
+          example_text: "John"
+          validate_regex: ""
+          reference: ""
+          reference_qual: ""
+          choice_table: ""
+          choice_field: ""
+          default_value: ""
+        status_code: 201
+        return_content: yes
+
+    - name: Create Requestor Last Name variable (fixed)
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          cat_item: "{{ basic_catalog_item_id }}"
+          name: "requestor_last_name"
+          question_text: "Requestor Last Name"
+          type: "string"
+          mandatory: true
+          order: 500
+          active: true
+          visible_guide: true
+          visible_standalone: true
+          visible_summary: true
+          help_text: "Your last name for Keycloak account"
+          example_text: "Smith"
+          validate_regex: ""
+          reference: ""
+          reference_qual: ""
+          choice_table: ""
+          choice_field: ""
+          default_value: ""
+        status_code: 201
+        return_content: yes
+
+    - name: Create Team Members variable (fixed)
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          cat_item: "{{ basic_catalog_item_id }}"
+          name: "team_members"
+          question_text: "Team Members"
+          type: "string"
+          mandatory: false
+          order: 600
+          active: true
+          visible_guide: true
+          visible_standalone: true
+          visible_summary: true
+          help_text: "Additional team members (use hyphens to separate)"
+          example_text: "john-smith-mary-jones"
+          validate_regex: ""
+          reference: ""
+          reference_qual: ""
+          choice_table: ""
+          choice_field: ""
+          default_value: ""
+        status_code: 201
+        return_content: yes
+
+    - name: Create Business Justification variable (fixed)
+      uri:
+        url: "{{ sn_host }}/api/now/table/item_option_new"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          cat_item: "{{ basic_catalog_item_id }}"
+          name: "business_justification"
+          question_text: "Business Justification"
+          type: "multi_line_text"
+          mandatory: true
+          order: 700
+          active: true
+          visible_guide: true
+          visible_standalone: true
+          visible_summary: true
+          help_text: "Explain why you need this OpenShift project"
+          example_text: "Development environment for customer portal application"
+          validate_regex: ""
+          reference: ""
+          reference_qual: ""
+          choice_table: ""
+          choice_field: ""
+          default_value: ""
+        status_code: 201
+        return_content: yes
+
+    - name: Wait for ServiceNow to process changes
+      pause:
+        seconds: 10
+
+    - name: Verify catalog item is accessible
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_cat_item/{{ basic_catalog_item_id }}"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        status_code: 200
+        return_content: yes
+      register: catalog_item_check
+
+    - name: Display fix results
+      debug:
+        msg: |
+          🔧 Catalog Variable Validation Fix Results:
+          
+          ✅ Variables Recreated:
+          - Project Name: String field with validation
+          - Display Name: Optional string field
+          - Environment: Choice list (Development/Staging/Production)
+          - Requestor First Name: Required string
+          - Requestor Last Name: Required string
+          - Team Members: Optional string with hyphen format
+          - Business Justification: Required multi-line text
+          
+          📋 Catalog Item Status:
+          - Name: {{ catalog_item_check.json.result.name }}
+          - Active: {{ catalog_item_check.json.result.active }}
+          - Short Description: {{ catalog_item_check.json.result.short_description }}
+          
+          🎯 Test the Form Now:
+          1. Go to: {{ sn_host }}/nav_to.do?uri=sc_cat_item.do?sys_id={{ basic_catalog_item_id }}
+          2. Use these test values:
+             - Project Name: test-project-001
+             - Display Name: Test Project 001
+             - Environment: development
+             - Requestor First Name: Test
+             - Requestor Last Name: User
+             - Team Members: test-user-admin
+             - Business Justification: Testing ServiceNow OpenShift integration
+          
+          🔗 Direct Link: {{ sn_host }}/nav_to.do?uri=sc_cat_item.do?sys_id={{ basic_catalog_item_id }}
+          
+          ⚠️ If you still see validation errors:
+          1. Clear your browser cache
+          2. Try in incognito/private mode
+          3. Wait 2-3 minutes for ServiceNow to fully process changes

@@ -1,0 +1,306 @@
+---
+# Create ServiceNow Business Rules for Automatic AAP Triggering
+- name: Create ServiceNow Business Rules for AAP Integration
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+    aap_controller_url: "https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+    aap_job_template_id: "9"
+    basic_catalog_item_id: "1a3b56b1470cfa50292cc82f316d4378"
+    database_catalog_item_id: "aa3b1e75470cfa50292cc82f316d43e2"
+
+  tasks:
+    - name: Create Business Rule for OpenShift Project Requests
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_script"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          name: "OpenShift Project AAP Trigger"
+          table: "sc_req_item"
+          when: "async"
+          order: "100"
+          active: true
+          advanced: true
+          condition: "cat_item={{ basic_catalog_item_id }}^ORcat_item={{ database_catalog_item_id }}"
+          script: |
+            (function executeRule(current, previous /*null when async*/) {
+                
+                // Only trigger when state changes to 'in_process' (state = 2)
+                if (current.state != '2' || (previous && previous.state == '2')) {
+                    return;
+                }
+                
+                // Get catalog variables
+                var variables = {};
+                var gr = new GlideRecord('sc_item_option_mtom');
+                gr.addQuery('request_item', current.sys_id);
+                gr.query();
+                
+                while (gr.next()) {
+                    var option = gr.sc_item_option.getRefRecord();
+                    if (option) {
+                        variables[option.name] = gr.sc_item_option.value;
+                    }
+                }
+                
+                // Prepare AAP job variables
+                var jobVars = {
+                    project_name: variables.project_name || 'default-project',
+                    display_name: variables.display_name || variables.project_name || 'Default Project',
+                    environment: variables.environment || 'development',
+                    requestor_first_name: variables.requestor_first_name || 'Unknown',
+                    requestor_last_name: variables.requestor_last_name || 'User',
+                    team_members: variables.team_members || 'default',
+                    business_justification: variables.business_justification || 'ServiceNow Request',
+                    servicenow_request_number: current.request.number.toString(),
+                    requestor: current.request.requested_for.user_name.toString()
+                };
+                
+                // Add database variables if present
+                if (variables.database_type) {
+                    jobVars.database_type = variables.database_type;
+                    jobVars.database_size = variables.database_size || '5Gi';
+                }
+                
+                // Call AAP API
+                try {
+                    var request = new sn_ws.RESTMessageV2();
+                    request.setEndpoint('{{ aap_controller_url }}/api/v2/job_templates/{{ aap_job_template_id }}/launch/');
+                    request.setHttpMethod('POST');
+                    request.setRequestHeader('Authorization', 'Bearer {{ vault_aap_token }}');
+                    request.setRequestHeader('Content-Type', 'application/json');
+                    
+                    var payload = {
+                        extra_vars: jobVars
+                    };
+                    
+                    request.setRequestBody(JSON.stringify(payload));
+                    
+                    var response = request.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    
+                    if (httpStatus == 201) {
+                        var jobData = JSON.parse(responseBody);
+                        current.work_notes = 'AAP Job launched successfully. Job ID: ' + jobData.job;
+                        current.state = '3'; // Set to 'work_in_progress'
+                        current.update();
+                        
+                        gs.log('OpenShift AAP Job launched: ' + jobData.job + ' for request: ' + current.number);
+                    } else {
+                        current.work_notes = 'Failed to launch AAP job. HTTP Status: ' + httpStatus + '. Response: ' + responseBody;
+                        current.state = '4'; // Set to 'closed_incomplete'
+                        current.close_code = 'Failed';
+                        current.close_notes = 'AAP job launch failed';
+                        current.update();
+                        
+                        gs.error('Failed to launch AAP job for request: ' + current.number + '. Status: ' + httpStatus);
+                    }
+                } catch (ex) {
+                    current.work_notes = 'Exception launching AAP job: ' + ex.message;
+                    current.state = '4'; // Set to 'closed_incomplete'
+                    current.close_code = 'Failed';
+                    current.close_notes = 'AAP integration error';
+                    current.update();
+                    
+                    gs.error('Exception launching AAP job for request: ' + current.number + '. Error: ' + ex.message);
+                }
+                
+            })(current, previous);
+        status_code: 201
+        return_content: yes
+      register: business_rule_result
+
+    - name: Create Business Rule for AAP Job Status Monitoring
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_script"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          name: "OpenShift AAP Job Status Monitor"
+          table: "sc_req_item"
+          when: "async"
+          order: "200"
+          active: true
+          advanced: true
+          condition: "cat_item={{ basic_catalog_item_id }}^ORcat_item={{ database_catalog_item_id }}^state=3"
+          script: |
+            (function executeRule(current, previous /*null when async*/) {
+                
+                // Only run for items in 'work_in_progress' state
+                if (current.state != '3') {
+                    return;
+                }
+                
+                // Extract job ID from work notes
+                var workNotes = current.work_notes.toString();
+                var jobIdMatch = workNotes.match(/Job ID: (\d+)/);
+                
+                if (!jobIdMatch) {
+                    return; // No job ID found
+                }
+                
+                var jobId = jobIdMatch[1];
+                
+                try {
+                    var request = new sn_ws.RESTMessageV2();
+                    request.setEndpoint('{{ aap_controller_url }}/api/v2/jobs/' + jobId + '/');
+                    request.setHttpMethod('GET');
+                    request.setRequestHeader('Authorization', 'Bearer {{ vault_aap_token }}');
+                    
+                    var response = request.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    
+                    if (httpStatus == 200) {
+                        var jobData = JSON.parse(responseBody);
+                        var jobStatus = jobData.status;
+                        
+                        if (jobStatus == 'successful') {
+                            current.work_notes += '\nAAP Job completed successfully. OpenShift project created.';
+                            current.state = '7'; // Set to 'delivered'
+                            current.update();
+                            
+                            gs.log('AAP Job ' + jobId + ' completed successfully for request: ' + current.number);
+                            
+                        } else if (jobStatus == 'failed' || jobStatus == 'error' || jobStatus == 'canceled') {
+                            current.work_notes += '\nAAP Job failed with status: ' + jobStatus;
+                            current.state = '4'; // Set to 'closed_incomplete'
+                            current.close_code = 'Failed';
+                            current.close_notes = 'OpenShift project creation failed';
+                            current.update();
+                            
+                            gs.error('AAP Job ' + jobId + ' failed for request: ' + current.number + '. Status: ' + jobStatus);
+                        }
+                        // For 'pending', 'waiting', 'running' - do nothing, let it continue
+                        
+                    } else {
+                        gs.warn('Failed to check AAP job status for request: ' + current.number + '. HTTP Status: ' + httpStatus);
+                    }
+                } catch (ex) {
+                    gs.error('Exception checking AAP job status for request: ' + current.number + '. Error: ' + ex.message);
+                }
+                
+            })(current, previous);
+        status_code: 201
+        return_content: yes
+      register: monitor_rule_result
+
+    - name: Create Scheduled Job for AAP Status Monitoring
+      uri:
+        url: "{{ sn_host }}/api/now/table/sysauto_script"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          name: "OpenShift AAP Job Monitor"
+          active: true
+          run_type: "periodically"
+          run_period: "00:00:02:00"  # Every 2 minutes
+          script: |
+            // Monitor AAP jobs for OpenShift requests in 'work_in_progress' state
+            var gr = new GlideRecord('sc_req_item');
+            gr.addQuery('state', '3'); // work_in_progress
+            gr.addQuery('cat_item', 'IN', '{{ basic_catalog_item_id }},{{ database_catalog_item_id }}');
+            gr.addQuery('work_notes', 'CONTAINS', 'Job ID:');
+            gr.query();
+            
+            while (gr.next()) {
+                // Extract job ID from work notes
+                var workNotes = gr.work_notes.toString();
+                var jobIdMatch = workNotes.match(/Job ID: (\d+)/);
+                
+                if (!jobIdMatch) {
+                    continue;
+                }
+                
+                var jobId = jobIdMatch[1];
+                
+                try {
+                    var request = new sn_ws.RESTMessageV2();
+                    request.setEndpoint('{{ aap_controller_url }}/api/v2/jobs/' + jobId + '/');
+                    request.setHttpMethod('GET');
+                    request.setRequestHeader('Authorization', 'Bearer {{ vault_aap_token }}');
+                    
+                    var response = request.execute();
+                    var responseBody = response.getBody();
+                    var httpStatus = response.getStatusCode();
+                    
+                    if (httpStatus == 200) {
+                        var jobData = JSON.parse(responseBody);
+                        var jobStatus = jobData.status;
+                        
+                        if (jobStatus == 'successful') {
+                            gr.work_notes += '\nAAP Job completed successfully. OpenShift project created.';
+                            gr.state = '7'; // delivered
+                            gr.update();
+                            
+                        } else if (jobStatus == 'failed' || jobStatus == 'error' || jobStatus == 'canceled') {
+                            gr.work_notes += '\nAAP Job failed with status: ' + jobStatus;
+                            gr.state = '4'; // closed_incomplete
+                            gr.close_code = 'Failed';
+                            gr.close_notes = 'OpenShift project creation failed';
+                            gr.update();
+                        }
+                    }
+                } catch (ex) {
+                    gs.error('Exception in AAP monitor for request: ' + gr.number + '. Error: ' + ex.message);
+                }
+            }
+        status_code: 201
+        return_content: yes
+      register: scheduled_job_result
+
+    - name: Display business rules creation results
+      debug:
+        msg: |
+          🎯 ServiceNow Business Rules Created Successfully!
+          
+          ✅ Business Rules Created:
+          1. OpenShift Project AAP Trigger
+             - Triggers when request state changes to 'in_process'
+             - Automatically calls AAP Job Template {{ aap_job_template_id }}
+             - Updates request with job status
+          
+          2. AAP Job Status Monitor  
+             - Monitors running AAP jobs
+             - Updates request state based on job completion
+             - Handles success/failure scenarios
+          
+          3. Scheduled AAP Monitor
+             - Runs every 2 minutes
+             - Checks all in-progress OpenShift requests
+             - Updates request states automatically
+          
+          🔗 Business Rule IDs:
+          - Trigger Rule: {{ business_rule_result.json.result.sys_id }}
+          - Monitor Rule: {{ monitor_rule_result.json.result.sys_id }}
+          - Scheduled Job: {{ scheduled_job_result.json.result.sys_id }}
+          
+          🎯 Next Steps:
+          1. Test the complete end-to-end workflow
+          2. Submit a new ServiceNow request
+          3. Watch it automatically trigger AAP
+          4. Verify OpenShift project creation
+          
+          ⚠️ Note: Business rules are now ACTIVE and will automatically
+          trigger AAP for all new OpenShift project requests!

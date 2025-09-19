@@ -1,0 +1,225 @@
+---
+# ServiceNow Flow Designer Setup for AAP Integration
+# Implements ADR-006: ServiceNow Implementation with Flow Designer and IntegrationHub
+- name: Configure ServiceNow Flow Designer with IntegrationHub for AAP Integration
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+    aap_controller_url: "https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+    aap_job_template_id: "9"
+    basic_catalog_item_id: "1a3b56b1470cfa50292cc82f316d4378"
+
+  tasks:
+    # Step 1: Test ServiceNow connectivity (simpler approach)
+    - name: Test ServiceNow API connectivity
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_user"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: connectivity_check
+      vars:
+        query_params:
+          sysparm_query: "user_name={{ sn_username }}"
+          sysparm_fields: "user_name,active,sys_id"
+          sysparm_limit: 1
+
+    - name: Display ServiceNow connectivity status
+      debug:
+        msg: |
+          🔍 ServiceNow API Connectivity: ✅ SUCCESS
+          - Connected as: {{ sn_username }}
+          - Instance: {{ sn_host }}
+          - User Active: {{ connectivity_check.json.result[0].active if connectivity_check.json.result|length > 0 else 'Unknown' }}
+
+          📋 Manual Setup Required:
+          IntegrationHub and Flow Designer plugins must be verified manually in ServiceNow UI.
+
+    # Step 2: Create Connection & Credential Alias for AAP
+    - name: Create AAP Connection & Credential Alias
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_alias"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          name: "AAP_Controller_Connection"
+          connection_url: "{{ aap_controller_url }}"
+          type: "connection"
+          multiple_connections: false
+          active: true
+        status_code: 201
+        return_content: yes
+      register: connection_alias
+      failed_when: false
+
+    - name: Create AAP Credential Alias
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_alias"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          name: "AAP_Controller_Credentials"
+          type: "credential"
+          multiple_connections: false
+          active: true
+          # Note: Actual credential configuration needs to be done via ServiceNow UI
+          # This creates the alias structure
+        status_code: 201
+        return_content: yes
+      register: credential_alias
+      failed_when: false
+
+    # Step 3: Create Flow Designer Flow
+    - name: Create Flow Designer Flow for OpenShift Project Creation
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_hub_flow"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          name: "OpenShift Project Creation Flow"
+          description: "Automated OpenShift project creation via AAP integration"
+          active: true
+          trigger_conditions: |
+            // Trigger when catalog item request is submitted
+            // Catalog Item: {{ basic_catalog_item_id }}
+          application: "Global"
+        status_code: 201
+        return_content: yes
+      register: flow_creation
+      failed_when: false
+
+    # Step 4: Create Flow Actions (this is complex and typically done via UI)
+    - name: Display Flow Designer setup instructions
+      debug:
+        msg: |
+          🎯 Flow Designer Setup Instructions:
+          
+          ✅ Automated Setup Complete:
+          - Connection Alias: {{ connection_alias.json.result.sys_id if connection_alias.status == 201 else 'Already exists or needs manual setup' }}
+          - Credential Alias: {{ credential_alias.json.result.sys_id if credential_alias.status == 201 else 'Already exists or needs manual setup' }}
+          - Flow Created: {{ flow_creation.json.result.sys_id if flow_creation.status == 201 else 'Already exists or needs manual setup' }}
+          
+          🔧 Manual Configuration Required:
+          
+          1. Configure Connection & Credential Aliases:
+             - Go to: System Definition > Connection & Credential Aliases
+             - Edit "AAP_Controller_Connection":
+               * Connection URL: {{ aap_controller_url }}
+               * Connection Type: REST
+             - Edit "AAP_Controller_Credentials":
+               * Credential Type: API Key
+               * API Key: {{ vault_aap_token }}
+          
+          2. Build Flow Designer Workflow:
+             - Go to: Process Automation > Flow Designer
+             - Open "OpenShift Project Creation Flow"
+             - Add Trigger: Service Catalog (Catalog Item: {{ basic_catalog_item_id }})
+             - Add Action: Get Catalog Variables
+             - Add Action: REST - Launch Job Template (using AAP connection)
+             - Add Action: Update Request Item with results
+          
+          3. Flow Actions Configuration:
+             
+             Trigger: Service Catalog
+             - Catalog Item: OpenShift Project Request
+             - Condition: State changes to "In Process"
+             
+             Action 1: Get Catalog Variables
+             - Retrieve: project_name, environment, team_members, requestor
+             
+             Action 2: REST - Launch Job Template
+             - Connection: AAP_Controller_Connection
+             - Credentials: AAP_Controller_Credentials
+             - Method: POST
+             - Endpoint: /api/v2/job_templates/{{ aap_job_template_id }}/launch/
+             - Request Body:
+               {
+                 "extra_vars": {
+                   "project_name": "${catalog_variables.project_name}",
+                   "display_name": "${catalog_variables.display_name}",
+                   "environment": "${catalog_variables.environment}",
+                   "team": "${catalog_variables.team_members}",
+                   "requestor": "${catalog_variables.requestor}",
+                   "servicenow_request_number": "${trigger.request_number}",
+                   "manage_keycloak_users": "true",
+                   "update_servicenow_request": "true"
+                 }
+               }
+             
+             Action 3: Update Request Item
+             - Set state to "Work in Progress"
+             - Add work notes with AAP job ID
+          
+          🔗 ServiceNow URLs:
+          - Flow Designer: {{ sn_host }}/nav_to.do?uri=flow_designer.do
+          - Connection Aliases: {{ sn_host }}/nav_to.do?uri=sys_alias_list.do
+          - Catalog Items: {{ sn_host }}/nav_to.do?uri=sc_cat_item_list.do
+
+    # Step 5: Disable old Business Rules (if they exist)
+    - name: Disable old Business Rules
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_script"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: PUT
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          active: false
+        status_code: 200
+      vars:
+        query_params:
+          sysparm_query: "name=OpenShift Project AAP Trigger"
+      register: disable_business_rules
+      failed_when: false
+
+    - name: Display setup completion
+      debug:
+        msg: |
+          🎉 ServiceNow Flow Designer Setup Complete!
+          
+          ✅ Next Steps:
+          1. Complete manual configuration in ServiceNow UI (see instructions above)
+          2. Test the flow with a new catalog request
+          3. Monitor AAP job execution
+          4. Verify OpenShift project creation
+          
+          📋 Testing Checklist:
+          - [ ] Connection & Credential Aliases configured
+          - [ ] Flow Designer workflow built
+          - [ ] Catalog item triggers flow correctly
+          - [ ] AAP job launches successfully
+          - [ ] OpenShift project created
+          - [ ] ServiceNow request updated with results
+          
+          🔧 Troubleshooting:
+          - Check Flow Designer execution logs
+          - Verify AAP API connectivity
+          - Confirm catalog variables are mapped correctly
+          - Test REST API calls manually if needed

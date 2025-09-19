@@ -1,0 +1,227 @@
+---
+- name: Create Catalog Item via REST API
+  hosts: localhost
+  gather_facts: false
+  collections:
+    - ansible.builtin
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+    item_name: "OpenShift Project Request"
+
+  tasks:
+    - name: Display Test Information
+      debug:
+        msg: |
+          🧪 Testing ServiceNow Catalog Item Creation via REST API
+          📋 Instance: {{ sn_host }}
+          👤 Username: {{ sn_username }}
+          🎯 Creating: {{ item_name }}
+
+    - name: Create the catalog item via a POST request
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_cat_item"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          name: "{{ item_name }}"
+          short_description: "Request a new OpenShift development project with basic resources"
+          description: |
+            Request a standard OpenShift development project with:
+            - Namespace with resource quotas
+            - RBAC permissions for your team
+            - Keycloak user account for SSO access
+            - Basic monitoring and logging
+            - Network policies for security
+          price: "0.00"
+          active: true
+          category: "Infrastructure Services"
+          sc_catalogs: "e0d08b13c3330100c8b837659bba8fb4"  # Service Catalog sys_id
+          workflow: ""
+          template: ""
+          item_option_new: ""
+          vendor: ""
+          model: ""
+          no_cart: false
+          no_quantity: false
+          no_order: false
+          no_order_now: false
+          no_proceed_checkout: false
+          omit_price: false
+          recurring_price: "0.00"
+          recurring_frequency: "monthly"
+          picture: ""
+          preview: "JavaScript: new CatalogItemPreviewGenerator().generatePreview(current);"
+        status_code: [201, 200]
+        return_content: yes
+      register: api_response
+      ignore_errors: true
+
+    - name: Display the new item details
+      debug:
+        msg: |
+          🎯 Catalog Item Creation Results:
+          
+          {% if api_response.failed %}
+          ❌ Creation Failed:
+          - Status Code: {{ api_response.status | default('N/A') }}
+          - Error: {{ api_response.msg | default('Unknown error') }}
+          - Response: {{ api_response.content | default('No response content') }}
+          {% else %}
+          ✅ Catalog Item Created Successfully:
+          - Status Code: {{ api_response.status }}
+          - Item Name: {{ api_response.json.result.name | default('N/A') }}
+          - Item ID: {{ api_response.json.result.sys_id | default('N/A') }}
+          - Short Description: {{ api_response.json.result.short_description | default('N/A') }}
+          - Active: {{ api_response.json.result.active | default('N/A') }}
+          - Category: {{ api_response.json.result.category | default('N/A') }}
+          {% endif %}
+
+    - name: Create OpenShift Project with Database Catalog Item
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_cat_item"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          name: "OpenShift Project with Database"
+          short_description: "Request an OpenShift project with integrated database services"
+          description: |
+            Request an OpenShift project with integrated database services:
+            - Everything from Standard Project
+            - PostgreSQL or MySQL database instance
+            - Database connection secrets
+            - Backup and monitoring for database
+            - Database administration tools
+          price: "0.00"
+          active: true
+          category: "Infrastructure Services"
+          sc_catalogs: "e0d08b13c3330100c8b837659bba8fb4"
+          workflow: ""
+          no_cart: false
+          no_quantity: false
+          no_order: false
+          no_order_now: false
+          no_proceed_checkout: false
+          omit_price: false
+          recurring_price: "0.00"
+          recurring_frequency: "monthly"
+        status_code: [201, 200]
+        return_content: yes
+      register: database_item_response
+      ignore_errors: true
+      when: not api_response.failed
+
+    - name: Display Database Item Results
+      debug:
+        msg: |
+          🗄️ Database Project Catalog Item:
+          
+          {% if database_item_response is not defined %}
+          ⏭️ Not executed
+          {% elif database_item_response.failed %}
+          ❌ Creation Failed:
+          - Status Code: {{ database_item_response.status | default('N/A') }}
+          - Error: {{ database_item_response.msg | default('Unknown error') }}
+          {% else %}
+          ✅ Database Item Created:
+          - Item Name: {{ database_item_response.json.result.name | default('N/A') }}
+          - Item ID: {{ database_item_response.json.result.sys_id | default('N/A') }}
+          - Active: {{ database_item_response.json.result.active | default('N/A') }}
+          {% endif %}
+
+    - name: Query existing catalog items to verify creation
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_cat_item?sysparm_query=nameLIKEOpenShift"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        return_content: yes
+      register: catalog_query
+      ignore_errors: true
+
+    - name: Display Existing OpenShift Catalog Items
+      debug:
+        msg: |
+          📋 Existing OpenShift Catalog Items:
+          
+          {% if catalog_query.failed %}
+          ❌ Query Failed: {{ catalog_query.msg | default('Unknown error') }}
+          {% else %}
+          Found {{ catalog_query.json.result | length }} OpenShift catalog items:
+          
+          {% for item in catalog_query.json.result %}
+          🔹 {{ item.name }}
+             - ID: {{ item.sys_id }}
+             - Description: {{ item.short_description }}
+             - Active: {{ item.active }}
+             - Created: {{ item.sys_created_on }}
+          {% endfor %}
+          {% endif %}
+
+    - name: Save Catalog Item Creation Results
+      copy:
+        content: |
+          # ServiceNow Catalog Item Creation Results
+          
+          ## Test Results - {{ ansible_date_time.iso8601 }}
+          
+          ### Primary Catalog Item: {{ item_name }}
+          {% if not api_response.failed %}
+          - **Status**: ✅ Created Successfully
+          - **Item ID**: {{ api_response.json.result.sys_id | default('N/A') }}
+          - **Name**: {{ api_response.json.result.name | default('N/A') }}
+          - **Short Description**: {{ api_response.json.result.short_description | default('N/A') }}
+          - **Active**: {{ api_response.json.result.active | default('N/A') }}
+          - **Category**: {{ api_response.json.result.category | default('N/A') }}
+          {% else %}
+          - **Status**: ❌ Creation Failed
+          - **Error**: {{ api_response.msg | default('Unknown error') }}
+          - **Status Code**: {{ api_response.status | default('N/A') }}
+          {% endif %}
+          
+          ### Database Project Item
+          {% if database_item_response is not defined %}
+          - **Status**: ⏭️ Not executed
+          {% elif database_item_response.failed %}
+          - **Status**: ❌ Creation Failed
+          - **Error**: {{ database_item_response.msg | default('Unknown error') }}
+          {% else %}
+          - **Status**: ✅ Created Successfully
+          - **Item ID**: {{ database_item_response.json.result.sys_id | default('N/A') }}
+          - **Name**: {{ database_item_response.json.result.name | default('N/A') }}
+          {% endif %}
+          
+          ### Existing OpenShift Items Query
+          {% if not catalog_query.failed %}
+          Found {{ catalog_query.json.result | length }} existing OpenShift catalog items.
+          {% endif %}
+          
+          ## Next Steps
+          
+          1. **Verify in ServiceNow UI**: Check Service Catalog → Catalog Definitions → Maintain Items
+          2. **Add Variables**: Configure catalog item variables for user input
+          3. **Set Workflow**: Link to business rules for AAP integration
+          4. **Test Ordering**: Validate end-to-end catalog item ordering
+          
+          ## ServiceNow URLs
+          
+          - **Service Catalog**: {{ sn_host }}/nav_to.do?uri=sc_catalog.do
+          - **Catalog Items Admin**: {{ sn_host }}/nav_to.do?uri=sc_cat_item_list.do
+          - **Maintain Items**: {{ sn_host }}/nav_to.do?uri=sc_cat_item.do
+        dest: "./catalog_item_creation_results.md"
+      when: api_response is defined
