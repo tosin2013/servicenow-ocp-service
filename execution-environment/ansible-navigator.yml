@@ -12,7 +12,7 @@ ansible-navigator:
     enable: false
   execution-environment:
     enabled: true
-    image: quay.io/takinosh/servicenow-ocp-ee:57b53792501543564d5eec5e76c36d1ceb0978a5
+    image: quay.io/takinosh/servicenow-ocp-ee:785b6cec231f96ae1400f6204e7f831ebb67f38a
     pull:
       policy: never
     container-engine: auto
