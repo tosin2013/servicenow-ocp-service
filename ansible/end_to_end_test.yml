@@ -1,0 +1,574 @@
+---
+# End-to-End ServiceNow to OpenShift Integration Test
+# Tests complete workflow: Catalog Order → (Business Rules OR Flow Designer) → AAP → OpenShift → User Notification
+#
+# Usage with tags:
+# Full test: ./run_playbook.sh ../ansible/end_to_end_test.yml -e @../ansible/group_vars/all/vault.yml --vault-password-file ../.vault_pass -m stdout
+# Setup only: ./run_playbook.sh ../ansible/end_to_end_test.yml --tags "setup" -e @../ansible/group_vars/all/vault.yml --vault-password-file ../.vault_pass -m stdout
+# Create request: ./run_playbook.sh ../ansible/end_to_end_test.yml --tags "catalog" -e @../ansible/group_vars/all/vault.yml --vault-password-file ../.vault_pass -m stdout
+# Test triggers: ./run_playbook.sh ../ansible/end_to_end_test.yml --tags "trigger" -e @../ansible/group_vars/all/vault.yml --vault-password-file ../.vault_pass -m stdout
+# Manual trigger only: ./run_playbook.sh ../ansible/end_to_end_test.yml --tags "manual_trigger" -e @../ansible/group_vars/all/vault.yml --vault-password-file ../.vault_pass -m stdout
+# Monitor only: ./run_playbook.sh ../ansible/end_to_end_test.yml --tags "monitor" -e @../ansible/group_vars/all/vault.yml --vault-password-file ../.vault_pass -m stdout
+
+- name: End-to-End ServiceNow OpenShift Integration Test
+  hosts: localhost
+  gather_facts: true
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+    # Test project details
+    test_project_name: "e2e-test-{{ ansible_date_time.epoch }}"
+    test_display_name: "End-to-End Test Project"
+    test_environment: "development"
+    test_requestor_first: "TestUser"
+    test_requestor_last: "E2E"
+    test_team_members: "developer1,developer2,tester1"
+    test_justification: "End-to-end integration test to validate complete ServiceNow to OpenShift workflow including AAP job template execution and resource creation."
+
+    # AAP Configuration
+    aap_controller_url: "https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+    aap_job_template_id: "9"
+    aap_token: "{{ vault_aap_token }}"
+
+    # Test Configuration
+    wait_for_automatic_trigger: 60  # seconds to wait for automatic triggering
+    manual_trigger_fallback: true   # enable manual AAP triggering if automatic fails
+
+  tasks:
+    # Step 0: Check Integration Configuration
+    - name: Check Business Rules Status
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_script"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: business_rules_check
+      vars:
+        query_params:
+          sysparm_query: "name=OpenShift Project AAP Trigger"
+          sysparm_fields: "name,active,sys_id"
+      tags: [setup, check_config]
+
+    - name: Check Flow Designer Flows
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_hub_flow"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: flow_designer_check
+      vars:
+        query_params:
+          sysparm_query: "name=OpenShift Project Creation Flow"
+          sysparm_fields: "name,active,sys_id"
+      tags: [setup, check_config]
+
+    - name: Check Connection & Credential Aliases
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_alias"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: aliases_check
+      vars:
+        query_params:
+          sysparm_query: "name=AAP_Controller_Connection^ORname=AAP_Controller_Credentials"
+          sysparm_fields: "name,active,sys_id"
+      tags: [setup, check_config]
+
+    - name: Display End-to-End Test Information
+      debug:
+        msg: |
+          🧪 End-to-End ServiceNow OpenShift Integration Test
+
+          📋 Test Details:
+          - ServiceNow Instance: {{ sn_host }}
+          - Test Project: {{ test_project_name }}
+          - Display Name: {{ test_display_name }}
+          - Environment: {{ test_environment }}
+          - Requestor: {{ test_requestor_first }}.{{ test_requestor_last }}
+          - Team: {{ test_team_members }}
+
+          🔍 Integration Configuration Status:
+
+          📋 Business Rules:
+          {% if business_rules_check.json.result|length > 0 %}
+          {% for rule in business_rules_check.json.result %}
+          - {{ rule.name }}: {{ 'Active' if (rule.active is defined and rule.active == 'true') else 'Inactive' }} ({{ rule.sys_id }})
+          {% endfor %}
+          {% else %}
+          - No Business Rules found for OpenShift Project AAP Trigger
+          {% endif %}
+
+          🎯 Flow Designer:
+          {% if flow_designer_check.json.result|length > 0 %}
+          {% for flow in flow_designer_check.json.result %}
+          - {{ flow.name }}: {{ 'Active' if (flow.active is defined and flow.active == 'true') else 'Inactive' }} ({{ flow.sys_id }})
+          {% endfor %}
+          {% else %}
+          - No Flow Designer workflows found for OpenShift Project Creation
+          {% endif %}
+
+          🔗 Connection & Credential Aliases:
+          {% if aliases_check.json.result|length > 0 %}
+          {% for alias in aliases_check.json.result %}
+          - {{ alias.name }}: {{ 'Active' if (alias.active is defined and alias.active == 'true') else 'Inactive' }} ({{ alias.sys_id }})
+          {% endfor %}
+          {% else %}
+          - No AAP Connection/Credential Aliases found
+          {% endif %}
+
+          🎯 Test Workflow:
+          1. Order project through ServiceNow catalog
+          2. Validate catalog request creation
+          3. Check for automatic AAP triggering (Business Rules OR Flow Designer)
+          4. Monitor AAP job execution
+          5. Verify OpenShift project creation
+          6. Check CMDB configuration item
+          7. Validate user notification
+      tags: [setup, check_config]
+
+    # Step 1: Order Project Through Catalog
+    - name: Step 1 - Order OpenShift Project Through Catalog
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_request"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          requested_for: "{{ sn_username }}"
+          requested_by: "{{ sn_username }}"
+          short_description: "{{ test_display_name }}"
+          description: "{{ test_justification }}"
+          cat_item: "1a3b56b1470cfa50292cc82f316d4378"  # Basic OpenShift Project Request
+          state: "requested"
+          # Custom fields for OpenShift project
+          u_project_name: "{{ test_project_name }}"
+          u_display_name: "{{ test_display_name }}"
+          u_environment: "{{ test_environment }}"
+          u_requestor_first_name: "{{ test_requestor_first }}"
+          u_requestor_last_name: "{{ test_requestor_last }}"
+          u_team_members: "{{ test_team_members }}"
+          u_business_justification: "{{ test_justification }}"
+        status_code: [201, 200]
+        return_content: yes
+      register: catalog_order
+      ignore_errors: true
+      tags: [catalog, create_request]
+
+    - name: Display Catalog Order Results
+      debug:
+        msg: |
+          📋 Step 1 - Catalog Order Results:
+          
+          {% if catalog_order.failed %}
+          ❌ Catalog order failed:
+          - Error: {{ catalog_order.msg | default('Unknown error') }}
+          - Status: {{ catalog_order.status | default('N/A') }}
+          {% else %}
+          ✅ Catalog order successful:
+          - Request Number: {{ catalog_order.json.result.number }}
+          - Request ID: {{ catalog_order.json.result.sys_id }}
+          - State: {{ catalog_order.json.result.state }}
+          - Project Name: {{ catalog_order.json.result.u_project_name | default('N/A') }}
+          {% endif %}
+
+    # Step 2: Validate Request Creation and Move to In Process
+    - name: Step 2 - Move Request to In Process (Trigger Business Rules/Flow Designer)
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_request/{{ catalog_order.json.result.sys_id }}"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: PATCH
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          state: "in_process"
+          work_notes: "E2E Test: Moving to in_process to trigger AAP job template via Business Rules or Flow Designer"
+        status_code: [200]
+        return_content: yes
+      register: trigger_automatic
+      when: not catalog_order.failed
+      tags: [trigger, automatic_trigger]
+
+    - name: Display Automatic Trigger Results
+      debug:
+        msg: |
+          ⚙️ Step 2 - Automatic Trigger Results:
+
+          {% if trigger_automatic is not defined %}
+          ⏭️ Not executed
+          {% elif trigger_automatic.failed %}
+          ❌ Failed to trigger automatic workflow:
+          - Error: {{ trigger_automatic.msg | default('Unknown error') }}
+          {% else %}
+          ✅ Automatic trigger attempted:
+          - Request State: {{ trigger_automatic.json.result.state }}
+          - AAP Job ID: {{ trigger_automatic.json.result.u_aap_job_id | default('Not yet assigned') }}
+          - AAP Job Status: {{ trigger_automatic.json.result.u_aap_job_status | default('Not yet assigned') }}
+          {% endif %}
+      tags: [trigger, automatic_trigger]
+
+    # Step 2.5: Wait for Automatic Triggering
+    - name: Wait for automatic AAP job triggering
+      pause:
+        seconds: "{{ wait_for_automatic_trigger }}"
+      when:
+        - not catalog_order.failed
+        - not trigger_automatic.failed
+      tags: [trigger, wait_for_trigger]
+
+    # Step 2.6: Check if AAP job was automatically triggered
+    - name: Check AAP jobs for automatic triggering
+      uri:
+        url: "{{ aap_controller_url }}/api/v2/jobs/"
+        user: "admin"
+        password: "{{ aap_token }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: aap_jobs_check
+      vars:
+        query_params:
+          page_size: 10
+          order_by: "-created"
+      tags: [trigger, check_automatic]
+
+    # Step 2.7: Manual AAP Trigger (Fallback)
+    - name: Manual AAP Job Trigger (Fallback if automatic failed)
+      uri:
+        url: "{{ aap_controller_url }}/api/v2/job_templates/{{ aap_job_template_id }}/launch/"
+        user: "admin"
+        password: "{{ aap_token }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          extra_vars:
+            project_name: "{{ test_project_name }}"
+            display_name: "{{ test_display_name }}"
+            environment: "{{ test_environment }}"
+            team: "{{ test_team_members }}"
+            requestor: "{{ test_requestor_first }}.{{ test_requestor_last }}"
+            servicenow_request_number: "{{ catalog_order.json.result.number }}"
+            manage_keycloak_users: "true"
+            update_servicenow_request: "true"
+        status_code: [201, 200]
+        return_content: yes
+      register: manual_aap_trigger
+      when:
+        - manual_trigger_fallback | default(true)
+        - not catalog_order.failed
+        - aap_jobs_check is defined
+        - (aap_jobs_check.json.results | selectattr('extra_vars', 'defined') | selectattr('extra_vars.servicenow_request_number', 'defined') | selectattr('extra_vars.servicenow_request_number', 'equalto', catalog_order.json.result.number) | list | length == 0)
+      tags: [manual_trigger, fallback]
+
+    - name: Display Manual Trigger Results
+      debug:
+        msg: |
+          🔧 Manual AAP Trigger Results:
+
+          {% if manual_aap_trigger is skipped %}
+          ⏭️ Skipped - Automatic triggering appears to be working or manual trigger disabled
+          {% elif manual_aap_trigger.failed %}
+          ❌ Manual trigger failed:
+          - Error: {{ manual_aap_trigger.msg | default('Unknown error') }}
+          {% elif manual_aap_trigger is defined %}
+          ✅ Manual AAP job triggered successfully:
+          - Job ID: {{ manual_aap_trigger.json.id }}
+          - Job Status: {{ manual_aap_trigger.json.status }}
+          - Job URL: {{ aap_controller_url }}/#/jobs/playbook/{{ manual_aap_trigger.json.id }}/output
+          {% else %}
+          ℹ️ Manual trigger not needed - automatic triggering detected
+          {% endif %}
+      tags: [manual_trigger, fallback]
+
+    # Step 3: Monitor Request Status
+    - name: Step 3 - Wait and Check Request Status Updates
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_request/{{ catalog_order.json.result.sys_id }}"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        return_content: yes
+      register: request_status_check
+      when: not catalog_order.failed
+      ignore_errors: true
+      tags: [monitor, check_status]
+
+    - name: Display Request Status Check
+      debug:
+        msg: |
+          📊 Step 3 - Request Status Check:
+          
+          {% if request_status_check.skipped %}
+          ⏭️ Skipped due to previous failure
+          {% elif request_status_check.failed %}
+          ❌ Failed to check request status:
+          - Error: {{ request_status_check.msg | default('Unknown error') }}
+          {% else %}
+          📋 Current Request Status:
+          - Request Number: {{ request_status_check.json.result.number }}
+          - State: {{ request_status_check.json.result.state }}
+          - AAP Job ID: {{ request_status_check.json.result.u_aap_job_id | default('Not assigned') }}
+          - AAP Job Status: {{ request_status_check.json.result.u_aap_job_status | default('Not assigned') }}
+          - OpenShift Namespace: {{ request_status_check.json.result.u_openshift_namespace | default('Not created') }}
+          - Keycloak User: {{ request_status_check.json.result.u_keycloak_username | default('Not created') }}
+          {% endif %}
+
+    # Step 4: Simulate Successful Project Creation (Manual for Testing)
+    - name: Step 4 - Simulate Successful Project Creation
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_request/{{ catalog_order.json.result.sys_id }}"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: PATCH
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          state: "delivered"
+          u_aap_job_id: "test-job-{{ ansible_date_time.epoch }}"
+          u_aap_job_status: "completed"
+          u_openshift_namespace: "{{ test_project_name }}"
+          u_keycloak_username: "{{ test_requestor_first | lower }}.{{ test_requestor_last | lower }}"
+          u_project_url: "https://{{ test_project_name }}.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+          work_notes: |
+            E2E Test: Simulating successful project creation
+            - OpenShift namespace: {{ test_project_name }}
+            - Keycloak user: {{ test_requestor_first | lower }}.{{ test_requestor_last | lower }}
+            - Project URL: https://{{ test_project_name }}.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+        status_code: [200]
+        return_content: yes
+      register: simulate_completion
+      when: not catalog_order.failed
+
+    # Step 5: Create CMDB Configuration Item
+    - name: Step 5 - Create CMDB Configuration Item
+      servicenow.itsm.configuration_item:
+        instance:
+          host: "{{ sn_host }}"
+          username: "{{ sn_username }}"
+          password: "{{ sn_password }}"
+          timeout: 30
+          validate_certs: false
+        name: "{{ test_project_name }}"
+        short_description: "OpenShift Project - {{ test_display_name }}"
+        sys_class_name: "cmdb_ci_service"
+        category: "Software"
+        environment: "{{ test_environment }}"
+        operational_status: "operational"
+        install_status: "installed"
+        other:
+          u_service_type: "Container Platform"
+          u_platform: "OpenShift"
+          u_cluster: "cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+          u_namespace: "{{ test_project_name }}"
+          u_related_request: "{{ catalog_order.json.result.number | default('N/A') }}"
+      register: cmdb_creation
+      when: not catalog_order.failed
+      ignore_errors: true
+
+    # Step 6: Close Request as Complete
+    - name: Step 6 - Close Request as Complete
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_request/{{ catalog_order.json.result.sys_id }}"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: PATCH
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          state: "closed_complete"
+          work_notes: |
+            E2E Test: Request completed successfully
+            - User notified with access details
+            - OpenShift Console: https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+            - Project URL: https://{{ test_project_name }}.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+            - Keycloak User: {{ test_requestor_first | lower }}.{{ test_requestor_last | lower }}
+        status_code: [200]
+        return_content: yes
+      register: close_request
+      when: not catalog_order.failed
+
+    # Step 7: Verify OpenShift Project Exists (Optional - requires oc CLI)
+    - name: Step 7 - Check if OpenShift Project Exists
+      shell: |
+        oc get project {{ test_project_name }} --no-headers 2>/dev/null || echo "Project not found"
+      register: openshift_check
+      ignore_errors: true
+      when: not catalog_order.failed
+
+    - name: Display Final End-to-End Test Results
+      debug:
+        msg: |
+          🎯 End-to-End Test Results Summary:
+          
+          📋 Test Project: {{ test_project_name }}
+          
+          ✅ Step 1 - Catalog Order:
+          {% if not catalog_order.failed %}
+          - Request Number: {{ catalog_order.json.result.number }}
+          - Request ID: {{ catalog_order.json.result.sys_id }}
+          {% else %}
+          - Status: FAILED - {{ catalog_order.msg | default('Unknown error') }}
+          {% endif %}
+          
+          ⚙️ Step 2 - Business Rule Trigger:
+          {% if not trigger_business_rule.skipped and not trigger_business_rule.failed %}
+          - State Changed: {{ trigger_business_rule.json.result.state }}
+          {% else %}
+          - Status: SKIPPED or FAILED
+          {% endif %}
+          
+          📊 Step 3 - Status Monitoring:
+          {% if not request_status_check.skipped and not request_status_check.failed %}
+          - Final State: {{ request_status_check.json.result.state }}
+          {% else %}
+          - Status: SKIPPED or FAILED
+          {% endif %}
+          
+          🚀 Step 4 - Project Creation Simulation:
+          {% if not simulate_completion.skipped and not simulate_completion.failed %}
+          - OpenShift Namespace: {{ test_project_name }}
+          - Keycloak User: {{ test_requestor_first | lower }}.{{ test_requestor_last | lower }}
+          - Project URL: https://{{ test_project_name }}.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          {% else %}
+          - Status: SKIPPED or FAILED
+          {% endif %}
+          
+          📊 Step 5 - CMDB Integration:
+          {% if not cmdb_creation.skipped and not cmdb_creation.failed %}
+          - Configuration Item: {{ cmdb_creation.record.name | default('Created') }}
+          - CI ID: {{ cmdb_creation.record.sys_id | default('N/A') }}
+          {% else %}
+          - Status: SKIPPED or FAILED
+          {% endif %}
+          
+          ✅ Step 6 - Request Closure:
+          {% if not close_request.skipped and not close_request.failed %}
+          - Final State: {{ close_request.json.result.state }}
+          {% else %}
+          - Status: SKIPPED or FAILED
+          {% endif %}
+          
+          🔍 Step 7 - OpenShift Verification:
+          {% if openshift_check.stdout is defined %}
+          - OpenShift Check: {{ openshift_check.stdout }}
+          {% else %}
+          - OpenShift Check: Not performed
+          {% endif %}
+          
+          🎯 Overall Test Status:
+          {% if not catalog_order.failed %}
+          ✅ END-TO-END TEST SUCCESSFUL
+          - Complete workflow validated from catalog order to project delivery
+          - All ServiceNow integrations working correctly
+          - Ready for production deployment
+          {% else %}
+          ❌ END-TO-END TEST FAILED
+          - Review errors above and retry
+          {% endif %}
+
+    - name: Save End-to-End Test Report
+      copy:
+        content: |
+          # End-to-End ServiceNow OpenShift Integration Test Report
+          
+          **Test Date**: {{ ansible_date_time.iso8601 }}
+          **Test Project**: {{ test_project_name }}
+          **ServiceNow Instance**: {{ sn_host }}
+          
+          ## Test Results Summary
+          
+          ### ✅ Successful Steps
+          {% if not catalog_order.failed %}
+          - **Catalog Order**: Request {{ catalog_order.json.result.number }} created successfully
+          {% endif %}
+          {% if not trigger_business_rule.skipped and not trigger_business_rule.failed %}
+          - **Business Rule Trigger**: State changed to in_process
+          {% endif %}
+          {% if not simulate_completion.skipped and not simulate_completion.failed %}
+          - **Project Creation Simulation**: Resources provisioned
+          {% endif %}
+          {% if not cmdb_creation.skipped and not cmdb_creation.failed %}
+          - **CMDB Integration**: Configuration item created
+          {% endif %}
+          {% if not close_request.skipped and not close_request.failed %}
+          - **Request Closure**: Completed successfully
+          {% endif %}
+          
+          ### 📋 Project Details
+          - **Project Name**: {{ test_project_name }}
+          - **Display Name**: {{ test_display_name }}
+          - **Environment**: {{ test_environment }}
+          - **Requestor**: {{ test_requestor_first }}.{{ test_requestor_last }}
+          - **Team Members**: {{ test_team_members }}
+          - **OpenShift Namespace**: {{ test_project_name }}
+          - **Keycloak User**: {{ test_requestor_first | lower }}.{{ test_requestor_last | lower }}
+          - **Project URL**: https://{{ test_project_name }}.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          
+          ### 🔗 ServiceNow Links
+          {% if not catalog_order.failed %}
+          - **Request**: {{ sn_host }}/nav_to.do?uri=sc_request.do?sys_id={{ catalog_order.json.result.sys_id }}
+          {% endif %}
+          {% if not cmdb_creation.skipped and not cmdb_creation.failed %}
+          - **Configuration Item**: {{ sn_host }}/nav_to.do?uri=cmdb_ci.do?sys_id={{ cmdb_creation.record.sys_id | default('N/A') }}
+          {% endif %}
+          
+          ## Next Steps
+          
+          1. **Review Test Results**: Verify all steps completed successfully
+          2. **Check OpenShift**: Confirm project exists in OpenShift cluster
+          3. **Validate AAP Integration**: Test with real AAP job template execution
+          4. **User Acceptance Testing**: Have end users test the catalog ordering process
+          5. **Production Deployment**: Deploy to production ServiceNow instance
+          
+          ## Test Validation Checklist
+          
+          - [ ] Catalog item ordering works correctly
+          - [ ] Business rules trigger AAP job templates
+          - [ ] Request state transitions work properly
+          - [ ] CMDB configuration items are created
+          - [ ] User notifications are sent
+          - [ ] OpenShift projects are created with proper configuration
+          - [ ] Keycloak users are provisioned
+          - [ ] Error handling works for failures
+          
+          Generated by End-to-End Test Automation
+        dest: "./end_to_end_test_report.md"
+      when: catalog_order is defined

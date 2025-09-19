@@ -1,0 +1,344 @@
+---
+# ServiceNow-OpenShift Integration Environment Cleanup
+# Cleans up test requests, failed jobs, and test projects to provide a fresh start
+#
+# Usage (following GETTING_STARTED.md pattern):
+# ./run_playbook.sh ansible/cleanup_integration_environment.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+
+- name: ServiceNow-OpenShift Integration Environment Cleanup
+  hosts: localhost
+  gather_facts: true
+  vars:
+    # ServiceNow instance configuration
+    servicenow_instance:
+      host: "{{ servicenow_url }}"
+      username: "{{ servicenow_username }}"
+      password: "{{ vault_servicenow_password }}"
+      timeout: 30
+      validate_certs: false
+    
+    # Cleanup configuration
+    cleanup_mode: "{{ cleanup_mode | default('safe') }}"  # safe, aggressive, or full
+    preserve_production: true
+    dry_run: "{{ dry_run | default(false) }}"
+
+  tasks:
+    - name: Display Cleanup Information
+      debug:
+        msg: |
+          🧹 ServiceNow-OpenShift Integration Environment Cleanup
+          =====================================================
+          
+          🎯 Cleanup Mode: {{ cleanup_mode }}
+          🔒 Preserve Production: {{ preserve_production }}
+          🧪 Dry Run: {{ dry_run }}
+          📅 Cleanup Date: {{ ansible_date_time.iso8601 }}
+          
+          📋 What will be cleaned:
+          🔹 ServiceNow test requests (last 7 days)
+          🔹 Failed AAP jobs (keeping last 5 successful)
+          🔹 ServiceNow-created OpenShift test projects
+          🔹 Temporary catalog items (if requested)
+          
+          ⚠️  Production resources will be preserved
+
+    # =============================================================================
+    # PHASE 1: SERVICENOW CLEANUP
+    # =============================================================================
+    
+    - name: "PHASE 1: ServiceNow Request Cleanup"
+      debug:
+        msg: "🔍 Starting ServiceNow request cleanup..."
+
+    - name: Get recent ServiceNow requests for cleanup
+      servicenow.itsm.api_info:
+        instance: "{{ servicenow_instance }}"
+        resource: "sc_request"
+        query:
+          - sys_created_on: ">=javascript:gs.daysAgoStart(7)"  # Last 7 days
+          - short_description: "LIKE ServiceNow"
+      register: recent_requests
+      failed_when: false
+      tags: [servicenow, cleanup]
+
+    - name: Display ServiceNow requests found for cleanup
+      debug:
+        msg: |
+          🔍 Found {{ recent_requests.records | length if recent_requests.records is defined else 0 }} ServiceNow requests for review
+          
+          {% if recent_requests.records is defined and recent_requests.records | length > 0 %}
+          📋 Requests to be cleaned:
+          {% for request in recent_requests.records[:10] %}
+          🔹 {{ request.number }}: {{ request.short_description }} ({{ request.state }})
+          {% endfor %}
+          {% if recent_requests.records | length > 10 %}
+          ... and {{ recent_requests.records | length - 10 }} more
+          {% endif %}
+          {% endif %}
+      tags: [servicenow, cleanup]
+
+    - name: Cancel in-process test requests (safe mode)
+      servicenow.itsm.api:
+        instance: "{{ servicenow_instance }}"
+        resource: "sc_request"
+        action: "update"
+        sys_id: "{{ item.sys_id }}"
+        data:
+          state: "7"  # Closed Cancelled
+          work_notes: "Cancelled during environment cleanup - {{ ansible_date_time.iso8601 }}"
+      loop: "{{ recent_requests.records | default([]) }}"
+      when: 
+        - not dry_run
+        - cleanup_mode in ['safe', 'aggressive', 'full']
+        - item.short_description is search('Test|test|ServiceNow Real Integration')
+        - item.state in ['1', '2']  # New or In Progress
+        - not (preserve_production and item.short_description is search('Production|production'))
+      failed_when: false
+      tags: [servicenow, cleanup]
+
+    # =============================================================================
+    # PHASE 2: AAP JOBS CLEANUP
+    # =============================================================================
+    
+    - name: "PHASE 2: AAP Jobs Cleanup"
+      debug:
+        msg: "🔍 Starting AAP jobs cleanup..."
+
+    - name: Get AAP job list for cleanup
+      uri:
+        url: "{{ aap_url }}/api/v2/jobs/?page_size=50&order_by=-created"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vault_aap_token }}"
+        validate_certs: false
+        status_code: [200]
+      register: aap_jobs_list
+      failed_when: false
+      tags: [aap, cleanup]
+
+    - name: Display AAP jobs found for cleanup
+      debug:
+        msg: |
+          🔍 Found {{ aap_jobs_list.json.count if aap_jobs_list.json is defined else 0 }} AAP jobs total
+          
+          {% if aap_jobs_list.json is defined and aap_jobs_list.json.results is defined %}
+          📊 Job Status Summary:
+          {% set failed_jobs = aap_jobs_list.json.results | selectattr('status', 'equalto', 'failed') | list %}
+          {% set successful_jobs = aap_jobs_list.json.results | selectattr('status', 'equalto', 'successful') | list %}
+          🔹 Failed jobs: {{ failed_jobs | length }}
+          🔹 Successful jobs: {{ successful_jobs | length }}
+          
+          {% if failed_jobs | length > 0 %}
+          🗑️  Failed jobs to be cleaned (showing first 5):
+          {% for job in failed_jobs[:5] %}
+          🔹 Job {{ job.id }}: {{ job.name }} - {{ job.status }} ({{ job.created }})
+          {% endfor %}
+          {% endif %}
+          {% endif %}
+      tags: [aap, cleanup]
+
+    - name: Delete failed AAP jobs (keeping last 5 for debugging)
+      uri:
+        url: "{{ aap_url }}/api/v2/jobs/{{ item.id }}/"
+        method: DELETE
+        headers:
+          Authorization: "Bearer {{ vault_aap_token }}"
+        validate_certs: false
+        status_code: [204, 404]
+      loop: "{{ (aap_jobs_list.json.results | selectattr('status', 'equalto', 'failed') | list)[5:] if aap_jobs_list.json is defined and aap_jobs_list.json.results is defined else [] }}"
+      when: 
+        - not dry_run
+        - cleanup_mode in ['aggressive', 'full']
+      failed_when: false
+      tags: [aap, cleanup]
+
+    # =============================================================================
+    # PHASE 3: OPENSHIFT PROJECTS CLEANUP
+    # =============================================================================
+    
+    - name: "PHASE 3: OpenShift Projects Cleanup"
+      debug:
+        msg: "🔍 Starting OpenShift projects cleanup..."
+
+    - name: Get ServiceNow-created OpenShift projects
+      shell: |
+        oc get projects -o json | jq -r '.items[] | select(.metadata.labels."managed-by" == "servicenow-aap" and (.metadata.labels."servicenow-request" | test("REQ00100[0-9]+")) and (.metadata.name | test("servicenow-|test-"))) | .metadata.name'
+      register: servicenow_projects
+      failed_when: false
+      tags: [openshift, cleanup]
+
+    - name: Display OpenShift projects found for cleanup
+      debug:
+        msg: |
+          🔍 Found {{ servicenow_projects.stdout_lines | length }} ServiceNow-created projects for cleanup
+          
+          {% if servicenow_projects.stdout_lines | length > 0 %}
+          🗑️  Projects to be cleaned:
+          {% for project in servicenow_projects.stdout_lines %}
+          🔹 {{ project }}
+          {% endfor %}
+          {% endif %}
+      tags: [openshift, cleanup]
+
+    - name: Delete ServiceNow test projects
+      shell: "oc delete project {{ item }}"
+      loop: "{{ servicenow_projects.stdout_lines }}"
+      when: 
+        - not dry_run
+        - cleanup_mode in ['safe', 'aggressive', 'full']
+        - not (preserve_production and item is search('prod|production'))
+      failed_when: false
+      register: project_deletion
+      tags: [openshift, cleanup]
+
+    - name: Wait for project deletion to complete
+      shell: "oc get project {{ item }} 2>/dev/null || echo 'deleted'"
+      loop: "{{ servicenow_projects.stdout_lines }}"
+      register: project_check
+      until: project_check.stdout is search('deleted') or project_check.rc != 0
+      retries: 30
+      delay: 10
+      when: 
+        - not dry_run
+        - cleanup_mode in ['safe', 'aggressive', 'full']
+        - project_deletion is defined
+      failed_when: false
+      tags: [openshift, cleanup]
+
+    # =============================================================================
+    # PHASE 4: SERVICENOW CATALOG CLEANUP (OPTIONAL)
+    # =============================================================================
+    
+    - name: "PHASE 4: ServiceNow Catalog Cleanup (Optional)"
+      debug:
+        msg: "🔍 Starting ServiceNow catalog cleanup (if requested)..."
+      when: cleanup_mode == 'full'
+
+    - name: Get test catalog items for cleanup
+      servicenow.itsm.api_info:
+        instance: "{{ servicenow_instance }}"
+        resource: "sc_cat_item"
+        query:
+          - name: "LIKE Test"
+          - active: "true"
+      register: test_catalog_items
+      when: cleanup_mode == 'full'
+      failed_when: false
+      tags: [servicenow, catalog, cleanup]
+
+    - name: Display test catalog items found
+      debug:
+        msg: |
+          🔍 Found {{ test_catalog_items.records | length if test_catalog_items.records is defined else 0 }} test catalog items
+          
+          {% if test_catalog_items.records is defined and test_catalog_items.records | length > 0 %}
+          🗑️  Test catalog items to be deactivated:
+          {% for item in test_catalog_items.records %}
+          🔹 {{ item.name }} ({{ item.sys_id }})
+          {% endfor %}
+          {% endif %}
+      when: cleanup_mode == 'full'
+      tags: [servicenow, catalog, cleanup]
+
+    - name: Deactivate test catalog items
+      servicenow.itsm.api:
+        instance: "{{ servicenow_instance }}"
+        resource: "sc_cat_item"
+        action: "update"
+        sys_id: "{{ item.sys_id }}"
+        data:
+          active: false
+          comments: "Deactivated during environment cleanup - {{ ansible_date_time.iso8601 }}"
+      loop: "{{ test_catalog_items.records | default([]) }}"
+      when: 
+        - not dry_run
+        - cleanup_mode == 'full'
+        - not (preserve_production and item.name is search('Production|production'))
+      failed_when: false
+      tags: [servicenow, catalog, cleanup]
+
+    # =============================================================================
+    # CLEANUP SUMMARY AND VERIFICATION
+    # =============================================================================
+
+    - name: Generate Cleanup Summary
+      debug:
+        msg: |
+          🎯 ENVIRONMENT CLEANUP SUMMARY
+          ==============================
+
+          📅 Cleanup Date: {{ ansible_date_time.iso8601 }}
+          🎯 Cleanup Mode: {{ cleanup_mode }}
+          🧪 Dry Run: {{ dry_run }}
+
+          📊 CLEANUP RESULTS:
+
+          1️⃣  ServiceNow Requests:
+             🔹 Found: {{ recent_requests.records | length if recent_requests.records is defined else 0 }} requests
+             🔹 Action: {{ 'Cancelled test requests' if not dry_run else 'Would cancel test requests' }}
+
+          2️⃣  AAP Jobs:
+             🔹 Total Jobs: {{ aap_jobs_list.json.count if aap_jobs_list.json is defined else 0 }}
+             🔹 Failed Jobs: {{ (aap_jobs_list.json.results | selectattr('status', 'equalto', 'failed') | list | length) if aap_jobs_list.json is defined and aap_jobs_list.json.results is defined else 0 }}
+             🔹 Action: {{ 'Cleaned failed jobs (kept last 5)' if not dry_run and cleanup_mode in ['aggressive', 'full'] else 'Would clean failed jobs' if dry_run else 'No job cleanup (safe mode)' }}
+
+          3️⃣  OpenShift Projects:
+             🔹 ServiceNow Projects: {{ servicenow_projects.stdout_lines | length }}
+             🔹 Action: {{ 'Deleted test projects' if not dry_run else 'Would delete test projects' }}
+
+          {% if cleanup_mode == 'full' %}
+          4️⃣  ServiceNow Catalog:
+             🔹 Test Items: {{ test_catalog_items.records | length if test_catalog_items.records is defined else 0 }}
+             🔹 Action: {{ 'Deactivated test items' if not dry_run else 'Would deactivate test items' }}
+          {% endif %}
+
+          🎯 ENVIRONMENT STATUS: {{ 'CLEANED' if not dry_run else 'READY FOR CLEANUP' }}
+
+          📋 NEXT STEPS:
+          {% if not dry_run %}
+          ✅ Environment is now clean and ready for fresh testing
+          1. Run preflight checks: ./run_playbook.sh ansible/preflight_checks.yml
+          2. Test end-to-end workflow: ./user-workflows/advanced/start-simplified-workflow.sh
+          {% else %}
+          ⚠️  This was a dry run. To actually clean the environment:
+          1. Run with dry_run=false: -e dry_run=false
+          2. Choose cleanup mode: -e cleanup_mode=safe|aggressive|full
+          {% endif %}
+
+    - name: Save Cleanup Report
+      copy:
+        content: |
+          # ServiceNow-OpenShift Integration Environment Cleanup Report
+
+          **Cleanup Date**: {{ ansible_date_time.iso8601 }}
+          **Cleanup Mode**: {{ cleanup_mode }}
+          **Dry Run**: {{ dry_run }}
+
+          ## Cleanup Results
+
+          ### ServiceNow Requests
+          - Found: {{ recent_requests.records | length if recent_requests.records is defined else 0 }} requests
+          - Action: {{ 'Cancelled test requests' if not dry_run else 'Would cancel test requests' }}
+
+          ### AAP Jobs
+          - Total: {{ aap_jobs_list.json.count if aap_jobs_list.json is defined else 0 }}
+          - Failed: {{ (aap_jobs_list.json.results | selectattr('status', 'equalto', 'failed') | list | length) if aap_jobs_list.json is defined and aap_jobs_list.json.results is defined else 0 }}
+
+          ### OpenShift Projects
+          - ServiceNow Projects: {{ servicenow_projects.stdout_lines | length }}
+          {% for project in servicenow_projects.stdout_lines %}
+          - {{ project }}
+          {% endfor %}
+
+          ## Next Steps
+
+          {% if not dry_run %}
+          Environment cleaned. Run:
+          ```bash
+          ./run_playbook.sh ansible/preflight_checks.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout
+          ```
+          {% else %}
+          Run cleanup with: -e dry_run=false -e cleanup_mode=safe
+          {% endif %}
+        dest: "./cleanup_report_{{ ansible_date_time.epoch }}.md"
+      tags: [documentation]

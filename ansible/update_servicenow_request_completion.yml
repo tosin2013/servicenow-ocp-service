@@ -1,0 +1,145 @@
+---
+# Update ServiceNow Request with Project Completion Details
+- name: Update ServiceNow Request with OpenShift Project Access Information
+  hosts: localhost
+  gather_facts: true
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+    
+    # Default values - these should be passed from AAP job template
+    project_name: "{{ project_name | default('example-project') }}"
+    servicenow_request_number: "{{ servicenow_request_number | default('REQ0000001') }}"
+    requestor: "{{ requestor | default('servicenow.admin') }}"
+    environment: "{{ environment | default('development') }}"
+    
+    # OpenShift cluster information
+    openshift_api_url: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+    openshift_console_url: "https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+    openshift_apps_domain: "apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+    
+    # Keycloak information
+    keycloak_url: "{{ rhsso_url | default('https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com') }}"
+    keycloak_realm: "{{ servicenow_realm | default('servicenow') }}"
+
+  tasks:
+    - name: Get ServiceNow request item details
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_req_item"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: request_items
+      vars:
+        query_params:
+          sysparm_query: "request.number={{ servicenow_request_number }}"
+          sysparm_fields: "sys_id,number,request,state,short_description"
+
+    - name: Debug request item lookup
+      debug:
+        msg: |
+          🔍 ServiceNow Request Item Lookup:
+          - Request Number: {{ servicenow_request_number }}
+          - Found Items: {{ request_items.json.result | length }}
+          {% if request_items.json.result | length > 0 %}
+          - Item ID: {{ request_items.json.result[0].sys_id }}
+          - Item Number: {{ request_items.json.result[0].number }}
+          {% endif %}
+
+    - name: Fail if no request item found
+      fail:
+        msg: "No ServiceNow request item found for request number: {{ servicenow_request_number }}"
+      when: request_items.json.result | length == 0
+
+    - name: Set request item facts
+      set_fact:
+        request_item_id: "{{ request_items.json.result[0].sys_id }}"
+        request_item_number: "{{ request_items.json.result[0].number }}"
+
+    - name: Generate project access information
+      set_fact:
+        project_access_info: |
+          🎉 OpenShift Project Successfully Created!
+          ==========================================
+          
+          📋 Project Details:
+          • Project Name: {{ project_name }}
+          • Environment: {{ environment }}
+          • Requestor: {{ requestor }}
+          • Request: {{ servicenow_request_number }}
+          
+          🔗 Access Information:
+          • OpenShift Console: {{ openshift_console_url }}/k8s/cluster/projects/{{ project_name }}
+          • Project Overview: {{ openshift_console_url }}/topology/ns/{{ project_name }}
+          • API Endpoint: {{ openshift_api_url }}
+          
+          🔐 Authentication:
+          • Keycloak SSO: {{ keycloak_url }}/realms/{{ keycloak_realm }}/account
+          • Username: {{ requestor }}
+          • Default Password: TempPass123! (change on first login)
+          
+          📱 Quick Access URLs:
+          • Project Workloads: {{ openshift_console_url }}/k8s/ns/{{ project_name }}/workloads
+          • Project Networking: {{ openshift_console_url }}/k8s/ns/{{ project_name }}/networking
+          • Project Storage: {{ openshift_console_url }}/k8s/ns/{{ project_name }}/storage
+          
+          🚀 Getting Started:
+          1. Login to Keycloak using the credentials above
+          2. Access the OpenShift Console using the project links
+          3. Deploy your applications to the {{ project_name }} namespace
+          4. Use {{ project_name }}.{{ openshift_apps_domain }} for application routes
+          
+          📞 Support:
+          For technical support, contact the Platform Team or update this ServiceNow request.
+          
+          ✅ Status: Project Ready for Use
+          📅 Created: {{ ansible_date_time.iso8601 }}
+
+    - name: Update ServiceNow request item with completion details
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_req_item/{{ request_item_id }}"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: PUT
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          state: "3"  # Closed Complete
+          work_notes: "{{ project_access_info }}"
+          close_notes: "OpenShift project {{ project_name }} successfully created and configured. Access information provided in work notes."
+        status_code: 200
+        return_content: yes
+      register: update_result
+
+    - name: Display completion update results
+      debug:
+        msg: |
+          ✅ ServiceNow Request Updated Successfully!
+          
+          📋 Update Details:
+          • Request Item: {{ request_item_number }}
+          • Status: Closed Complete
+          • Project: {{ project_name }}
+          
+          🔗 ServiceNow Links:
+          • Request Item: {{ sn_host }}/nav_to.do?uri=sc_req_item.do?sys_id={{ request_item_id }}
+          • Request: {{ sn_host }}/nav_to.do?uri=sc_request_list.do
+          
+          🎯 User Access Information:
+          • Console: {{ openshift_console_url }}/k8s/cluster/projects/{{ project_name }}
+          • Keycloak: {{ keycloak_url }}/realms/{{ keycloak_realm }}/account
+          • Username: {{ requestor }}
+          
+          ✅ The user can now access their OpenShift project!

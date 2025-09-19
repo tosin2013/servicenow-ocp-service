@@ -1,0 +1,108 @@
+---
+- name: Query ServiceNow Catalog Items
+  hosts: localhost
+  gather_facts: true
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+
+  tasks:
+    - name: Query all catalog items
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_cat_item?sysparm_query=active=true"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        return_content: yes
+      register: all_items
+
+    - name: Query OpenShift catalog items specifically
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_cat_item?sysparm_query=nameLIKEOpenShift"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        return_content: yes
+      register: openshift_items
+
+    - name: Display All Catalog Items
+      debug:
+        msg: |
+          📋 All Active Catalog Items ({{ all_items.json.result | length }} total):
+          
+          {% for item in all_items.json.result %}
+          🔹 {{ item.name }}
+             - ID: {{ item.sys_id }}
+             - Description: {{ item.short_description }}
+             - Category: {{ item.category.display_value | default('N/A') }}
+             - Created: {{ item.sys_created_on }}
+          {% endfor %}
+
+    - name: Display OpenShift Catalog Items
+      debug:
+        msg: |
+          🚀 OpenShift Catalog Items ({{ openshift_items.json.result | length }} found):
+          
+          {% for item in openshift_items.json.result %}
+          ✅ {{ item.name }}
+             - ID: {{ item.sys_id }}
+             - Description: {{ item.short_description }}
+             - Active: {{ item.active }}
+             - Category: {{ item.category.display_value | default('N/A') }}
+             - Created: {{ item.sys_created_on }}
+             - URL: {{ sn_host }}/nav_to.do?uri=sc_cat_item.do?sys_id={{ item.sys_id }}
+          {% endfor %}
+          
+          {% if openshift_items.json.result | length == 0 %}
+          ⚠️ No OpenShift catalog items found. They may need to be created.
+          {% endif %}
+
+    - name: Save Catalog Items Report
+      copy:
+        content: |
+          # ServiceNow Catalog Items Report
+          
+          Generated: {{ ansible_date_time.iso8601 }}
+          Instance: {{ sn_host }}
+          
+          ## All Active Catalog Items ({{ all_items.json.result | length }} total)
+          
+          {% for item in all_items.json.result %}
+          ### {{ item.name }}
+          - **ID**: {{ item.sys_id }}
+          - **Description**: {{ item.short_description }}
+          - **Category**: {{ item.category.display_value | default('N/A') }}
+          - **Active**: {{ item.active }}
+          - **Created**: {{ item.sys_created_on }}
+          - **URL**: {{ sn_host }}/nav_to.do?uri=sc_cat_item.do?sys_id={{ item.sys_id }}
+          
+          {% endfor %}
+          
+          ## OpenShift Catalog Items ({{ openshift_items.json.result | length }} found)
+          
+          {% for item in openshift_items.json.result %}
+          ### {{ item.name }}
+          - **ID**: {{ item.sys_id }}
+          - **Description**: {{ item.short_description }}
+          - **Active**: {{ item.active }}
+          - **Category**: {{ item.category.display_value | default('N/A') }}
+          - **Created**: {{ item.sys_created_on }}
+          - **Direct URL**: {{ sn_host }}/nav_to.do?uri=sc_cat_item.do?sys_id={{ item.sys_id }}
+          
+          {% endfor %}
+          
+          ## ServiceNow Navigation URLs
+          
+          - **Service Catalog**: {{ sn_host }}/nav_to.do?uri=sc_catalog.do
+          - **Catalog Items Admin**: {{ sn_host }}/nav_to.do?uri=sc_cat_item_list.do
+          - **Maintain Items**: {{ sn_host }}/nav_to.do?uri=sc_cat_item.do
+        dest: "./servicenow_catalog_items_report.md"

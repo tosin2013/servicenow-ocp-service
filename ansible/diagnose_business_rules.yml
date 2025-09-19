@@ -1,0 +1,164 @@
+---
+# ansible/diagnose_business_rules.yml
+# Simple diagnostic to check Business Rules configuration
+
+- name: Diagnose Business Rules Configuration
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    test_request_id: "d2ce4146474c3e50292cc82f316d4348"
+    test_item_id: "fece4146474c3e50292cc82f316d439d"
+    catalog_item_id: "1a3b56b1470cfa50292cc82f316d4378"
+
+  tasks:
+    - name: Check Business Rules for OpenShift
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_script"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: business_rules_check
+      vars:
+        query_params:
+          sysparm_query: "nameSTARTSWITHOpenShift^ORnameSTARTSWITHAAP"
+          sysparm_fields: "sys_id,name,active,table,when,condition,order"
+
+    - name: Display Business Rules found
+      debug:
+        msg: |
+          🔍 BUSINESS RULES DIAGNOSTIC
+          
+          📊 Found {{ business_rules_check.json.result|length }} Business Rules:
+          
+          {% for rule in business_rules_check.json.result %}
+          🔧 {{ rule.name }}:
+          - ID: {{ rule.sys_id }}
+          - Active: {{ rule.active }}
+          - Table: {{ rule.table }}
+          - When: {{ rule.when }}
+          - Order: {{ rule.order }}
+          - Condition: {{ rule.condition }}
+          {% endfor %}
+
+    - name: Check current test request item details
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_req_item/{{ test_item_id }}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: current_item
+
+    - name: Display current item status
+      debug:
+        msg: |
+          📦 CURRENT TEST ITEM STATUS
+          
+          🎯 Item Details:
+          - Number: {{ current_item.json.result.number }}
+          - State: {{ current_item.json.result.state }}
+          - Catalog Item: {{ current_item.json.result.cat_item.value }}
+          - Active: {{ current_item.json.result.active }}
+          - Created: {{ current_item.json.result.sys_created_on }}
+          - Updated: {{ current_item.json.result.sys_updated_on }}
+          
+          🔍 Business Rules Matching:
+          - Expected Catalog Item: {{ catalog_item_id }}
+          - Actual Catalog Item: {{ current_item.json.result.cat_item.value }}
+          - Match: {{ 'YES' if current_item.json.result.cat_item.value == catalog_item_id else 'NO' }}
+          - State for Trigger: {{ current_item.json.result.state }} (should be '2')
+
+    - name: Check system logs for Business Rules execution
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/syslog"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: system_logs
+      vars:
+        query_params:
+          sysparm_query: "messageSTARTSWITH[OpenShift AAP Integration]^ORmessageSTARTSWITHOpenShift^sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)"
+          sysparm_fields: "sys_created_on,level,message"
+          sysparm_limit: 10
+          sysparm_order_by: "-sys_created_on"
+
+    - name: Display system logs
+      debug:
+        msg: |
+          📋 SYSTEM LOGS (Today)
+          
+          {% if system_logs.json.result|length > 0 %}
+          Found {{ system_logs.json.result|length }} log entries:
+          
+          {% for log in system_logs.json.result %}
+          🕐 {{ log.sys_created_on }} [{{ log.level }}]:
+          {{ log.message }}
+          {% endfor %}
+          {% else %}
+          ❌ No OpenShift/AAP related logs found today
+          {% endif %}
+
+    - name: Test Business Rules condition manually
+      debug:
+        msg: |
+          🧪 BUSINESS RULES CONDITION TEST
+          
+          📋 Manual Condition Check:
+          - Current Item Catalog ID: {{ current_item.json.result.cat_item.value }}
+          - Expected Catalog ID: {{ catalog_item_id }}
+          - Condition Match: {{ 'PASS' if current_item.json.result.cat_item.value == catalog_item_id else 'FAIL' }}
+          - Current State: {{ current_item.json.result.state }}
+          - Expected State: 2 (In Process)
+          - State Match: {{ 'PASS' if current_item.json.result.state == '2' else 'FAIL' }}
+          
+          💡 Diagnosis:
+          {% if current_item.json.result.cat_item.value == catalog_item_id and current_item.json.result.state == '2' %}
+          ✅ All conditions met - Business Rules should have triggered!
+          
+          🔍 Possible Issues:
+          1. Business Rules may be inactive
+          2. Business Rules may have script errors
+          3. AAP connectivity issues
+          4. ServiceNow permissions issues
+          {% else %}
+          ❌ Conditions not met:
+          {% if current_item.json.result.cat_item.value != catalog_item_id %}
+          - Catalog item mismatch
+          {% endif %}
+          {% if current_item.json.result.state != '2' %}
+          - State is not 'In Process'
+          {% endif %}
+          {% endif %}
+
+    - name: Display ServiceNow URLs for manual checking
+      debug:
+        msg: |
+          🔗 SERVICENOW URLS FOR MANUAL VERIFICATION
+          
+          📋 Check These URLs:
+          - Request: {{ servicenow_url }}/nav_to.do?uri=sc_request.do?sys_id={{ test_request_id }}
+          - Item: {{ servicenow_url }}/nav_to.do?uri=sc_req_item.do?sys_id={{ test_item_id }}
+          - Business Rules: {{ servicenow_url }}/nav_to.do?uri=sys_script_list.do?sysparm_query=nameSTARTSWITHOpenShift
+          - System Logs: {{ servicenow_url }}/nav_to.do?uri=syslog_list.do?sysparm_query=messageSTARTSWITH[OpenShift
+          
+          💡 Manual Steps:
+          1. Check if Business Rules are active
+          2. Look for script errors in system logs
+          3. Verify AAP connectivity
+          4. Check ServiceNow user permissions

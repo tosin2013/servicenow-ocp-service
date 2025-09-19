@@ -1,0 +1,91 @@
+---
+# Simple ServiceNow Catalog Test
+# Tests basic connectivity and catalog item creation
+
+- name: Test ServiceNow Catalog Connection
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    servicenow_instance:
+      host: "https://dev295398.service-now.com"
+      username: "admin"
+      password: "{{ vault_servicenow_admin_password | default('admin') }}"
+      timeout: 30
+      validate_certs: false
+
+  tasks:
+    - name: Display Test Information
+      debug:
+        msg: |
+          🧪 Testing ServiceNow Catalog Connection
+          📋 Instance: {{ servicenow_instance.host }}
+          👤 Username: {{ servicenow_instance.username }}
+          🎯 Goal: Validate servicenow.itsm.service_catalog module
+
+    - name: Test ServiceNow Connection with Simple Catalog Query
+      servicenow.itsm.service_catalog_info:
+        instance: "{{ servicenow_instance }}"
+      register: catalog_info
+      ignore_errors: true
+
+    - name: Display Connection Test Results
+      debug:
+        msg: |
+          {% if catalog_info.failed %}
+          ❌ ServiceNow Connection Failed
+          Error: {{ catalog_info.msg | default('Unknown error') }}
+          {% else %}
+          ✅ ServiceNow Connection Successful
+          Found {{ catalog_info.records | length }} catalog items
+          {% endif %}
+
+    - name: Create Test Catalog Item (if connection successful)
+      servicenow.itsm.service_catalog:
+        instance: "{{ servicenow_instance }}"
+        action: order_now
+        items:
+          - sys_id: "test-item-id"
+            requested_for: "admin"
+            quantity: 1
+            variables:
+              test_variable: "OpenShift Integration Test"
+              description: "Test catalog item for OpenShift integration validation"
+      register: test_catalog_result
+      when: not catalog_info.failed
+      ignore_errors: true
+
+    - name: Display Test Results
+      debug:
+        msg: |
+          🎯 ServiceNow Catalog Test Results:
+          
+          {% if catalog_info.failed %}
+          ❌ Connection Test: FAILED
+          - Error: {{ catalog_info.msg | default('Unknown error') }}
+          - Check ServiceNow instance URL and credentials
+          {% else %}
+          ✅ Connection Test: PASSED
+          - Found {{ catalog_info.records | length }} existing catalog items
+          {% endif %}
+          
+          {% if test_catalog_result is defined %}
+          {% if test_catalog_result.failed %}
+          ⚠️  Catalog Creation Test: FAILED
+          - Error: {{ test_catalog_result.msg | default('Unknown error') }}
+          {% else %}
+          ✅ Catalog Creation Test: PASSED
+          - Request ID: {{ test_catalog_result.record.request_id | default('N/A') }}
+          {% endif %}
+          {% endif %}
+          
+          📋 Next Steps:
+          {% if catalog_info.failed %}
+          1. Verify ServiceNow instance is accessible
+          2. Check username/password credentials
+          3. Ensure servicenow.itsm collection is properly installed
+          {% else %}
+          1. Proceed with full catalog setup
+          2. Create OpenShift service catalog items
+          3. Configure business rules for AAP integration
+          {% endif %}

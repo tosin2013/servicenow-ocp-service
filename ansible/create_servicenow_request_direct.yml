@@ -1,0 +1,122 @@
+---
+# Create ServiceNow Request Directly via API (Bypass Form Issues)
+- name: Create ServiceNow OpenShift Request via API
+  hosts: localhost
+  gather_facts: true
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+    basic_catalog_item_id: "1a3b56b1470cfa50292cc82f316d4378"
+    test_project_name: "servicenow-ui-test-{{ ansible_date_time.epoch }}"
+
+  tasks:
+    - name: Create catalog request directly via API
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_request"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          requested_for: "{{ sn_username }}"
+          requested_by: "{{ sn_username }}"
+          short_description: "OpenShift Project Request - UI Test"
+          description: "OpenShift project request created via ServiceNow UI test"
+          priority: "3"
+          urgency: "3"
+          impact: "3"
+          state: "requested"
+        status_code: 201
+        return_content: yes
+      register: api_request
+
+    - name: Create catalog request item
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_req_item"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          request: "{{ api_request.json.result.sys_id }}"
+          cat_item: "{{ basic_catalog_item_id }}"
+          short_description: "OpenShift Project: {{ test_project_name }}"
+          description: "OpenShift project creation request"
+          state: "requested"
+          variables:
+            project_name: "{{ test_project_name }}"
+            display_name: "ServiceNow UI Test Project"
+            environment: "development"
+            requestor_first_name: "ServiceNow"
+            requestor_last_name: "Admin"
+            team_members: "servicenow-admin-test"
+            business_justification: "Testing ServiceNow UI integration with OpenShift provisioning"
+        status_code: 201
+        return_content: yes
+      register: api_req_item
+
+    - name: Display API request results
+      debug:
+        msg: |
+          🎯 ServiceNow Request Created via API:
+          
+          📋 Request Details:
+          - Request Number: {{ api_request.json.result.number }}
+          - Request ID: {{ api_request.json.result.sys_id }}
+          - State: {{ api_request.json.result.state }}
+          
+          📋 Request Item Details:
+          - Item Number: {{ api_req_item.json.result.number }}
+          - Item ID: {{ api_req_item.json.result.sys_id }}
+          - Project Name: {{ test_project_name }}
+          
+          🔗 ServiceNow Links:
+          - Request: {{ sn_host }}/nav_to.do?uri=sc_request.do?sys_id={{ api_request.json.result.sys_id }}
+          - Request Item: {{ sn_host }}/nav_to.do?uri=sc_req_item.do?sys_id={{ api_req_item.json.result.sys_id }}
+          
+          🎯 Next Steps:
+          1. View the request in ServiceNow using the links above
+          2. Change state to "in_process" to trigger AAP job
+          3. Monitor AAP job execution
+          4. Check for OpenShift project creation: oc get project {{ test_project_name }}
+
+    - name: Trigger AAP job by changing state to in_process
+      uri:
+        url: "{{ sn_host }}/api/now/table/sc_req_item/{{ api_req_item.json.result.sys_id }}"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: PUT
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          state: "2"
+          work_notes: "API Test: Triggering AAP job template execution - State changed to In Process"
+        status_code: 200
+        return_content: yes
+      register: trigger_aap
+
+    - name: Display AAP trigger results
+      debug:
+        msg: |
+          ⚙️ AAP Job Trigger Attempt:
+          - Request Item State: {{ trigger_aap.json.result.state }}
+          - Work Notes Updated: Yes
+          
+          🔍 Check AAP Controller:
+          - URL: https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com/#/jobs
+          - Look for new job with project name: {{ test_project_name }}
+          
+          ⏱️ Expected Timeline:
+          - AAP job should start within 1-2 minutes
+          - OpenShift project creation: 5-10 minutes
+          - Check with: oc get project {{ test_project_name }}

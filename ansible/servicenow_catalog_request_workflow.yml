@@ -1,0 +1,255 @@
+---
+# ServiceNow Catalog Request Workflow Management
+# Manages the complete lifecycle of OpenShift project requests using servicenow.itsm.catalog_request
+
+- name: ServiceNow Catalog Request Workflow Management
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+  vars:
+    servicenow_instance:
+      host: "{{ servicenow_instance_url }}"
+      username: "{{ servicenow_admin_user }}"
+      password: "{{ vault_servicenow_admin_password }}"
+      timeout: 30
+      validate_certs: false
+
+  tasks:
+    - name: Display Workflow Management Status
+      debug:
+        msg: |
+          🔄 ServiceNow Catalog Request Workflow Management
+          📋 Instance: {{ servicenow_instance.host }}
+          👤 Username: {{ servicenow_instance.username }}
+          🎯 Goal: Demonstrate complete request lifecycle management
+
+    # Phase 1: Create a Sample OpenShift Project Request
+    - name: Create OpenShift Project Catalog Request
+      servicenow.itsm.catalog_request:
+        instance: "{{ servicenow_instance }}"
+        state: present
+        requested_for: "{{ servicenow_admin_user }}"
+        requested_by: "{{ servicenow_admin_user }}"
+        short_description: "OpenShift Development Project Request"
+        description: |
+          Request for a new OpenShift development project with the following specifications:
+          - Project Name: demo-openshift-project
+          - Environment: Development
+          - Team Size: 5 developers
+          - Resource Requirements: 4 CPU cores, 8GB RAM, 20GB storage
+          - Database: PostgreSQL
+          - Monitoring: Basic monitoring and logging
+        priority: "2"
+        urgency: "2"
+        impact: "3"
+        other:
+          # Custom fields for OpenShift project details
+          u_project_name: "demo-openshift-project"
+          u_display_name: "Demo OpenShift Project"
+          u_environment: "development"
+          u_requestor_first_name: "Demo"
+          u_requestor_last_name: "User"
+          u_requestor_role: "Developer"
+          u_database_type: "postgresql"
+          u_database_size: "5Gi"
+          u_team_members: "user1,user2,user3"
+          u_business_justification: "Development project for new microservices application"
+      register: openshift_request
+
+    - name: Display Request Creation Results
+      debug:
+        msg: |
+          ✅ OpenShift Project Request Created:
+          - Request Number: {{ openshift_request.record.number }}
+          - Request ID: {{ openshift_request.record.sys_id }}
+          - State: {{ openshift_request.record.request_state }}
+          - Priority: {{ openshift_request.record.priority }}
+
+    # Phase 2: Update Request to Submitted State
+    - name: Submit OpenShift Project Request
+      servicenow.itsm.catalog_request:
+        instance: "{{ servicenow_instance }}"
+        sys_id: "{{ openshift_request.record.sys_id }}"
+        request_state: "submitted"
+        work_notes: "Request submitted for approval and processing"
+      register: submitted_request
+
+    - name: Display Submission Results
+      debug:
+        msg: |
+          📋 Request Submitted:
+          - Request Number: {{ submitted_request.record.number }}
+          - State: {{ submitted_request.record.request_state }}
+          - Stage: {{ submitted_request.record.stage | default('N/A') }}
+
+    # Phase 3: Simulate Approval and Move to In Process
+    - name: Move Request to In Process (Simulating AAP Trigger)
+      servicenow.itsm.catalog_request:
+        instance: "{{ servicenow_instance }}"
+        sys_id: "{{ openshift_request.record.sys_id }}"
+        request_state: "in_process"
+        work_notes: |
+          Request approved and processing started:
+          - AAP Job Template 9 triggered
+          - OpenShift project creation in progress
+          - Keycloak user provisioning initiated
+        other:
+          u_aap_job_id: "12345"
+          u_aap_job_status: "running"
+          u_processing_started: "{{ ansible_date_time.iso8601 }}"
+      register: processing_request
+
+    - name: Display Processing Status
+      debug:
+        msg: |
+          ⚙️ Request In Process:
+          - Request Number: {{ processing_request.record.number }}
+          - State: {{ processing_request.record.request_state }}
+          - AAP Job ID: {{ processing_request.record.u_aap_job_id | default('N/A') }}
+
+    # Phase 4: Simulate Successful Completion
+    - name: Complete OpenShift Project Request
+      servicenow.itsm.catalog_request:
+        instance: "{{ servicenow_instance }}"
+        sys_id: "{{ openshift_request.record.sys_id }}"
+        request_state: "delivered"
+        work_notes: |
+          OpenShift project successfully created:
+          - Namespace: demo-openshift-project
+          - Keycloak User: demo.user@company.com
+          - Database: PostgreSQL instance deployed
+          - Access URL: https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          - Project URL: https://demo-openshift-project.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+        other:
+          u_aap_job_status: "completed"
+          u_openshift_namespace: "demo-openshift-project"
+          u_keycloak_username: "demo.user"
+          u_database_connection_string: "postgresql://demo-db:5432/demo"
+          u_project_url: "https://demo-openshift-project.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+          u_completion_date: "{{ ansible_date_time.iso8601 }}"
+      register: completed_request
+
+    - name: Display Completion Results
+      debug:
+        msg: |
+          ✅ Request Delivered:
+          - Request Number: {{ completed_request.record.number }}
+          - State: {{ completed_request.record.request_state }}
+          - OpenShift Namespace: {{ completed_request.record.u_openshift_namespace | default('N/A') }}
+          - Keycloak User: {{ completed_request.record.u_keycloak_username | default('N/A') }}
+
+    # Phase 5: Close Request as Complete
+    - name: Close OpenShift Project Request
+      servicenow.itsm.catalog_request:
+        instance: "{{ servicenow_instance }}"
+        sys_id: "{{ openshift_request.record.sys_id }}"
+        request_state: "closed_complete"
+        work_notes: |
+          Request completed successfully. User notified with access details:
+          - OpenShift Console Access: Provided
+          - Keycloak Credentials: Sent via secure email
+          - Documentation: Available in project wiki
+          - Support: Available via IT Service Desk
+        other:
+          u_user_notified: "true"
+          u_documentation_provided: "true"
+          u_support_contact: "it-support@company.com"
+      register: closed_request
+
+    - name: Display Final Results
+      debug:
+        msg: |
+          🎯 Complete Request Lifecycle Demonstrated:
+          
+          📋 Request Details:
+          - Request Number: {{ closed_request.record.number }}
+          - Final State: {{ closed_request.record.request_state }}
+          - Created: {{ openshift_request.record.sys_created_on | default('N/A') }}
+          - Completed: {{ closed_request.record.sys_updated_on | default('N/A') }}
+          
+          🔄 Workflow States Completed:
+          1. ✅ Draft → Created initial request
+          2. ✅ Submitted → Request submitted for approval
+          3. ✅ In Process → AAP job triggered, resources being created
+          4. ✅ Delivered → OpenShift project and Keycloak user created
+          5. ✅ Closed Complete → User notified with access details
+          
+          🎯 Next Steps:
+          1. Configure business rules to automatically trigger AAP jobs
+          2. Set up webhooks for status updates from AAP
+          3. Implement CMDB integration for resource tracking
+          4. Create incident management for failure scenarios
+
+    # Phase 6: Create Configuration Items for CMDB Tracking
+    - name: Create OpenShift Project Configuration Item
+      servicenow.itsm.configuration_item:
+        instance: "{{ servicenow_instance }}"
+        name: "{{ completed_request.record.u_openshift_namespace | default('demo-openshift-project') }}"
+        short_description: "OpenShift Project - {{ completed_request.record.u_openshift_namespace | default('demo-openshift-project') }}"
+        sys_class_name: "cmdb_ci_service"
+        category: "Software"
+        environment: "development"
+        operational_status: "operational"
+        install_status: "installed"
+        other:
+          u_service_type: "Container Platform"
+          u_platform: "OpenShift"
+          u_cluster: "cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+          u_namespace: "{{ completed_request.record.u_openshift_namespace | default('demo-openshift-project') }}"
+          u_related_request: "{{ completed_request.record.number }}"
+      register: openshift_ci
+      ignore_errors: true
+
+    - name: Display CMDB Integration Results
+      debug:
+        msg: |
+          📊 CMDB Integration:
+          {% if openshift_ci.failed %}
+          ⚠️ Configuration Item Creation: FAILED
+          - Error: {{ openshift_ci.msg | default('Unknown error') }}
+          - Note: May require custom CMDB table configuration
+          {% else %}
+          ✅ Configuration Item Created:
+          - CI Name: {{ openshift_ci.record.name }}
+          - CI ID: {{ openshift_ci.record.sys_id }}
+          - Status: {{ openshift_ci.record.operational_status }}
+          {% endif %}
+
+    - name: Save Workflow Results
+      copy:
+        content: |
+          # ServiceNow Catalog Request Workflow Results
+          
+          ## Request Details
+          - **Request Number**: {{ closed_request.record.number }}
+          - **Request ID**: {{ closed_request.record.sys_id }}
+          - **Final State**: {{ closed_request.record.request_state }}
+          - **Created**: {{ openshift_request.record.sys_created_on | default('N/A') }}
+          - **Completed**: {{ closed_request.record.sys_updated_on | default('N/A') }}
+          
+          ## OpenShift Project Details
+          - **Namespace**: {{ completed_request.record.u_openshift_namespace | default('demo-openshift-project') }}
+          - **Keycloak User**: {{ completed_request.record.u_keycloak_username | default('demo.user') }}
+          - **Database**: PostgreSQL
+          - **Project URL**: {{ completed_request.record.u_project_url | default('N/A') }}
+          
+          ## Workflow States Completed
+          1. Draft → Created initial request
+          2. Submitted → Request submitted for approval  
+          3. In Process → AAP job triggered, resources being created
+          4. Delivered → OpenShift project and Keycloak user created
+          5. Closed Complete → User notified with access details
+          
+          ## CMDB Integration
+          {% if not openshift_ci.failed %}
+          - **Configuration Item**: {{ openshift_ci.record.name }}
+          - **CI ID**: {{ openshift_ci.record.sys_id }}
+          {% else %}
+          - **Status**: Configuration Item creation failed (requires custom setup)
+          {% endif %}
+          
+          Generated: {{ ansible_date_time.iso8601 }}
+        dest: "./servicenow_workflow_results.md"

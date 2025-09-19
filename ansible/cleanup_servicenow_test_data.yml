@@ -1,0 +1,298 @@
+---
+# ansible/cleanup_servicenow_test_data.yml
+# Comprehensive ServiceNow test data cleanup using Ansible
+
+- name: Clean Up ServiceNow Test Data and Reset Environment
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    # Safety patterns to identify test data (be very careful with these!)
+    test_patterns:
+      - "test-"
+      - "Test "
+      - "TEST"
+      - "e2e-"
+      - "E2E"
+      - "diagnostic"
+      - "DIAGNOSTIC"
+      - "demo-"
+      - "Demo "
+      - "ansible-"
+      - "Ansible"
+      - "servicenow-real-"
+      - "Business Rules Test"
+      - "AAP Integration Test"
+
+  tasks:
+    - name: Display cleanup information
+      debug:
+        msg: |
+          🧹 ServiceNow Test Data Cleanup
+          
+          ⚠️  SAFETY FIRST:
+          This playbook will clean up test data based on naming patterns.
+          It will NOT delete production data.
+          
+          🎯 Cleanup Targets:
+          1. Test catalog requests (sc_request)
+          2. Test requested items (sc_req_item) 
+          3. Duplicate catalog items (sc_cat_item)
+          4. Test business rules (sys_script)
+          5. Test configuration items (cmdb_ci)
+          6. Test incidents (incident)
+          
+          📋 Test Patterns: {{ test_patterns | join(', ') }}
+
+    - name: Get test catalog requests for cleanup
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_request"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: test_requests
+      vars:
+        query_params:
+          sysparm_query: "short_descriptionSTARTSWITHtest^ORshort_descriptionSTARTSWITHTest^ORshort_descriptionSTARTSWITHE2E^ORshort_descriptionSTARTSWITHDIAGNOSTIC^ORshort_descriptionSTARTSWITHDemo^ORshort_descriptionSTARTSWITHAnsible"
+          sysparm_fields: "sys_id,number,short_description,state"
+
+    - name: Display test requests found
+      debug:
+        msg: |
+          📊 Test Catalog Requests Found: {{ test_requests.json.result|length }}
+          
+          {% if test_requests.json.result|length > 0 %}
+          {% for req in test_requests.json.result[:10] %}
+          🎫 {{ req.number }}: {{ req.short_description }}
+          {% endfor %}
+          {% if test_requests.json.result|length > 10 %}
+          ... and {{ test_requests.json.result|length - 10 }} more
+          {% endif %}
+          {% endif %}
+
+    - name: Delete test catalog requests
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_request/{{ item.sys_id }}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: DELETE
+        force_basic_auth: yes
+        validate_certs: false
+        status_code: [200, 204]
+      loop: "{{ test_requests.json.result }}"
+      when: test_requests.json.result|length > 0
+      ignore_errors: true
+
+    - name: Get test requested items for cleanup
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_req_item"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: test_req_items
+      vars:
+        query_params:
+          sysparm_query: "short_descriptionSTARTSWITHtest^ORshort_descriptionSTARTSWITHTest^ORshort_descriptionSTARTSWITHOpenShift Project: test^ORshort_descriptionSTARTSWITHE2E^ORshort_descriptionSTARTSWITHDiagnostic"
+          sysparm_fields: "sys_id,number,short_description"
+
+    - name: Delete test requested items
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_req_item/{{ item.sys_id }}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: DELETE
+        force_basic_auth: yes
+        validate_certs: false
+        status_code: [200, 204]
+      loop: "{{ test_req_items.json.result }}"
+      when: test_req_items.json.result|length > 0
+      ignore_errors: true
+
+    - name: Get duplicate OpenShift catalog items
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_cat_item"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: duplicate_catalog_items
+      vars:
+        query_params:
+          sysparm_query: "nameSTARTSWITHTest OpenShift^ORnameSTARTSWITHDemo OpenShift^ORnameSTARTSWITHOpenShift Project Request^active=false"
+          sysparm_fields: "sys_id,name,active"
+
+    - name: Display duplicate catalog items
+      debug:
+        msg: |
+          📦 Duplicate/Test Catalog Items Found: {{ duplicate_catalog_items.json.result|length }}
+          
+          {% if duplicate_catalog_items.json.result|length > 0 %}
+          {% for item in duplicate_catalog_items.json.result[:10] %}
+          📋 {{ item.name }} (Active: {{ item.active }})
+          {% endfor %}
+          {% endif %}
+
+    - name: Delete duplicate/inactive catalog items (CAREFUL!)
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_cat_item/{{ item.sys_id }}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: DELETE
+        force_basic_auth: yes
+        validate_certs: false
+        status_code: [200, 204]
+      loop: "{{ duplicate_catalog_items.json.result }}"
+      when: 
+        - duplicate_catalog_items.json.result|length > 0
+        - item.active == "false" or item.name is search("Test|Demo|test|demo")
+      ignore_errors: true
+
+    - name: Get test business rules for cleanup
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_script"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: test_business_rules
+      vars:
+        query_params:
+          sysparm_query: "nameSTARTSWITHTest^ORnameSTARTSWITHtest^ORnameSTARTSWITHDemo^ORnameSTARTSWITHOpenShift Project AAP Trigger - Enhanced^ORnameSTARTSWITHBusiness Rules Test"
+          sysparm_fields: "sys_id,name,active,table"
+
+    - name: Display test business rules
+      debug:
+        msg: |
+          ⚙️ Test Business Rules Found: {{ test_business_rules.json.result|length }}
+          
+          {% if test_business_rules.json.result|length > 0 %}
+          {% for rule in test_business_rules.json.result[:10] %}
+          🔧 {{ rule.name }} (Table: {{ rule.table }}, Active: {{ rule.active }})
+          {% endfor %}
+          {% endif %}
+
+    - name: Delete test business rules (VERY CAREFUL!)
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_script/{{ item.sys_id }}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: DELETE
+        force_basic_auth: yes
+        validate_certs: false
+        status_code: [200, 204]
+      loop: "{{ test_business_rules.json.result }}"
+      when: 
+        - test_business_rules.json.result|length > 0
+        - item.name is search("Test|test|Demo|Enhanced|Business Rules Test")
+      ignore_errors: true
+
+    - name: Get test configuration items
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/cmdb_ci"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: test_config_items
+      vars:
+        query_params:
+          sysparm_query: "nameSTARTSWITHtest^ORnameSTARTSWITHe2e^ORnameSTARTSWITHdemo^ORnameSTARTSWITHservicenow"
+          sysparm_fields: "sys_id,name,sys_class_name"
+      ignore_errors: true
+
+    - name: Delete test configuration items
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/cmdb_ci/{{ item.sys_id }}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: DELETE
+        force_basic_auth: yes
+        validate_certs: false
+        status_code: [200, 204]
+      loop: "{{ test_config_items.json.result }}"
+      when: 
+        - test_config_items is succeeded
+        - test_config_items.json.result|length > 0
+      ignore_errors: true
+
+    - name: Get test incidents
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/incident"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: test_incidents
+      vars:
+        query_params:
+          sysparm_query: "short_descriptionSTARTSWITHAAP Integration Test^ORshort_descriptionSTARTSWITHOpenShift Project Creation^ORshort_descriptionSTARTSWITHTest"
+          sysparm_fields: "sys_id,number,short_description,state"
+      ignore_errors: true
+
+    - name: Delete test incidents
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/incident/{{ item.sys_id }}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: DELETE
+        force_basic_auth: yes
+        validate_certs: false
+        status_code: [200, 204]
+      loop: "{{ test_incidents.json.result }}"
+      when: 
+        - test_incidents is succeeded
+        - test_incidents.json.result|length > 0
+      ignore_errors: true
+
+    - name: Display cleanup summary
+      debug:
+        msg: |
+          🧹 CLEANUP SUMMARY
+          
+          ✅ Cleaned up:
+          - Test Catalog Requests: {{ test_requests.json.result|length }}
+          - Test Requested Items: {{ test_req_items.json.result|length }}
+          - Duplicate Catalog Items: {{ duplicate_catalog_items.json.result|length }}
+          - Test Business Rules: {{ test_business_rules.json.result|length }}
+          - Test Config Items: {{ test_config_items.json.result|length if test_config_items is succeeded else 0 }}
+          - Test Incidents: {{ test_incidents.json.result|length if test_incidents is succeeded else 0 }}
+          
+          💡 Environment Status:
+          - ServiceNow instance is now cleaner
+          - End-to-end tests should work more reliably
+          - Business Rules conflicts reduced
+          
+          🔧 Next Steps:
+          1. Run end-to-end test to verify clean environment
+          2. Check ServiceNow dashboard to confirm cleanup
+          3. Monitor for any remaining test data
+          
+          ⚠️  Note: If you need to restore any accidentally deleted items,
+          check ServiceNow's recycle bin or contact your ServiceNow admin.

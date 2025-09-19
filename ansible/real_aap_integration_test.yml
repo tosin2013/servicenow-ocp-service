@@ -1,0 +1,506 @@
+---
+# Real AAP Integration Test - Creates Actual OpenShift Projects
+# This playbook configures ServiceNow to actually call AAP Job Template 9
+
+- name: Real AAP Integration Test - ServiceNow to OpenShift
+  hosts: localhost
+  gather_facts: true
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+
+  vars:
+    sn_host: "{{ servicenow_instance_url }}"
+    sn_username: "{{ servicenow_admin_user }}"
+    sn_password: "{{ vault_servicenow_admin_password }}"
+    aap_controller_url: "https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+    aap_job_template_id: "9"
+    # Real test project that will be created in OpenShift
+    real_project_name: "servicenow-real-{{ ansible_date_time.epoch }}"
+    real_display_name: "ServiceNow Real Integration Test"
+
+  tasks:
+    - name: Display Real AAP Integration Test Information
+      debug:
+        msg: |
+          🚀 Real AAP Integration Test - ServiceNow to OpenShift
+          
+          📋 Test Details:
+          - ServiceNow Instance: {{ sn_host }}
+          - AAP Controller: {{ aap_controller_url }}
+          - Job Template ID: {{ aap_job_template_id }}
+          - Real Project Name: {{ real_project_name }}
+          - Display Name: {{ real_display_name }}
+          
+          🎯 This test will:
+          1. Configure AAP API token in ServiceNow system properties
+          2. Create a real catalog request
+          3. Trigger actual AAP job template execution
+          4. Create a real OpenShift project you can see with 'oc get project'
+          5. Provision actual Keycloak user
+          6. Complete the full workflow
+
+    # Step 1: Configure AAP API Token in ServiceNow System Properties
+    - name: Step 1 - Configure AAP API Token in ServiceNow
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_properties"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          name: "aap.api.token"
+          value: "{{ vault_aap_token }}"
+          description: "AAP API token for ServiceNow integration"
+          type: "string"
+          suffix: "aap_integration"
+        status_code: [201, 200]
+        return_content: yes
+      register: aap_token_config
+      ignore_errors: true
+
+    - name: Configure AAP Controller URL Property
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_properties"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          name: "aap.controller.url"
+          value: "{{ aap_controller_url }}"
+          description: "AAP Controller URL for ServiceNow integration"
+          type: "string"
+          suffix: "aap_integration"
+        status_code: [201, 200]
+        return_content: yes
+      register: aap_url_config
+      ignore_errors: true
+
+    - name: Configure AAP Job Template ID Property
+      uri:
+        url: "{{ sn_host }}/api/now/table/sys_properties"
+        user: "{{ sn_username }}"
+        password: "{{ sn_password }}"
+        method: POST
+        force_basic_auth: yes
+        body_format: json
+        validate_certs: false
+        body:
+          name: "aap.job.template.id"
+          value: "{{ aap_job_template_id }}"
+          description: "AAP Job Template ID for OpenShift project creation"
+          type: "string"
+          suffix: "aap_integration"
+        status_code: [201, 200]
+        return_content: yes
+      register: aap_template_config
+      ignore_errors: true
+
+    - name: Display AAP Configuration Results
+      debug:
+        msg: |
+          ⚙️ Step 1 - AAP Configuration in ServiceNow:
+
+          {% if not aap_token_config.failed %}
+          ✅ AAP API Token: Configured successfully
+          {% elif aap_token_config.status == 403 %}
+          ⚠️ AAP API Token: Permission denied (403) - ServiceNow user lacks sys_properties access
+          {% else %}
+          ⚠️ AAP API Token: {{ aap_token_config.msg | default('Configuration failed') }}
+          {% endif %}
+
+          {% if not aap_url_config.failed %}
+          ✅ AAP Controller URL: Configured successfully
+          {% elif aap_url_config.status == 403 %}
+          ⚠️ AAP Controller URL: Permission denied (403) - ServiceNow user lacks sys_properties access
+          {% else %}
+          ⚠️ AAP Controller URL: {{ aap_url_config.msg | default('Configuration failed') }}
+          {% endif %}
+          
+          {% if not aap_template_config.failed %}
+          ✅ AAP Job Template ID: Configured successfully
+          {% elif aap_template_config.status == 403 %}
+          ⚠️ AAP Job Template ID: Permission denied (403) - ServiceNow user lacks sys_properties access
+          {% else %}
+          ⚠️ AAP Job Template ID: {{ aap_template_config.msg | default('Configuration failed') }}
+          {% endif %}
+
+          💡 Note: System properties configuration requires admin privileges in ServiceNow.
+          💡 The integration can still work if properties are manually configured in ServiceNow.
+
+    # Step 2: Test AAP Connectivity Before Creating Request
+    - name: Step 2 - Test AAP Job Template Accessibility
+      uri:
+        url: "{{ aap_controller_url }}/api/v2/job_templates/{{ aap_job_template_id }}/"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vault_aap_token }}"
+        validate_certs: false
+        status_code: [200]
+        return_content: yes
+      register: aap_template_check
+      ignore_errors: true
+
+    - name: Display AAP Template Check Results
+      debug:
+        msg: |
+          🔍 Step 2 - AAP Job Template Check:
+          
+          {% if not aap_template_check.failed %}
+          ✅ Job Template Accessible:
+          - Template Name: {{ aap_template_check.json.name }}
+          - Template ID: {{ aap_template_check.json.id }}
+          - Description: {{ aap_template_check.json.description | default('N/A') }}
+          - Project: {{ aap_template_check.json.project_name | default('N/A') }}
+          - Playbook: {{ aap_template_check.json.playbook | default('N/A') }}
+          {% else %}
+          ❌ Job Template Check Failed:
+          - Error: {{ aap_template_check.msg | default('Unknown error') }}
+          - Status: {{ aap_template_check.status | default('N/A') }}
+          {% endif %}
+
+    # Step 3: Create Real Catalog Request
+    - name: Step 3 - Create Real Catalog Request
+      servicenow.itsm.catalog_request:
+        instance:
+          host: "{{ sn_host }}"
+          username: "{{ sn_username }}"
+          password: "{{ sn_password }}"
+          timeout: 30
+          validate_certs: false
+        state: present
+        requested_for: "{{ sn_username }}"
+        requested_by: "{{ sn_username }}"
+        short_description: "{{ real_display_name }}"
+        description: |
+          REAL AAP INTEGRATION TEST - This will create an actual OpenShift project:
+          
+          Project Details:
+          - Project Name: {{ real_project_name }}
+          - Display Name: {{ real_display_name }}
+          - Environment: Development
+          - Requestor: ServiceNow Admin
+          - Purpose: Validate real AAP job template execution
+          
+          Expected Outcomes:
+          - OpenShift namespace created: {{ real_project_name }}
+          - Keycloak user provisioned: servicenow.admin
+          - RBAC permissions configured
+          - Resource quotas applied
+          - Network policies created
+        priority: "2"
+        urgency: "2"
+        impact: "3"
+        other:
+          u_project_name: "{{ real_project_name }}"
+          u_display_name: "{{ real_display_name }}"
+          u_environment: "development"
+          u_requestor_first_name: "ServiceNow"
+          u_requestor_last_name: "Admin"
+          u_team_members: "admin,developer,tester"
+          u_business_justification: "Real AAP integration test to validate complete ServiceNow to OpenShift workflow with actual resource creation"
+      register: real_request
+
+    - name: Display Real Request Creation
+      debug:
+        msg: |
+          📋 Step 3 - Real Catalog Request Created:
+          - Request Number: {{ real_request.record.number }}
+          - Request ID: {{ real_request.record.sys_id }}
+          - State: {{ real_request.record.request_state }}
+          - Project Name: {{ real_request.record.u_project_name | default('N/A') }}
+
+    # Step 4: Manually Trigger AAP Job (Simulating Business Rule)
+    - name: Step 4 - Manually Trigger AAP Job Template
+      uri:
+        url: "{{ aap_controller_url }}/api/v2/job_templates/{{ aap_job_template_id }}/launch/"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ vault_aap_token }}"
+          Content-Type: "application/json"
+        validate_certs: false
+        body_format: json
+        body:
+          extra_vars:
+            project_name: "{{ real_project_name }}"
+            display_name: "{{ real_display_name }}"
+            requestor: "servicenow.admin"
+            servicenow_request_number: "{{ real_request.record.number }}"
+            environment: "development"
+            team: "admin,developer,tester"
+            database_type: "postgresql"
+            database_size: "5Gi"
+            temp_password: "ChangeMe123!"
+        status_code: [201]
+        return_content: yes
+      register: aap_job_launch
+      when: not aap_template_check.failed
+
+    - name: Display AAP Job Launch Results
+      debug:
+        msg: |
+          🚀 Step 4 - AAP Job Template Launch:
+
+          {% if aap_job_launch is not defined %}
+          ⏭️ Skipped due to template check failure
+          {% elif aap_job_launch.json is not defined %}
+          ❌ Job launch failed:
+          - Error: {{ aap_job_launch.msg | default('Unknown error') }}
+          {% elif aap_job_launch is defined and aap_job_launch.json is defined %}
+          ✅ AAP Job Launched Successfully:
+          - Job ID: {{ aap_job_launch.json.id }}
+          - Job URL: {{ aap_controller_url }}/#/jobs/playbook/{{ aap_job_launch.json.id }}
+          - Status: {{ aap_job_launch.json.status | default('N/A') }}
+          - Project: {{ real_project_name }}
+          {% else %}
+          ⚠️ AAP Job launch was not attempted (template check may have failed)
+          {% endif %}
+
+    # Step 5: Wait for AAP Job to Initialize
+    - name: Step 5a - Wait for AAP Job to Initialize
+      pause:
+        seconds: 10
+      when: aap_job_launch is defined and aap_job_launch.json is defined and aap_job_launch.json.id is defined
+
+    # Step 5b: Update ServiceNow Request with AAP Job Details
+    - name: Step 5b - Update ServiceNow Request with AAP Job Details
+      servicenow.itsm.catalog_request:
+        instance:
+          host: "{{ sn_host }}"
+          username: "{{ sn_username }}"
+          password: "{{ sn_password }}"
+          timeout: 30
+          validate_certs: false
+        sys_id: "{{ real_request.record.sys_id }}"
+        request_state: "in_process"
+        work_notes: |
+          Real AAP Integration Test - Job Launched:
+          - AAP Job ID: {{ aap_job_launch.json.id | default('N/A') }}
+          - AAP Job URL: {{ aap_controller_url }}/#/jobs/playbook/{{ aap_job_launch.json.id | default('N/A') }}
+          - OpenShift project creation in progress: {{ real_project_name }}
+          - Expected completion: 5-10 minutes
+        other:
+          u_aap_job_id: "{{ aap_job_launch.json.id | default('manual-test') }}"
+          u_aap_job_status: "running"
+      register: update_request
+      when: aap_job_launch is defined and aap_job_launch.json is defined and aap_job_launch.json.id is defined
+
+    # Step 6: Wait and Monitor Job Status
+    - name: Step 6 - Wait for AAP Job Completion (5 minutes max)
+      uri:
+        url: "{{ aap_controller_url }}/api/v2/jobs/{{ aap_job_launch.json.id }}/"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vault_aap_token }}"
+        validate_certs: false
+        return_content: yes
+      register: job_status_check
+      until: job_status_check.json.status in ['successful', 'failed', 'error', 'canceled']
+      retries: 30
+      delay: 10
+      when: aap_job_launch is defined and aap_job_launch.json is defined and aap_job_launch.json.id is defined
+      ignore_errors: true
+
+    - name: Display Job Completion Status
+      debug:
+        msg: |
+          ⏱️ Step 6 - AAP Job Status Check:
+          
+          {% if job_status_check is not defined %}
+          ⏭️ Skipped due to job launch failure
+          {% elif job_status_check.json is not defined %}
+          ⚠️ Job status check timed out or failed
+          - Check manually: {{ aap_controller_url }}/#/jobs/playbook/{{ aap_job_launch.json.id | default('N/A') }}
+          {% else %}
+          📊 Job Status: {{ job_status_check.json.status }}
+          - Job ID: {{ job_status_check.json.id }}
+          - Started: {{ job_status_check.json.started | default('N/A') }}
+          - Finished: {{ job_status_check.json.finished | default('In Progress') }}
+          - Elapsed: {{ job_status_check.json.elapsed | default('N/A') }} seconds
+          {% endif %}
+      when: aap_job_launch is defined and aap_job_launch.json is defined and aap_job_launch.json.id is defined
+
+    # Step 7: Check if OpenShift Project Was Created
+    - name: Step 7 - Check if OpenShift Project Exists
+      shell: |
+        oc get project {{ real_project_name }} --no-headers 2>/dev/null || echo "Project not found"
+      register: openshift_project_check
+      ignore_errors: true
+
+    - name: Display OpenShift Project Check
+      debug:
+        msg: |
+          🔍 Step 7 - OpenShift Project Verification:
+          
+          {% if 'not found' in openshift_project_check.stdout %}
+          ⚠️ OpenShift project not yet created
+          - Project Name: {{ real_project_name }}
+          - Status: {{ openshift_project_check.stdout }}
+          - Note: Job may still be running or failed
+          {% else %}
+          ✅ OpenShift Project Created Successfully:
+          - Project: {{ openshift_project_check.stdout }}
+          - You can now see it with: oc get project {{ real_project_name }}
+          {% endif %}
+
+    # Step 8: Update ServiceNow Request Based on Results
+    - name: Step 8 - Update ServiceNow Request with Final Status
+      servicenow.itsm.catalog_request:
+        instance:
+          host: "{{ sn_host }}"
+          username: "{{ sn_username }}"
+          password: "{{ sn_password }}"
+          timeout: 30
+          validate_certs: false
+        sys_id: "{{ real_request.record.sys_id }}"
+        request_state: "{{ 'delivered' if 'not found' not in openshift_project_check.stdout else 'in_process' }}"
+        work_notes: |
+          Real AAP Integration Test Results:
+          {% if 'not found' not in openshift_project_check.stdout %}
+          ✅ SUCCESS - OpenShift project created successfully:
+          - Project Name: {{ real_project_name }}
+          - OpenShift Status: {{ openshift_project_check.stdout }}
+          - Keycloak User: servicenow.admin (provisioned)
+          - Project URL: https://{{ real_project_name }}.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          {% else %}
+          ⚠️ IN PROGRESS - Project creation may still be running:
+          - AAP Job ID: {{ aap_job_launch.json.id | default('N/A') }}
+          - Check job status: {{ aap_controller_url }}/#/jobs/playbook/{{ aap_job_launch.json.id | default('N/A') }}
+          - OpenShift Status: {{ openshift_project_check.stdout }}
+          {% endif %}
+        other:
+          u_aap_job_status: "{{ job_status_check.json.status | default('running') }}"
+          u_openshift_namespace: "{{ real_project_name if 'not found' not in openshift_project_check.stdout else '' }}"
+          u_keycloak_username: "{{ 'servicenow.admin' if 'not found' not in openshift_project_check.stdout else '' }}"
+          u_project_url: "{{ 'https://' + real_project_name + '.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com' if 'not found' not in openshift_project_check.stdout else '' }}"
+      register: final_update
+
+    - name: Display Final Test Results
+      debug:
+        msg: |
+          🎯 Real AAP Integration Test Results:
+          
+          📋 Test Project: {{ real_project_name }}
+          📅 Test Date: {{ ansible_date_time.iso8601 }}
+          
+          🔧 AAP Configuration:
+          - API Token: {{ 'Configured' if not aap_token_config.failed else 'Failed' }}
+          - Controller URL: {{ aap_controller_url }}
+          - Job Template: {{ aap_job_template_id }}
+          
+          🚀 AAP Job Execution:
+          {% if aap_job_launch is defined and aap_job_launch.json is defined and aap_job_launch.json.id is defined %}
+          - Job ID: {{ aap_job_launch.json.id }}
+          - Job Status: {{ job_status_check.json.status | default('Running/Unknown') }}
+          - Job URL: {{ aap_controller_url }}/#/jobs/playbook/{{ aap_job_launch.json.id }}
+          {% else %}
+          - Status: Failed to launch or skipped
+          {% endif %}
+          
+          🔍 OpenShift Project:
+          {% if 'not found' not in openshift_project_check.stdout %}
+          ✅ SUCCESS - Project Created:
+          - Project: {{ openshift_project_check.stdout }}
+          - Command: oc get project {{ real_project_name }}
+          - Console: https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          {% else %}
+          ⚠️ Project not yet visible:
+          - Status: {{ openshift_project_check.stdout }}
+          - May still be creating or job failed
+          {% endif %}
+          
+          📋 ServiceNow Request:
+          - Request Number: {{ real_request.record.number }}
+          - Request URL: {{ sn_host }}/nav_to.do?uri=sc_request.do?sys_id={{ real_request.record.sys_id }}
+          
+          🎯 Next Steps:
+          1. Check AAP job logs if project not created
+          2. Run 'oc get project {{ real_project_name }}' to verify
+          3. Test Keycloak user login if successful
+          4. Configure business rules for automatic triggering
+
+    - name: Save Real Integration Test Report
+      copy:
+        content: |
+          # Real AAP Integration Test Report
+          
+          **Test Date**: {{ ansible_date_time.iso8601 }}
+          **Test Project**: {{ real_project_name }}
+          **ServiceNow Instance**: {{ sn_host }}
+          **AAP Controller**: {{ aap_controller_url }}
+          
+          ## Test Results
+          
+          ### AAP Configuration
+          - **API Token**: {{ 'Configured' if not aap_token_config.failed else 'Failed' }}
+          - **Controller URL**: {{ aap_controller_url }}
+          - **Job Template ID**: {{ aap_job_template_id }}
+          
+          ### AAP Job Execution
+          {% if aap_job_launch is defined and aap_job_launch.json is defined and aap_job_launch.json.id is defined %}
+          - **Job ID**: {{ aap_job_launch.json.id }}
+          - **Job Status**: {{ job_status_check.json.status | default('Running/Unknown') }}
+          - **Job URL**: {{ aap_controller_url }}/#/jobs/playbook/{{ aap_job_launch.json.id }}
+          - **Started**: {{ job_status_check.json.started | default('N/A') }}
+          - **Finished**: {{ job_status_check.json.finished | default('In Progress') }}
+          {% else %}
+          - **Status**: Failed to launch or skipped
+          {% endif %}
+          
+          ### OpenShift Project Creation
+          {% if 'not found' not in openshift_project_check.stdout %}
+          - **Status**: ✅ SUCCESS
+          - **Project**: {{ openshift_project_check.stdout }}
+          - **Verification Command**: `oc get project {{ real_project_name }}`
+          - **Console URL**: https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          - **Project URL**: https://{{ real_project_name }}.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          {% else %}
+          - **Status**: ⚠️ Not Yet Created
+          - **OpenShift Check**: {{ openshift_project_check.stdout }}
+          - **Possible Causes**: Job still running, job failed, or configuration issue
+          {% endif %}
+          
+          ### ServiceNow Integration
+          - **Request Number**: {{ real_request.record.number }}
+          - **Request ID**: {{ real_request.record.sys_id }}
+          - **Request URL**: {{ sn_host }}/nav_to.do?uri=sc_request.do?sys_id={{ real_request.record.sys_id }}
+          
+          ## Validation Commands
+          
+          ```bash
+          # Check if OpenShift project exists
+          oc get project {{ real_project_name }}
+          
+          # Get project details
+          oc describe project {{ real_project_name }}
+          
+          # Check AAP job status
+          curl -k -H "Authorization: Bearer YOUR_TOKEN" \
+            {{ aap_controller_url }}/api/v2/jobs/{{ aap_job_launch.json.id | default('JOB_ID') }}/
+          ```
+          
+          ## Next Steps
+          
+          1. **If Project Created Successfully**:
+             - Configure ServiceNow business rules for automatic AAP triggering
+             - Test Keycloak user login
+             - Validate RBAC permissions
+             - Test application deployment
+          
+          2. **If Project Not Created**:
+             - Check AAP job logs for errors
+             - Verify AAP job template configuration
+             - Check OpenShift cluster resources
+             - Review Keycloak integration
+          
+          3. **Production Deployment**:
+             - Deploy business rules to production ServiceNow
+             - Configure production AAP API tokens
+             - Set up monitoring and alerting
+             - Train users on catalog ordering
+        dest: "./real_aap_integration_test_report.md"

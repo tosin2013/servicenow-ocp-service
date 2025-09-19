@@ -1,0 +1,275 @@
+---
+# ansible/diagnose_servicenow_requests.yml
+# Diagnostic playbook to check what's actually in ServiceNow
+
+- name: Diagnose ServiceNow Requests and Business Rules
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Display diagnostic information
+      debug:
+        msg: |
+          🔍 ServiceNow Request Diagnostic
+          
+          📋 Checking:
+          1. Recent catalog requests (sc_request table)
+          2. Recent requested items (sc_req_item table) 
+          3. Business Rules configuration
+          4. Catalog items configuration
+          
+          🎯 Goal: Find out why requests aren't visible in dashboard
+
+    - name: Check recent catalog requests (sc_request table)
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_request"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: recent_requests
+      vars:
+        query_params:
+          sysparm_query: "sys_created_onONToday@javascript:gs.daysAgoStart(1)@javascript:gs.daysAgoEnd(0)"
+          sysparm_fields: "number,sys_id,short_description,state,requested_for,requested_by,sys_created_on"
+          sysparm_limit: 20
+
+    - name: Display recent catalog requests
+      debug:
+        msg: |
+          📊 Recent Catalog Requests (sc_request):
+          
+          {% if recent_requests.json.result|length > 0 %}
+          Found {{ recent_requests.json.result|length }} recent request(s):
+          {% for req in recent_requests.json.result %}
+          
+          🎫 {{ req.number }}:
+          - ID: {{ req.sys_id }}
+          - Description: {{ req.short_description }}
+          - State: {{ req.state }}
+          - Requested For: {{ req.requested_for }}
+          - Created: {{ req.sys_created_on }}
+          - URL: {{ servicenow_url }}/nav_to.do?uri=sc_request.do?sys_id={{ req.sys_id }}
+          {% endfor %}
+          {% else %}
+          ❌ No recent catalog requests found in sc_request table
+          {% endif %}
+
+    - name: Check recent requested items (sc_req_item table)
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_req_item"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: recent_req_items
+      vars:
+        query_params:
+          sysparm_query: "sys_created_onONToday@javascript:gs.daysAgoStart(1)@javascript:gs.daysAgoEnd(0)"
+          sysparm_fields: "number,sys_id,short_description,state,cat_item,request,sys_created_on"
+          sysparm_limit: 20
+
+    - name: Display recent requested items
+      debug:
+        msg: |
+          📊 Recent Requested Items (sc_req_item):
+          
+          {% if recent_req_items.json.result|length > 0 %}
+          Found {{ recent_req_items.json.result|length }} recent item(s):
+          {% for item in recent_req_items.json.result %}
+          
+          🎯 {{ item.number }}:
+          - ID: {{ item.sys_id }}
+          - Description: {{ item.short_description }}
+          - State: {{ item.state }}
+          - Catalog Item: {{ item.cat_item }}
+          - Parent Request: {{ item.request }}
+          - Created: {{ item.sys_created_on }}
+          - URL: {{ servicenow_url }}/nav_to.do?uri=sc_req_item.do?sys_id={{ item.sys_id }}
+          {% endfor %}
+          {% else %}
+          ❌ No recent requested items found in sc_req_item table
+          {% endif %}
+
+    - name: Check OpenShift catalog items
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_cat_item"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: openshift_catalog_items
+      vars:
+        query_params:
+          sysparm_query: "nameSTARTSWITHOpenShift^ORnameSTARTSWITHopenshift"
+          sysparm_fields: "name,sys_id,active,short_description"
+
+    - name: Display OpenShift catalog items
+      debug:
+        msg: |
+          📋 OpenShift Catalog Items:
+          
+          {% if openshift_catalog_items.json.result|length > 0 %}
+          Found {{ openshift_catalog_items.json.result|length }} OpenShift catalog item(s):
+          {% for item in openshift_catalog_items.json.result %}
+          
+          📦 {{ item.name }}:
+          - ID: {{ item.sys_id }}
+          - Active: {{ item.active }}
+          - Description: {{ item.short_description | default('No description') }}
+          {% endfor %}
+          {% else %}
+          ❌ No OpenShift catalog items found
+          {% endif %}
+
+    - name: Check Business Rules for OpenShift
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_script"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: business_rules
+      vars:
+        query_params:
+          sysparm_query: "nameSTARTSWITHOpenShift^ORnameSTARTSWITHopenshift^ORnameSTARTSWITHAAP"
+          sysparm_fields: "name,sys_id,active,table,when,condition"
+
+    - name: Display Business Rules
+      debug:
+        msg: |
+          🔧 Business Rules for OpenShift/AAP:
+          
+          {% if business_rules.json.result|length > 0 %}
+          Found {{ business_rules.json.result|length }} business rule(s):
+          {% for rule in business_rules.json.result %}
+          
+          ⚙️ {{ rule.name }}:
+          - ID: {{ rule.sys_id }}
+          - Active: {{ rule.active }}
+          - Table: {{ rule.table | default('N/A') }}
+          - When: {{ rule.when | default('N/A') }}
+          - Condition: {{ rule.condition | default('No condition') }}
+          {% endfor %}
+          {% else %}
+          ❌ No OpenShift/AAP Business Rules found
+          {% endif %}
+
+    - name: Create a test request to see what happens
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_request"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: POST
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          requested_for: "{{ servicenow_username }}"
+          requested_by: "{{ servicenow_username }}"
+          short_description: "DIAGNOSTIC TEST - {{ ansible_date_time.epoch }}"
+          description: "Diagnostic test to check request creation"
+          state: "requested"
+        status_code: [200, 201]
+        return_content: yes
+      register: diagnostic_request
+      ignore_errors: true
+
+    - name: Display test request creation results
+      debug:
+        msg: |
+          🧪 Diagnostic Test Request Creation:
+          
+          {% if diagnostic_request is succeeded %}
+          ✅ Test request created successfully:
+          - Request Number: {{ diagnostic_request.json.result.number }}
+          - Request ID: {{ diagnostic_request.json.result.sys_id }}
+          - State: {{ diagnostic_request.json.result.state }}
+          - URL: {{ servicenow_url }}/nav_to.do?uri=sc_request.do?sys_id={{ diagnostic_request.json.result.sys_id }}
+          
+          🔍 Check this URL in your ServiceNow dashboard to see if it appears!
+          {% else %}
+          ❌ Test request creation failed:
+          - Error: {{ diagnostic_request.msg | default('Unknown error') }}
+          {% endif %}
+
+    - name: Check ServiceNow system properties for AAP integration
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sys_properties"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: system_properties
+      vars:
+        query_params:
+          sysparm_query: "nameSTARTSWITHaap^ORnameSTARTSWITHansible^ORnameSTARTSWITHopenshift"
+          sysparm_fields: "name,value,description"
+      ignore_errors: true
+
+    - name: Display system properties
+      debug:
+        msg: |
+          ⚙️ ServiceNow System Properties:
+          
+          {% if system_properties is succeeded and system_properties.json.result|length > 0 %}
+          Found {{ system_properties.json.result|length }} relevant system properties:
+          {% for prop in system_properties.json.result %}
+          
+          🔧 {{ prop.name }}:
+          - Value: {{ prop.value | default('Not set') }}
+          - Description: {{ prop.description | default('No description') }}
+          {% endfor %}
+          {% else %}
+          ❌ No AAP/OpenShift system properties found
+          {% endif %}
+
+    - name: Display diagnostic summary
+      debug:
+        msg: |
+          🎯 DIAGNOSTIC SUMMARY
+          
+          📊 What we found:
+          - Recent Requests (sc_request): {{ recent_requests.json.result|length }}
+          - Recent Items (sc_req_item): {{ recent_req_items.json.result|length }}
+          - OpenShift Catalog Items: {{ openshift_catalog_items.json.result|length }}
+          - Business Rules: {{ business_rules.json.result|length }}
+          - Test Request: {{ 'Created' if diagnostic_request is succeeded else 'Failed' }}
+          
+          🔍 Possible Issues:
+          {% if recent_requests.json.result|length == 0 %}
+          1. ❌ No recent requests found - requests may not be creating properly
+          {% endif %}
+          {% if openshift_catalog_items.json.result|length == 0 %}
+          2. ❌ No OpenShift catalog items found - catalog may not be configured
+          {% endif %}
+          {% if business_rules.json.result|length == 0 %}
+          3. ❌ No Business Rules found - automation may not be configured
+          {% endif %}
+          
+          💡 Next Steps:
+          1. Check the diagnostic test request URL in ServiceNow dashboard
+          2. If requests are creating but not visible, check dashboard filters
+          3. If no requests are creating, check API permissions
+          4. If Business Rules are missing, run business rule creation playbook

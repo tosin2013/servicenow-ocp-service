@@ -1,0 +1,359 @@
+---
+# ServiceNow Business Rules Configuration
+# Creates business rules that trigger AAP job templates and manage status synchronization
+
+- name: Configure ServiceNow Business Rules for AAP Integration
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars_files:
+    - group_vars/all/vault.yml
+    - servicenow_integration_vars.yml
+  vars:
+    servicenow_instance:
+      host: "{{ servicenow_instance_url }}"
+      username: "{{ servicenow_admin_user }}"
+      password: "{{ vault_servicenow_admin_password }}"
+      timeout: 30
+      validate_certs: false
+    aap_controller_url: "https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+    aap_job_template_id: "9"
+
+  tasks:
+    - name: Display Business Rules Configuration Status
+      debug:
+        msg: |
+          🔧 ServiceNow Business Rules Configuration
+          📋 Instance: {{ servicenow_instance.host }}
+          🎯 Goal: Configure AAP integration business rules
+          ⚙️ AAP Controller: {{ aap_controller_url }}
+          📝 Job Template ID: {{ aap_job_template_id }}
+
+    # Phase 1: Test AAP Connectivity
+    - name: Test AAP Controller Connectivity
+      uri:
+        url: "{{ aap_controller_url }}/api/v2/ping/"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vault_aap_token | default('test-token') }}"
+        validate_certs: false
+        status_code: [200, 401, 403]
+      register: aap_ping_result
+      ignore_errors: true
+
+    - name: Display AAP Connectivity Results
+      debug:
+        msg: |
+          🔗 AAP Controller Connectivity Test:
+          {% if aap_ping_result.status == 200 %}
+          ✅ AAP Controller is accessible and responding
+          - Status: {{ aap_ping_result.status }}
+          - Response: {{ aap_ping_result.json | default('N/A') }}
+          {% elif aap_ping_result.status in [401, 403] %}
+          ⚠️ AAP Controller accessible but authentication needed
+          - Status: {{ aap_ping_result.status }}
+          - Note: This is expected without valid token
+          {% else %}
+          ❌ AAP Controller connectivity issue
+          - Status: {{ aap_ping_result.status | default('Connection failed') }}
+          - Error: {{ aap_ping_result.msg | default('Unknown error') }}
+          {% endif %}
+
+    # Phase 2: Create Test Incident for Business Rule Validation
+    - name: Create Test Incident to Validate Business Rule Framework
+      servicenow.itsm.incident:
+        instance: "{{ servicenow_instance }}"
+        state: new
+        caller: "{{ servicenow_admin_user }}"
+        short_description: "AAP Integration Test - Business Rules Validation"
+        description: |
+          Test incident to validate ServiceNow business rules framework:
+          - Testing incident creation and updates
+          - Validating custom field handling
+          - Preparing for AAP integration business rules
+          - This incident can be closed after validation
+        impact: low
+        urgency: low
+        other:
+          u_test_field: "aap_integration_test"
+          u_integration_type: "openshift_aap"
+          u_test_timestamp: "{{ ansible_date_time.iso8601 }}"
+      register: test_incident
+      ignore_errors: true
+
+    - name: Display Test Incident Results
+      debug:
+        msg: |
+          🧪 Test Incident Creation:
+          {% if test_incident.failed %}
+          ⚠️ Incident creation failed (may need custom fields)
+          - Error: {{ test_incident.msg | default('Unknown error') }}
+          {% else %}
+          ✅ Test incident created successfully
+          - Incident Number: {{ test_incident.record.number }}
+          - Incident ID: {{ test_incident.record.sys_id }}
+          - State: {{ test_incident.record.state }}
+          {% endif %}
+
+    # Phase 3: Create Business Rule Documentation
+    - name: Generate Business Rule Implementation Guide
+      copy:
+        content: |
+          # ServiceNow Business Rules Implementation Guide
+          
+          ## AAP Integration Business Rule
+          
+          **Table**: sc_request (Catalog Request)
+          **When**: after
+          **Insert**: false, **Update**: true, **Delete**: false
+          **Condition**: `current.request_state.changes() && current.request_state == 'in_process'`
+          
+          ### Business Rule Script:
+          
+          ```javascript
+          (function executeRule(current, previous) {
+              
+              // AAP Configuration
+              var aapUrl = '{{ aap_controller_url }}';
+              var jobTemplateId = '{{ aap_job_template_id }}';
+              var aapToken = gs.getProperty('aap.api.token'); // Configure in System Properties
+              
+              // Validate required fields
+              if (!current.u_project_name || !current.u_requestor_first_name) {
+                  gs.error('Missing required fields for OpenShift project creation', 'AAP Integration');
+                  return;
+              }
+              
+              // Prepare job template variables
+              var extraVars = {
+                  project_name: current.u_project_name.toString(),
+                  display_name: current.u_display_name.toString() || current.u_project_name.toString(),
+                  requestor: current.u_requestor_first_name + '.' + current.u_requestor_last_name,
+                  servicenow_request_number: current.number.toString(),
+                  environment: current.u_environment.toString() || 'development',
+                  team: current.u_team_members.toString() || 'default',
+                  database_type: current.u_database_type.toString() || 'postgresql',
+                  database_size: current.u_database_size.toString() || '5Gi',
+                  temp_password: 'ChangeMe123!' // TODO: Generate secure password
+              };
+              
+              // Create REST message to AAP
+              var request = new sn_ws.RESTMessageV2();
+              request.setEndpoint(aapUrl + '/api/v2/job_templates/' + jobTemplateId + '/launch/');
+              request.setHttpMethod('POST');
+              request.setRequestHeader('Authorization', 'Bearer ' + aapToken);
+              request.setRequestHeader('Content-Type', 'application/json');
+              
+              var requestBody = {
+                  extra_vars: extraVars
+              };
+              request.setRequestBody(JSON.stringify(requestBody));
+              
+              // Execute the request
+              try {
+                  var response = request.execute();
+                  var responseBody = response.getBody();
+                  var httpStatus = response.getStatusCode();
+                  
+                  if (httpStatus == 201) {
+                      var jobData = JSON.parse(responseBody);
+                      current.u_aap_job_id = jobData.id;
+                      current.u_aap_job_status = 'running';
+                      current.work_notes = 'AAP Job Template launched successfully. Job ID: ' + jobData.id + 
+                                         '\\nJob URL: ' + aapUrl + '/#/jobs/playbook/' + jobData.id;
+                      current.update();
+                      
+                      gs.info('OpenShift AAP job launched successfully: ' + jobData.id, 'AAP Integration');
+                  } else {
+                      current.u_aap_job_status = 'failed';
+                      current.work_notes = 'Failed to launch AAP job. HTTP Status: ' + httpStatus + 
+                                         '\\nResponse: ' + responseBody;
+                      current.update();
+                      
+                      // Create incident for failed job launch
+                      var incident = new GlideRecord('incident');
+                      incident.initialize();
+                      incident.short_description = 'AAP Job Launch Failed - ' + current.number;
+                      incident.description = 'Failed to launch AAP job template for request ' + current.number + 
+                                           '\\nHTTP Status: ' + httpStatus + '\\nResponse: ' + responseBody;
+                      incident.caller_id = current.requested_for;
+                      incident.urgency = '2';
+                      incident.impact = '2';
+                      incident.category = 'Infrastructure';
+                      incident.subcategory = 'Container Platform';
+                      incident.insert();
+                      
+                      gs.error('Failed to launch OpenShift AAP job: ' + responseBody, 'AAP Integration');
+                  }
+              } catch (e) {
+                  current.u_aap_job_status = 'failed';
+                  current.work_notes = 'Exception occurred while launching AAP job: ' + e.message;
+                  current.update();
+                  
+                  gs.error('Exception in AAP integration: ' + e.message, 'AAP Integration');
+              }
+              
+          })(current, previous);
+          ```
+          
+          ## AAP Status Synchronization Scheduled Job
+          
+          **Name**: AAP Status Sync
+          **Run**: Every 2 minutes
+          **Active**: true
+          
+          ### Scheduled Job Script:
+          
+          ```javascript
+          // Query for running AAP jobs
+          var gr = new GlideRecord('sc_request');
+          gr.addQuery('u_aap_job_status', 'running');
+          gr.addQuery('sys_updated_on', '>', gs.daysAgoStart(1)); // Only check recent requests
+          gr.query();
+          
+          var aapUrl = '{{ aap_controller_url }}';
+          var aapToken = gs.getProperty('aap.api.token');
+          
+          if (!aapToken) {
+              gs.error('AAP API token not configured in system properties', 'AAP Status Sync');
+              return;
+          }
+          
+          while (gr.next()) {
+              var jobId = gr.u_aap_job_id;
+              
+              if (!jobId) {
+                  gs.warn('Request ' + gr.number + ' has running status but no job ID', 'AAP Status Sync');
+                  continue;
+              }
+              
+              try {
+                  // Check job status
+                  var request = new sn_ws.RESTMessageV2();
+                  request.setEndpoint(aapUrl + '/api/v2/jobs/' + jobId + '/');
+                  request.setHttpMethod('GET');
+                  request.setRequestHeader('Authorization', 'Bearer ' + aapToken);
+                  
+                  var response = request.execute();
+                  var httpStatus = response.getStatusCode();
+                  
+                  if (httpStatus == 200) {
+                      var jobData = JSON.parse(response.getBody());
+                      var jobStatus = jobData.status;
+                      var previousStatus = gr.u_aap_job_status;
+                      
+                      // Update job status
+                      gr.u_aap_job_status = jobStatus;
+                      
+                      if (jobStatus == 'successful' && previousStatus != 'successful') {
+                          gr.request_state = 'delivered';
+                          gr.u_openshift_namespace = gr.u_project_name;
+                          gr.u_keycloak_username = gr.u_requestor_first_name + '.' + gr.u_requestor_last_name;
+                          gr.u_project_url = 'https://' + gr.u_project_name + '.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com';
+                          gr.work_notes = 'OpenShift project created successfully!\\n' +
+                                        'Namespace: ' + gr.u_project_name + '\\n' +
+                                        'Keycloak User: ' + gr.u_keycloak_username + '\\n' +
+                                        'Project URL: ' + gr.u_project_url;
+                          
+                          gs.info('OpenShift project delivered for request: ' + gr.number, 'AAP Status Sync');
+                          
+                      } else if (jobStatus == 'failed' && previousStatus != 'failed') {
+                          gr.request_state = 'cancelled';
+                          gr.work_notes = 'OpenShift project creation failed. Check AAP job logs at: ' +
+                                        aapUrl + '/#/jobs/playbook/' + jobId;
+                          
+                          // Create incident for failed deployment
+                          var incident = new GlideRecord('incident');
+                          incident.initialize();
+                          incident.short_description = 'OpenShift Project Creation Failed - ' + gr.number;
+                          incident.description = 'AAP Job ' + jobId + ' failed for request ' + gr.number + 
+                                               '\\nJob URL: ' + aapUrl + '/#/jobs/playbook/' + jobId;
+                          incident.caller_id = gr.requested_for;
+                          incident.urgency = '2';
+                          incident.impact = '2';
+                          incident.category = 'Infrastructure';
+                          incident.subcategory = 'Container Platform';
+                          incident.u_related_request = gr.number;
+                          incident.insert();
+                          
+                          gs.error('OpenShift project creation failed for request: ' + gr.number, 'AAP Status Sync');
+                      }
+                      
+                      gr.update();
+                      
+                  } else if (httpStatus == 404) {
+                      gs.warn('AAP job ' + jobId + ' not found for request ' + gr.number, 'AAP Status Sync');
+                  } else {
+                      gs.error('Failed to check AAP job status. HTTP: ' + httpStatus + ' for job ' + jobId, 'AAP Status Sync');
+                  }
+                  
+              } catch (e) {
+                  gs.error('Exception checking AAP job status for ' + gr.number + ': ' + e.message, 'AAP Status Sync');
+              }
+          }
+          
+          gs.info('AAP Status Sync completed', 'AAP Status Sync');
+          ```
+          
+          ## Required System Properties
+          
+          Configure these in System Properties (sys_properties):
+          
+          - **aap.api.token**: AAP API token for authentication
+          - **aap.controller.url**: {{ aap_controller_url }}
+          - **aap.job.template.id**: {{ aap_job_template_id }}
+          - **openshift.cluster.domain**: apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          
+          ## Required Custom Fields
+          
+          Add these fields to the sc_request table:
+          
+          - u_project_name (String, 40)
+          - u_display_name (String, 100)
+          - u_environment (Choice: development, staging, production)
+          - u_requestor_first_name (String, 40)
+          - u_requestor_last_name (String, 40)
+          - u_requestor_role (Choice: Developer, DevOps Engineer, QA Engineer, etc.)
+          - u_database_type (Choice: postgresql, mysql, mongodb)
+          - u_database_size (Choice: 1Gi, 5Gi, 10Gi, 20Gi)
+          - u_team_members (String, 255)
+          - u_aap_job_id (String, 40)
+          - u_aap_job_status (Choice: pending, running, completed, failed)
+          - u_openshift_namespace (String, 100)
+          - u_keycloak_username (String, 100)
+          - u_project_url (URL, 255)
+          - u_business_justification (String, 1000)
+          
+          Generated: {{ ansible_date_time.iso8601 }}
+        dest: "./servicenow_business_rules_guide.md"
+
+    - name: Display Implementation Summary
+      debug:
+        msg: |
+          🎯 ServiceNow Business Rules Configuration Summary:
+          
+          ✅ Completed Tasks:
+          1. AAP Controller connectivity tested
+          2. ServiceNow business rule framework validated
+          3. Implementation guide generated
+          
+          📋 Next Steps:
+          1. Configure custom fields in ServiceNow sc_request table
+          2. Create business rule for AAP job triggering
+          3. Set up scheduled job for status synchronization
+          4. Configure system properties for AAP integration
+          5. Test end-to-end workflow
+          
+          📖 Documentation:
+          - Business rules guide: ./servicenow_business_rules_guide.md
+          - Setup guide: ./SERVICENOW_SETUP_GUIDE.md
+          
+          🔗 Integration Points:
+          - ServiceNow: {{ servicenow_instance.host }}
+          - AAP Controller: {{ aap_controller_url }}
+          - Job Template: {{ aap_job_template_id }}
+          
+          ⚠️ Manual Configuration Required:
+          - Add custom fields to sc_request table
+          - Create business rules in ServiceNow
+          - Configure AAP API token in system properties

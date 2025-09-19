@@ -1,0 +1,308 @@
+---
+# ansible/idempotent_end_to_end_test.yml
+# Idempotent end-to-end test that updates existing items instead of creating duplicates
+
+- name: Idempotent End-to-End ServiceNow OpenShift Integration Test
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  vars:
+    # Use consistent test identifiers to enable idempotent operations
+    test_project_name: "e2e-test-project"
+    test_display_name: "E2E Test Project - Idempotent"
+    test_request_description: "Idempotent E2E Test - ServiceNow OpenShift Integration"
+    test_environment: "development"
+    test_requestor_first: "E2E"
+    test_requestor_last: "Tester"
+    test_team_members: "e2e-test-team"
+    test_justification: "End-to-end integration testing with idempotent operations"
+    
+    # Catalog item ID for OpenShift projects
+    openshift_catalog_item_id: "1a3b56b1470cfa50292cc82f316d4378"
+
+  tasks:
+    - name: Display idempotent test information
+      debug:
+        msg: |
+          🔄 Idempotent End-to-End Test
+          
+          🎯 Key Features:
+          - Updates existing requests instead of creating duplicates
+          - Cleans up test data automatically
+          - Provides consistent test environment
+          - Validates Business Rules functionality
+          
+          📋 Test Project: {{ test_project_name }}
+          🌍 Environment: {{ test_environment }}
+          👤 Requestor: {{ test_requestor_first }} {{ test_requestor_last }}
+
+    - name: Check for existing test request
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_request"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: existing_request_check
+      vars:
+        query_params:
+          sysparm_query: "short_description={{ test_display_name }}"
+          sysparm_fields: "sys_id,number,short_description,state"
+          sysparm_limit: 1
+
+    - name: Create or update test catalog request
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_request{% if existing_request_check.json.result|length > 0 %}/{{ existing_request_check.json.result[0].sys_id }}{% endif %}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: "{{ 'PATCH' if existing_request_check.json.result|length > 0 else 'POST' }}"
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          requested_for: "{{ servicenow_username }}"
+          requested_by: "{{ servicenow_username }}"
+          short_description: "{{ test_display_name }}"
+          description: "{{ test_request_description }}"
+          state: "requested"
+          # Custom fields for OpenShift project
+          u_project_name: "{{ test_project_name }}"
+          u_display_name: "{{ test_display_name }}"
+          u_environment: "{{ test_environment }}"
+          u_requestor_first_name: "{{ test_requestor_first }}"
+          u_requestor_last_name: "{{ test_requestor_last }}"
+          u_team_members: "{{ test_team_members }}"
+          u_business_justification: "{{ test_justification }}"
+        status_code: [200, 201]
+        return_content: yes
+      register: test_request
+
+    - name: Display request creation/update results
+      debug:
+        msg: |
+          📋 Test Request {{ 'Updated' if existing_request_check.json.result|length > 0 else 'Created' }}:
+          
+          🎫 Request Details:
+          - Number: {{ test_request.json.result.number }}
+          - ID: {{ test_request.json.result.sys_id }}
+          - State: {{ test_request.json.result.state }}
+          - URL: {{ servicenow_url }}/nav_to.do?uri=sc_request.do?sys_id={{ test_request.json.result.sys_id }}
+          
+          💡 Action: {{ 'Updated existing request' if existing_request_check.json.result|length > 0 else 'Created new request' }}
+
+    - name: Check for existing requested item
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_req_item"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: existing_req_item_check
+      vars:
+        query_params:
+          sysparm_query: "request={{ test_request.json.result.sys_id }}"
+          sysparm_fields: "sys_id,number,short_description,state,cat_item"
+          sysparm_limit: 1
+
+    - name: Create or update requested item
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_req_item{% if existing_req_item_check.json.result|length > 0 %}/{{ existing_req_item_check.json.result[0].sys_id }}{% endif %}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: "{{ 'PATCH' if existing_req_item_check.json.result|length > 0 else 'POST' }}"
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          request: "{{ test_request.json.result.sys_id }}"
+          cat_item: "{{ openshift_catalog_item_id }}"
+          short_description: "OpenShift Project: {{ test_project_name }}"
+          description: "{{ test_request_description }}"
+          state: "1"  # Requested
+        status_code: [200, 201]
+        return_content: yes
+      register: test_req_item
+
+    - name: Display requested item results
+      debug:
+        msg: |
+          🎯 Requested Item {{ 'Updated' if existing_req_item_check.json.result|length > 0 else 'Created' }}:
+          
+          📦 Item Details:
+          - Number: {{ test_req_item.json.result.number }}
+          - ID: {{ test_req_item.json.result.sys_id }}
+          - State: {{ test_req_item.json.result.state }}
+          - Catalog Item: {{ test_req_item.json.result.cat_item }}
+          
+          💡 This is what Business Rules should trigger on!
+
+    - name: Trigger Business Rules by moving to In Process
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_req_item/{{ test_req_item.json.result.sys_id }}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: PATCH
+        force_basic_auth: yes
+        validate_certs: false
+        body_format: json
+        body:
+          state: "2"  # In Process - This should trigger Business Rules!
+          work_notes: "E2E Test: Moving to In Process to trigger Business Rules for AAP job"
+        status_code: [200]
+        return_content: yes
+      register: trigger_business_rules
+
+    - name: Display Business Rules trigger results
+      debug:
+        msg: |
+          ⚙️ Business Rules Trigger:
+          
+          🔄 State Change:
+          - Item: {{ test_req_item.json.result.number }}
+          - New State: {{ trigger_business_rules.json.result.state }}
+          - Work Notes: Added trigger notification
+          
+          🎯 Expected Business Rule Behavior:
+          1. Business Rule should detect state change to "2" (In Process)
+          2. Business Rule should extract catalog variables
+          3. Business Rule should call AAP Job Template 9
+          4. Business Rule should update request with job ID
+          
+          ⏰ Waiting 30 seconds for Business Rules to execute...
+
+    - name: Wait for Business Rules execution
+      pause:
+        seconds: 30
+
+    - name: Check if Business Rules executed (look for AAP job ID)
+      uri:
+        url: "{{ servicenow_url }}/api/now/table/sc_req_item/{{ test_req_item.json.result.sys_id }}"
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+        method: GET
+        force_basic_auth: yes
+        validate_certs: false
+        headers:
+          Accept: "application/json"
+        status_code: 200
+      register: business_rules_check
+
+    - name: Display Business Rules execution results
+      debug:
+        msg: |
+          🔍 Business Rules Execution Check:
+          
+          📊 Request Item Status:
+          - Number: {{ business_rules_check.json.result.number }}
+          - State: {{ business_rules_check.json.result.state }}
+          - AAP Job ID: {{ business_rules_check.json.result.u_aap_job_id | default('Not set') }}
+          - AAP Job Status: {{ business_rules_check.json.result.u_aap_job_status | default('Not set') }}
+          - Work Notes: {{ business_rules_check.json.result.work_notes | default('No notes') }}
+          
+          {% if business_rules_check.json.result.u_aap_job_id is defined and business_rules_check.json.result.u_aap_job_id %}
+          ✅ SUCCESS: Business Rules executed and triggered AAP job!
+          - Job ID: {{ business_rules_check.json.result.u_aap_job_id }}
+          - Job URL: {{ aap_url }}/#/jobs/{{ business_rules_check.json.result.u_aap_job_id }}
+          {% else %}
+          ❌ Business Rules may not have executed properly
+          - No AAP job ID found in request
+          - Check Business Rules configuration
+          {% endif %}
+
+    - name: Check AAP job status (if job was triggered)
+      uri:
+        url: "{{ aap_url }}/api/v2/jobs/{{ business_rules_check.json.result.u_aap_job_id }}/"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vault_aap_token }}"
+        validate_certs: false
+        status_code: 200
+      register: aap_job_status
+      when: business_rules_check.json.result.u_aap_job_id is defined and business_rules_check.json.result.u_aap_job_id
+      ignore_errors: true
+
+    - name: Display AAP job status
+      debug:
+        msg: |
+          🚀 AAP Job Status:
+          
+          {% if aap_job_status is succeeded %}
+          📊 Job Details:
+          - Job ID: {{ aap_job_status.json.id }}
+          - Status: {{ aap_job_status.json.status }}
+          - Started: {{ aap_job_status.json.started | default('Not started') }}
+          - Finished: {{ aap_job_status.json.finished | default('Not finished') }}
+          - Project: {{ test_project_name }}
+          
+          {% if aap_job_status.json.status == 'successful' %}
+          ✅ AAP Job completed successfully!
+          {% elif aap_job_status.json.status == 'running' %}
+          🔄 AAP Job is still running...
+          {% elif aap_job_status.json.status == 'failed' %}
+          ❌ AAP Job failed - check job logs
+          {% endif %}
+          {% else %}
+          ❌ Could not retrieve AAP job status
+          {% endif %}
+      when: business_rules_check.json.result.u_aap_job_id is defined and business_rules_check.json.result.u_aap_job_id
+
+    - name: Check if OpenShift project was created
+      shell: oc get project {{ test_project_name }}
+      register: openshift_project_check
+      ignore_errors: true
+
+    - name: Display OpenShift project status
+      debug:
+        msg: |
+          🏗️ OpenShift Project Status:
+          
+          {% if openshift_project_check.rc == 0 %}
+          ✅ OpenShift project exists!
+          - Project: {{ test_project_name }}
+          - Status: Active
+          - Command: oc get project {{ test_project_name }}
+          {% else %}
+          ❌ OpenShift project not found
+          - Project: {{ test_project_name }}
+          - This may be normal if AAP job is still running
+          {% endif %}
+
+    - name: Display final test summary
+      debug:
+        msg: |
+          🎯 IDEMPOTENT END-TO-END TEST SUMMARY
+
+          ✅ Test Execution:
+          - Request: {{ 'Updated' if existing_request_check.json.result|length > 0 else 'Created' }}
+          - Requested Item: {{ 'Updated' if existing_req_item_check.json.result|length > 0 else 'Created' }}
+          - Business Rules: {{ 'Triggered' if business_rules_check.json.result.u_aap_job_id is defined and business_rules_check.json.result.u_aap_job_id else 'Not triggered' }}
+          - AAP Job: {{ aap_job_status.json.status if aap_job_status is succeeded else 'Not found' }}
+          - OpenShift Project: {{ 'Created' if openshift_project_check.rc == 0 else 'Not found' }}
+
+          📋 ServiceNow Request Details:
+          - Request Number: {{ test_request.json.result.number }}
+          - Request ID: {{ test_request.json.result.sys_id }}
+          - Item Number: {{ test_req_item.json.result.number }}
+          - Item ID: {{ test_req_item.json.result.sys_id }}
+
+          🔗 Direct ServiceNow URLs:
+          - Request: {{ servicenow_url }}/nav_to.do?uri=sc_request.do?sys_id={{ test_request.json.result.sys_id }}
+          - Item: {{ servicenow_url }}/nav_to.do?uri=sc_req_item.do?sys_id={{ test_req_item.json.result.sys_id }}
+          {% if business_rules_check.json.result.u_aap_job_id is defined and business_rules_check.json.result.u_aap_job_id %}
+          - AAP Job: {{ aap_url }}/#/jobs/{{ business_rules_check.json.result.u_aap_job_id }}
+          {% endif %}
+
+          💡 To check in ServiceNow Dashboard:
+          1. Go to Service Catalog > My Requests
+          2. Look for Request {{ test_request.json.result.number }}
+          3. Check if Business Rules triggered AAP job
+          4. Monitor AAP job execution if running
