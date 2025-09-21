@@ -86,6 +86,7 @@ nav:
     - ADR-013 PDI Workaround Strategy: adrs/013-pdi-workaround-strategy-for-development.md
     - ADR-014 Business Rules Over Flow Designer: adrs/014-business-rules-over-flow-designer.md
     - ADR-015 Secure Credential Management: adrs/015-secure-credential-management-in-user-workflows.md
+    - ADR-016 Documentation Link Validation Strategy: adrs/016-documentation-link-validation-strategy.md
   - Tutorials:
     - 🚀 Getting Started: tutorials/getting-started.md
     - 🔐 Ansible Vault Configuration: tutorials/ansible-vault-configuration.md
@@ -109,4 +110,7 @@ nav:
     - ⚙️ Ansible Reference: reference/ansible-reference.md
     - 🐳 Execution Environment Reference: reference/execution-environment-reference.md
     - 🔧 User Workflows Reference: reference/user-workflows-reference.md
+    - 🔗 Link Validation Report: reference/link-validation-report.md
+    - 🔍 Link Monitoring Setup: reference/link-monitoring-setup.md
+    - ✅ Link Validation Checklist: reference/link-validation-checklist.md
     - PDI Alternative Solutions: PDI_ALTERNATIVE_SOLUTIONS.md
