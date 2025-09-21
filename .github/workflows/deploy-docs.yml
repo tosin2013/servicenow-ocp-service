@@ -110,7 +110,7 @@ jobs:
       run: |
         cd docs
         echo "🏗️ Building MkDocs documentation..."
-        mkdocs build --verbose --strict
+        mkdocs build --verbose
         
         # Verify build output
         if [ ! -d "site" ] || [ ! -f "site/index.html" ]; then

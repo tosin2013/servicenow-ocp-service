@@ -1,10 +1,10 @@
 site_name: ServiceNow OpenShift Integration
 site_description: A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform
 # Site URL Configuration:
-# - For LOCAL DEVELOPMENT: Keep site_url commented out (current setting)
+# - For LOCAL DEVELOPMENT: Keep site_url commented out
 #   This prevents canonical URLs like http://localhost:8000/servicenow-ocp-service/getting-started.md
-# - For PRODUCTION DEPLOYMENT: Uncomment the line below
-# site_url: https://tosin2013.github.io/servicenow-ocp-service
+# - For PRODUCTION DEPLOYMENT: Uncommented for GitHub Pages deployment
+site_url: https://tosin2013.github.io/servicenow-ocp-service
 
 # Documentation directory structure - build occurs in docs folder
 docs_dir: content
