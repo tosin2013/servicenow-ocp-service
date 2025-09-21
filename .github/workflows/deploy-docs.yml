@@ -121,21 +121,42 @@ jobs:
           exit 1
         fi
 
-        # Critical pages that should exist (based on mkdocs.yml navigation)
-        CRITICAL_PAGES=(
-          "site/index.html"
-          "site/GETTING_STARTED/index.html"
-          "site/explanation/deployment-architecture/index.html"
-          "site/explanation/user-workflows-analysis/index.html"
-          "site/adrs/001-three-tier-orchestration-architecture/index.html"
-          "site/adrs/016-documentation-link-validation-strategy/index.html"
-          "site/tutorials/ansible-vault-configuration/index.html"
-          "site/reference/link-validation-report/index.html"
-        )
+        # Dynamic discovery of expected pages from source content
+        echo "🔍 Discovering expected pages from source content..."
 
-        echo "📋 Checking critical pages..."
+        # Find all markdown files in content directory and convert to expected HTML paths
+        EXPECTED_PAGES=()
         MISSING_PAGES=()
-        for page in "${CRITICAL_PAGES[@]}"; do
+
+        # Add index.html (always required)
+        EXPECTED_PAGES+=("site/index.html")
+
+        # Scan content directory for markdown files
+        if [ -d "content" ]; then
+          while IFS= read -r -d '' file; do
+            # Convert content/path/file.md to site/path/file/index.html
+            relative_path="${file#content/}"
+            if [[ "$relative_path" == "index.md" ]]; then
+              # Skip - already handled above
+              continue
+            elif [[ "$relative_path" == */index.md ]]; then
+              # Skip subdirectory index.md files - MkDocs handles these differently
+              continue
+            elif [[ "$relative_path" == */README.md ]]; then
+              # Skip README.md files - MkDocs may not build these as separate pages
+              continue
+            elif [[ "$relative_path" == *.md ]]; then
+              # Remove .md extension and add /index.html
+              html_path="site/${relative_path%.md}/index.html"
+              EXPECTED_PAGES+=("$html_path")
+            fi
+          done < <(find content -name "*.md" -type f -print0 2>/dev/null)
+        fi
+
+        echo "📋 Found ${#EXPECTED_PAGES[@]} expected pages from source content"
+        echo "🔍 Checking if all expected pages were built..."
+
+        for page in "${EXPECTED_PAGES[@]}"; do
           if [ ! -f "$page" ]; then
             echo "❌ Missing: $page"
             MISSING_PAGES+=("$page")
@@ -148,14 +169,23 @@ jobs:
         if [ ${#MISSING_PAGES[@]} -gt 0 ]; then
           echo ""
           echo "❌ BUILD VERIFICATION FAILED"
-          echo "Missing ${#MISSING_PAGES[@]} critical pages:"
+          echo "Missing ${#MISSING_PAGES[@]} expected pages:"
           printf '%s\n' "${MISSING_PAGES[@]}"
           echo ""
-          echo "🔍 Site structure:"
-          find site -name "*.html" | head -20
+          echo "🔍 Debugging information:"
+          echo "Working directory: $(pwd)"
           echo ""
-          echo "📁 Directory structure:"
-          find site -type d | head -20
+          echo "📁 Source content structure:"
+          find content -name "*.md" -type f 2>/dev/null | head -20 || echo "No content directory found"
+          echo ""
+          echo "📁 Built site directory contents:"
+          ls -la site/ 2>/dev/null || echo "No site directory found"
+          echo ""
+          echo "📁 Built site subdirectories:"
+          find site -type d 2>/dev/null | head -20 || echo "Cannot list site subdirectories"
+          echo ""
+          echo "📄 Built HTML files:"
+          find site -name "*.html" -type f 2>/dev/null | head -20 || echo "No HTML files found"
           exit 1
         fi
         
