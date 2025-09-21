@@ -112,9 +112,50 @@ jobs:
         echo "🏗️ Building MkDocs documentation..."
         mkdocs build --verbose
         
-        # Verify build output
+        # Verify build output - comprehensive recursive test
+        echo "🔍 Verifying build output..."
+
+        # Basic structure check
         if [ ! -d "site" ] || [ ! -f "site/index.html" ]; then
           echo "❌ MkDocs build failed - no site directory or index.html"
+          exit 1
+        fi
+
+        # Critical pages that should exist (based on mkdocs.yml navigation)
+        CRITICAL_PAGES=(
+          "site/index.html"
+          "site/GETTING_STARTED/index.html"
+          "site/explanation/deployment-architecture/index.html"
+          "site/explanation/user-workflows-analysis/index.html"
+          "site/adrs/001-three-tier-orchestration-architecture/index.html"
+          "site/adrs/016-documentation-link-validation-strategy/index.html"
+          "site/tutorials/ansible-vault-configuration/index.html"
+          "site/reference/link-validation-report/index.html"
+        )
+
+        echo "📋 Checking critical pages..."
+        MISSING_PAGES=()
+        for page in "${CRITICAL_PAGES[@]}"; do
+          if [ ! -f "$page" ]; then
+            echo "❌ Missing: $page"
+            MISSING_PAGES+=("$page")
+          else
+            echo "✅ Found: $page"
+          fi
+        done
+
+        # Report missing pages
+        if [ ${#MISSING_PAGES[@]} -gt 0 ]; then
+          echo ""
+          echo "❌ BUILD VERIFICATION FAILED"
+          echo "Missing ${#MISSING_PAGES[@]} critical pages:"
+          printf '%s\n' "${MISSING_PAGES[@]}"
+          echo ""
+          echo "🔍 Site structure:"
+          find site -name "*.html" | head -20
+          echo ""
+          echo "📁 Directory structure:"
+          find site -type d | head -20
           exit 1
         fi
         
