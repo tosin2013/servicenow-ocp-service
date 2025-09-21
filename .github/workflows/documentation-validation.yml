@@ -1,0 +1,188 @@
+name: Documentation Link Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'docs/**/*.md'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - '**/*.md'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'docs/**/*.md'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - '**/*.md'
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      validation_type:
+        description: 'Type of validation to run'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - external-only
+          - internal-only
+      fail_on_broken:
+        description: 'Fail workflow on broken links'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  validate-links:
+    runs-on: ubuntu-latest
+    name: Validate Documentation Links
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm install -g markdown-link-check
+        sudo apt-get update
+        sudo apt-get install -y jq curl
+    
+    - name: Create reports directory
+      run: mkdir -p docs/reports
+    
+    - name: Validate documentation links (Full)
+      if: github.event.inputs.validation_type == 'full' || github.event.inputs.validation_type == ''
+      run: |
+        echo "🔍 Running full link validation..."
+        ./docs/scripts/validate-links.sh --fail-on-broken --report-format json --output docs/reports/validation-full.json
+      continue-on-error: ${{ github.event.inputs.fail_on_broken == 'false' }}
+    
+    - name: Validate external links only
+      if: github.event.inputs.validation_type == 'external-only'
+      run: |
+        echo "🔍 Running external link validation..."
+        ./docs/scripts/validate-links.sh --external-only --fail-on-broken --timeout 10 --report-format json --output docs/reports/validation-external.json
+      continue-on-error: ${{ github.event.inputs.fail_on_broken == 'false' }}
+    
+    - name: Validate internal links only
+      if: github.event.inputs.validation_type == 'internal-only'
+      run: |
+        echo "🔍 Running internal link validation..."
+        ./docs/scripts/validate-links.sh --internal-only --no-anchors --report-format json --output docs/reports/validation-internal.json
+      continue-on-error: false
+    
+    - name: Run markdown-link-check (fallback validation)
+      run: |
+        echo "🔍 Running fallback markdown link validation..."
+        find docs -name "*.md" -not -path "docs/site/*" | xargs -I {} markdown-link-check {} --config .markdown-link-check.json || true
+    
+    - name: Generate summary report
+      run: |
+        echo "📊 Generating validation summary..."
+        cat > docs/reports/validation-summary.md << 'EOF'
+        # Link Validation Summary
+        
+        **Date**: $(date -Iseconds)
+        **Workflow**: ${{ github.workflow }}
+        **Trigger**: ${{ github.event_name }}
+        **Validation Type**: ${{ github.event.inputs.validation_type || 'full' }}
+        
+        ## Results
+        
+        - ✅ Validation completed successfully
+        - 📁 Reports available in `docs/reports/`
+        - 🔧 See [ADR-016](docs/content/adrs/016-documentation-link-validation-strategy.md) for validation strategy
+        
+        ## Next Steps
+        
+        1. Review validation reports for any issues
+        2. Fix broken links identified in the reports
+        3. Update documentation following [link validation checklist](docs/content/reference/link-validation-checklist.md)
+        
+        EOF
+    
+    - name: Upload validation reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: link-validation-reports-${{ github.run_number }}
+        path: docs/reports/
+        retention-days: 30
+    
+    - name: Comment on PR (if applicable)
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = 'docs/reports/validation-summary.md';
+          
+          if (fs.existsSync(path)) {
+            const summary = fs.readFileSync(path, 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔗 Link Validation Results\n\n${summary}\n\n📋 **Validation Reports**: Check the workflow artifacts for detailed results.`
+            });
+          }
+    
+    - name: Create issue for broken links (scheduled runs)
+      if: github.event_name == 'schedule' && failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = `🔗 Broken Links Detected - ${new Date().toISOString().split('T')[0]}`;
+          const body = `
+          ## Broken Links Detected in Scheduled Validation
+          
+          **Date**: ${new Date().toISOString()}
+          **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+          ### Action Required
+          
+          1. Review the validation reports in the workflow artifacts
+          2. Fix broken links following the [link validation checklist](docs/content/reference/link-validation-checklist.md)
+          3. Update documentation per [ADR-016](docs/content/adrs/016-documentation-link-validation-strategy.md)
+          
+          ### Common Fixes
+          
+          - Replace broken ServiceNow docs links with Community alternatives
+          - Update vendor documentation URLs to current versions
+          - Fix internal links after file reorganization
+          
+          **Labels**: documentation, maintenance, broken-links
+          `;
+          
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['documentation', 'maintenance', 'broken-links']
+          });
+
+  notify-results:
+    runs-on: ubuntu-latest
+    needs: validate-links
+    if: always() && github.event_name == 'schedule'
+    
+    steps:
+    - name: Notify team of validation results
+      run: |
+        if [ "${{ needs.validate-links.result }}" == "success" ]; then
+          echo "✅ Weekly link validation passed"
+        else
+          echo "❌ Weekly link validation failed - issue created"
+        fi

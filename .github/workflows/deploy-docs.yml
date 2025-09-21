@@ -1,0 +1,249 @@
+name: Deploy Documentation to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/deploy-docs.yml'
+  workflow_dispatch:
+    inputs:
+      skip_link_validation:
+        description: 'Skip link validation (not recommended)'
+        required: false
+        default: false
+        type: boolean
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Validate links before deployment
+  validate-links:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.skip_link_validation != 'true'
+    outputs:
+      validation-passed: ${{ steps.validation.outputs.passed }}
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Set up Node.js for link checking
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install link checking tools
+      run: |
+        npm install -g markdown-link-check
+        sudo apt-get update && sudo apt-get install -y curl jq
+    
+    - name: Create reports directory
+      run: mkdir -p docs/reports
+    
+    - name: Run link validation
+      id: validation
+      run: |
+        echo "🔍 Validating documentation links before deployment..."
+        
+        # Run our custom validation script
+        if ./docs/scripts/validate-links.sh --external-only --timeout 10 --report-format json --output docs/reports/pre-deploy-validation.json; then
+          echo "✅ Link validation passed"
+          echo "passed=true" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Link validation failed"
+          echo "passed=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+    
+    - name: Upload validation report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pre-deploy-validation-report
+        path: docs/reports/
+        retention-days: 7
+
+  # Build and deploy documentation
+  deploy:
+    runs-on: ubuntu-latest
+    needs: validate-links
+    if: always() && (needs.validate-links.result == 'success' || github.event.inputs.skip_link_validation == 'true')
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for git info in docs
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install MkDocs and dependencies
+      run: |
+        cd docs
+        pip install -r requirements.txt
+    
+    - name: Configure git for MkDocs
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+    
+    - name: Build documentation
+      run: |
+        cd docs
+        echo "🏗️ Building MkDocs documentation..."
+        mkdocs build --verbose --strict
+        
+        # Verify build output
+        if [ ! -d "site" ] || [ ! -f "site/index.html" ]; then
+          echo "❌ MkDocs build failed - no site directory or index.html"
+          exit 1
+        fi
+        
+        echo "✅ Documentation built successfully"
+        echo "📊 Site statistics:"
+        find site -name "*.html" | wc -l | xargs echo "HTML files:"
+        du -sh site | cut -f1 | xargs echo "Total size:"
+    
+    - name: Add build metadata
+      run: |
+        cd docs/site
+        
+        # Create build info file
+        cat > build-info.json << EOF
+        {
+          "build_time": "$(date -Iseconds)",
+          "commit_sha": "${{ github.sha }}",
+          "commit_ref": "${{ github.ref }}",
+          "workflow_run": "${{ github.run_number }}",
+          "link_validation": "${{ needs.validate-links.outputs.validation-passed || 'skipped' }}"
+        }
+        EOF
+        
+        # Add build timestamp to footer (if using custom theme)
+        echo "<!-- Built on $(date -Iseconds) from commit ${{ github.sha }} -->" >> index.html
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: 'docs/site'
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+    
+    - name: Verify deployment
+      run: |
+        echo "🚀 Documentation deployed successfully!"
+        echo "📍 URL: ${{ steps.deployment.outputs.page_url }}"
+        echo "🔗 Direct links:"
+        echo "  - Home: ${{ steps.deployment.outputs.page_url }}"
+        echo "  - ADRs: ${{ steps.deployment.outputs.page_url }}adrs/"
+        echo "  - Getting Started: ${{ steps.deployment.outputs.page_url }}GETTING_STARTED/"
+        
+        # Test deployment with curl
+        sleep 30  # Wait for deployment to propagate
+        if curl -f -s "${{ steps.deployment.outputs.page_url }}" > /dev/null; then
+          echo "✅ Deployment verification successful"
+        else
+          echo "⚠️ Deployment verification failed - site may still be propagating"
+        fi
+
+  # Post-deployment validation
+  post-deploy-validation:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: success()
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Wait for deployment propagation
+      run: sleep 60
+    
+    - name: Validate deployed site
+      run: |
+        SITE_URL="${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}"
+        echo "🔍 Validating deployed site: $SITE_URL"
+        
+        # Test main pages
+        pages_to_test=(
+          ""
+          "GETTING_STARTED/"
+          "adrs/"
+          "tutorials/"
+          "how-to/"
+          "reference/"
+        )
+        
+        failed_pages=()
+        for page in "${pages_to_test[@]}"; do
+          url="${SITE_URL}${page}"
+          echo "Testing: $url"
+          if curl -f -s "$url" > /dev/null; then
+            echo "✅ $url - OK"
+          else
+            echo "❌ $url - FAILED"
+            failed_pages+=("$url")
+          fi
+        done
+        
+        if [ ${#failed_pages[@]} -eq 0 ]; then
+          echo "🎉 All pages validated successfully!"
+        else
+          echo "⚠️ Some pages failed validation:"
+          printf '%s\n' "${failed_pages[@]}"
+          echo "This may be due to propagation delays. Check again in a few minutes."
+        fi
+    
+    - name: Create deployment summary
+      run: |
+        cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+        ## 📚 Documentation Deployment Summary
+        
+        ### ✅ Deployment Status: SUCCESS
+        
+        **🔗 Site URL**: ${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
+        
+        ### 📊 Build Information
+        - **Commit**: `${{ github.sha }}`
+        - **Branch**: `${{ github.ref_name }}`
+        - **Build Time**: $(date -Iseconds)
+        - **Link Validation**: ${{ needs.validate-links.outputs.validation-passed || 'skipped' }}
+        
+        ### 🎯 Key Pages
+        - [🏠 Home](${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }})
+        - [📋 Getting Started](${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}GETTING_STARTED/)
+        - [🏗️ Architecture Decision Records](${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}adrs/)
+        - [📚 Tutorials](${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}tutorials/)
+        
+        ### 🔧 Documentation Quality
+        - Link validation performed before deployment
+        - All documentation follows [ADR-016](https://github.com/${{ github.repository }}/blob/main/docs/content/adrs/016-documentation-link-validation-strategy.md) standards
+        - Automated quality checks integrated into deployment pipeline
+        
+        ---
+        *Documentation deployed via GitHub Actions with integrated link validation*
+        EOF

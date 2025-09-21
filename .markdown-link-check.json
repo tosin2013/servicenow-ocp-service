@@ -1,0 +1,50 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^https://localhost"
+    },
+    {
+      "pattern": "^http://127.0.0.1"
+    },
+    {
+      "pattern": "^https://127.0.0.1"
+    },
+    {
+      "pattern": "^file://"
+    }
+  ],
+  "replacementPatterns": [
+    {
+      "pattern": "^/",
+      "replacement": "{{BASEURL}}/"
+    }
+  ],
+  "httpHeaders": [
+    {
+      "urls": ["https://docs.servicenow.com"],
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (compatible; LinkChecker/1.0)"
+      }
+    },
+    {
+      "urls": ["https://community.servicenow.com"],
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (compatible; LinkChecker/1.0)"
+      }
+    }
+  ],
+  "timeout": "10s",
+  "retryOn429": true,
+  "retryCount": 3,
+  "fallbackRetryDelay": "30s",
+  "aliveStatusCodes": [200, 206, 301, 302, 307, 308],
+  "ignoreStatusCodes": [
+    {
+      "urls": ["https://www.vaultproject.io"],
+      "statusCodes": [429]
+    }
+  ]
+}
