@@ -1,0 +1,112 @@
+site_name: ServiceNow OpenShift Integration
+site_description: A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform
+# Site URL Configuration:
+# - For LOCAL DEVELOPMENT: Keep site_url commented out (current setting)
+#   This prevents canonical URLs like http://localhost:8000/servicenow-ocp-service/getting-started.md
+# - For PRODUCTION DEPLOYMENT: Uncomment the line below
+# site_url: https://tosin2013.github.io/servicenow-ocp-service
+
+# Documentation directory structure - build occurs in docs folder
+docs_dir: content
+site_dir: site
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - scheme: default
+      primary: red
+      accent: red
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: red
+      accent: red
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+
+plugins:
+  - search
+  - mermaid2
+  - git-revision-date-localized:
+      enable_creation_date: true
+      fallback_to_build_date: true
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - admonition
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - 📋 Implementation Guide: GETTING_STARTED.md
+  - 🏗️ Deployment Architecture: explanation/deployment-architecture.md
+  - 📊 User Workflows Analysis: explanation/user-workflows-analysis.md
+  - Architecture Decision Records:
+    - Overview: adrs/README.md
+    - ADR-001 Three-Tier Architecture: adrs/001-three-tier-orchestration-architecture.md
+    - ADR-002 API-Driven Integration: adrs/002-decoupled-api-driven-integration.md
+    - ADR-003 Centralized Configuration: adrs/003-centralized-configuration-with-connection-credential-aliases.md
+    - ADR-004 GitOps Deployment: adrs/004-gitops-based-deployment-with-argocd-and-kustomize.md
+    - ADR-005 Keycloak Deployment: adrs/005-keycloak-deployment-on-openshift-via-operator.md
+    - ADR-006 ServiceNow Implementation: adrs/006-servicenow-implementation-with-flow-designer-and-integrationhub.md
+    - ADR-007 Secret Management: adrs/007-secret-management-with-external-secrets-operator.md
+    - ADR-008 Observability Strategy: adrs/008-observability-strategy-using-openshift-built-in-monitoring.md
+    - ADR-009 Hybrid GitOps: adrs/009-hybrid-gitops-and-ansible-configuration.md
+    - ADR-010 AAP Integration: adrs/010-ansible-automation-platform-integration.md
+    - ADR-011 Custom Execution Environment: adrs/011-custom-execution-environment-for-aap.md
+    - ADR-012 AAP Kustomize Deployment: adrs/012-ansible-automation-platform-kustomize-deployment.md
+    - ADR-013 PDI Workaround Strategy: adrs/013-pdi-workaround-strategy-for-development.md
+    - ADR-014 Business Rules Over Flow Designer: adrs/014-business-rules-over-flow-designer.md
+    - ADR-015 Secure Credential Management: adrs/015-secure-credential-management-in-user-workflows.md
+  - Tutorials:
+    - 🚀 Getting Started: tutorials/getting-started.md
+    - 🔐 Ansible Vault Configuration: tutorials/ansible-vault-configuration.md
+    - 🐳 Execution Environment Guide: tutorials/execution-environment-guide.md
+    - ⚙️ Ansible Automation Guide: tutorials/ansible-automation-guide.md
+    - 🎯 Your First Project: tutorials/your-first-project.md
+    - 🔄 User Workflows Guide: tutorials/user-workflows-guide.md
+  - How-To Guides:
+    - 🔧 AAP Token Setup: how-to/aap-token-setup.md
+    - 🐳 Working with Execution Environment: how-to/working-with-execution-environment.md
+    - ⚙️ Working with Ansible: how-to/working-with-ansible.md
+    - 📋 Business Rule Logic: how-to/business-rule-logic.md
+    - 🧪 End-to-End Testing: how-to/end-to-end-testing.md
+    - 🔍 Debugging Integration Issues: how-to/debugging-integration-issues.md
+    - 🎨 User Experience Guide: how-to/user-experience-guide.md
+    - 🚀 Scale for Production: how-to/scale-for-production.md
+    - 🛡️ Backup and Recovery: how-to/backup-and-recovery.md
+  - Reference:
+    - 📋 Configuration Variables: reference/configuration-variables.md
+    - 🔌 API Reference: reference/api-reference.md
+    - ⚙️ Ansible Reference: reference/ansible-reference.md
+    - 🐳 Execution Environment Reference: reference/execution-environment-reference.md
+    - 🔧 User Workflows Reference: reference/user-workflows-reference.md
+    - PDI Alternative Solutions: PDI_ALTERNATIVE_SOLUTIONS.md
