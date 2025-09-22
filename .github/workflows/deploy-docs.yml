@@ -272,6 +272,7 @@ jobs:
           "tutorials/"
           "how-to/"
           "reference/"
+          "explanation/"
         )
         
         failed_pages=()

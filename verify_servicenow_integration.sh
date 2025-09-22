@@ -11,8 +11,45 @@ SERVICENOW_URL="https://dev295398.service-now.com"
 KEYCLOAK_URL="https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
 CLIENT_ID="servicenow-client"
 REALM="servicenow"
-ADMIN_USER="admin"
-ADMIN_PASS="*AFel2uYm9N@"
+# Get credentials from vault
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source vault configuration securely
+if [ ! -f "$PROJECT_ROOT/.vault_pass" ]; then
+    echo "❌ Error: Vault password file not found at $PROJECT_ROOT/.vault_pass"
+    echo "Please ensure you have completed the vault configuration setup."
+    exit 1
+fi
+
+if [ ! -f "$PROJECT_ROOT/ansible/group_vars/all/vault.yml" ]; then
+    echo "❌ Error: Vault file not found at $PROJECT_ROOT/ansible/group_vars/all/vault.yml"
+    echo "Please ensure you have completed the vault configuration setup."
+    exit 1
+fi
+
+# Decrypt vault and source variables
+VAULT_TEMP=$(mktemp)
+trap "rm -f $VAULT_TEMP" EXIT
+
+if ! ansible-vault view "$PROJECT_ROOT/ansible/group_vars/all/vault.yml" \
+    --vault-password-file "$PROJECT_ROOT/.vault_pass" > "$VAULT_TEMP" 2>/dev/null; then
+    echo "❌ Error: Failed to decrypt vault file"
+    echo "Please check your vault password and file integrity."
+    exit 1
+fi
+
+# Source the decrypted vault variables
+source "$VAULT_TEMP"
+
+# Validate required variables
+if [ -z "${vault_servicenow_user:-}" ] || [ -z "${vault_servicenow_password:-}" ]; then
+    echo "❌ Error: Required ServiceNow configuration not found in vault"
+    echo "Please ensure vault_servicenow_user and vault_servicenow_password are configured."
+    exit 1
+fi
+
+ADMIN_USER="$vault_servicenow_user"
+ADMIN_PASS="$vault_servicenow_password"
 
 echo ""
 echo "📋 Configuration Details:"

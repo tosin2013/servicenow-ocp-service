@@ -77,3 +77,8 @@ ansible.cfg
 playbook-artifact-*
 *-artifact-*.json
 execution-environment/maketoken.sh
+# Community cleanup artifacts
+*backup*/
+vault_backup_*.yml
+# MkDocs build artifacts
+docs/_site/
