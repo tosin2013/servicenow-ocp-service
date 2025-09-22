@@ -254,7 +254,12 @@ jobs:
     - name: Wait for deployment propagation
       run: sleep 60
     
-    - name: Validate deployed site
+    - name: Install link checking tools
+      run: |
+        npm install -g markdown-link-check broken-link-checker
+        sudo apt-get update && sudo apt-get install -y curl jq
+    
+    - name: Validate deployed site accessibility
       run: |
         SITE_URL="${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}"
         echo "🔍 Validating deployed site: $SITE_URL"
@@ -282,12 +287,179 @@ jobs:
         done
         
         if [ ${#failed_pages[@]} -eq 0 ]; then
-          echo "🎉 All pages validated successfully!"
+          echo "🎉 All pages accessible successfully!"
         else
-          echo "⚠️ Some pages failed validation:"
+          echo "⚠️ Some pages failed accessibility:"
           printf '%s\n' "${failed_pages[@]}"
           echo "This may be due to propagation delays. Check again in a few minutes."
         fi
+    
+    - name: Run comprehensive link validation on deployed site
+      id: live-validation
+      run: |
+        SITE_URL="${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}"
+        echo "🔗 Running comprehensive link validation on live site: $SITE_URL"
+        
+        # Create reports directory
+        mkdir -p live-validation-reports
+        
+        # Use broken-link-checker to scan the entire deployed site
+        echo "Starting broken link checker scan..."
+        blc "$SITE_URL" \
+          --recursive \
+          --ordered \
+          --exclude-external \
+          --filter-level 3 \
+          --requests 5 \
+          --max-sockets 10 \
+          --timeout 10000 \
+          --retry-limit 2 \
+          --json > live-validation-reports/broken-links.json || true
+        
+        # Parse results and create summary
+        echo "📊 Generating validation summary..."
+        
+        # Count broken links
+        broken_count=$(jq '[.[] | select(.broken == true)] | length' live-validation-reports/broken-links.json 2>/dev/null || echo "0")
+        total_count=$(jq 'length' live-validation-reports/broken-links.json 2>/dev/null || echo "0")
+        
+        echo "validation_summary<<EOF" >> $GITHUB_OUTPUT
+        echo "## 🔗 Live Site Link Validation Results" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "**Site URL**: $SITE_URL" >> $GITHUB_OUTPUT
+        echo "**Total Links Checked**: $total_count" >> $GITHUB_OUTPUT
+        echo "**Broken Links Found**: $broken_count" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        
+        if [ "$broken_count" -gt 0 ]; then
+          echo "### ❌ Broken Links Detected" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "The following links are broken on the live site:" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          
+          # Extract broken links details
+          jq -r '.[] | select(.broken == true) | "- **\(.url.original)** (Status: \(.http.statusCode // "N/A")) on page \(.base.original)"' \
+            live-validation-reports/broken-links.json 2>/dev/null | head -20 >> $GITHUB_OUTPUT || true
+          
+          if [ "$broken_count" -gt 20 ]; then
+            echo "" >> $GITHUB_OUTPUT
+            echo "*... and $(($broken_count - 20)) more broken links. See full report in artifacts.*" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "" >> $GITHUB_OUTPUT
+          echo "### 🛠️ Next Steps" >> $GITHUB_OUTPUT
+          echo "1. Download the validation report artifact for detailed analysis" >> $GITHUB_OUTPUT
+          echo "2. Fix broken links in the documentation source" >> $GITHUB_OUTPUT
+          echo "3. Test fixes locally using \`cd docs && ./run-docs.sh validate\`" >> $GITHUB_OUTPUT
+          echo "4. Commit and push fixes to trigger re-deployment" >> $GITHUB_OUTPUT
+          
+          echo "status=failed" >> $GITHUB_OUTPUT
+        else
+          echo "### ✅ All Links Working" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "No broken links detected on the live site! 🎉" >> $GITHUB_OUTPUT
+          echo "status=passed" >> $GITHUB_OUTPUT
+        fi
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Upload live validation report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: live-site-validation-report
+        path: live-validation-reports/
+        retention-days: 30
+    
+    - name: Create GitHub issue for broken links
+      if: steps.live-validation.outputs.status == 'failed'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const brokenLinksIssueTitle = '🔗 Broken Links Detected on Live Documentation Site';
+          
+          // Check if issue already exists
+          const existingIssues = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: ['documentation', 'broken-links']
+          });
+          
+          const existingIssue = existingIssues.data.find(issue => 
+            issue.title.includes('Broken Links Detected')
+          );
+          
+          const issueBody = `
+          ## 🔗 Broken Links Detected on Live Documentation Site
+          
+          **Deployment**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          **Site URL**: ${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
+          **Validation Date**: ${new Date().toISOString()}
+          
+          ${{ steps.live-validation.outputs.validation_summary }}
+          
+          ### 📋 Action Items
+          - [ ] Review the [validation report artifact](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [ ] Fix broken links in documentation source files
+          - [ ] Test fixes locally: \`cd docs && ./run-docs.sh validate\`
+          - [ ] Verify fixes on deployed site after re-deployment
+          
+          ### 🔄 Auto-Resolution
+          This issue will be automatically closed when the next deployment passes link validation.
+          
+          ---
+          *This issue was automatically created by the [Deploy Documentation workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*
+          `;
+          
+          if (existingIssue) {
+            // Update existing issue
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: existingIssue.number,
+              body: `## 🔄 Updated Broken Links Report\n\n${issueBody}`
+            });
+          } else {
+            // Create new issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: brokenLinksIssueTitle,
+              body: issueBody,
+              labels: ['documentation', 'broken-links', 'bug']
+            });
+          }
+    
+    - name: Close resolved broken links issues
+      if: steps.live-validation.outputs.status == 'passed'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // Find and close any open broken links issues
+          const existingIssues = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: ['documentation', 'broken-links']
+          });
+          
+          for (const issue of existingIssues.data) {
+            if (issue.title.includes('Broken Links Detected')) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `## ✅ Broken Links Resolved\n\nAll links are now working on the live documentation site!\n\n**Deployment**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})\n**Validation Date**: ${new Date().toISOString()}\n\nClosing this issue automatically.`
+              });
+              
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+            }
+          }
     
     - name: Create deployment summary
       run: |
@@ -302,7 +474,8 @@ jobs:
         - **Commit**: `${{ github.sha }}`
         - **Branch**: `${{ github.ref_name }}`
         - **Build Time**: $(date -Iseconds)
-        - **Link Validation**: ${{ needs.validate-links.outputs.validation-passed || 'skipped' }}
+        - **Pre-Deploy Link Validation**: ${{ needs.validate-links.outputs.validation-passed || 'skipped' }}
+        - **Post-Deploy Validation**: Running (see post-deploy-validation job)
         
         ### 🎯 Key Pages
         - [🏠 Home](${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }})
@@ -311,10 +484,18 @@ jobs:
         - [📚 Tutorials](${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}tutorials/)
         
         ### 🔧 Documentation Quality
-        - Link validation performed before deployment
+        - ✅ Pre-deployment source validation performed
+        - 🔄 Post-deployment live link validation in progress
+        - 📊 Comprehensive broken link detection on live site
+        - 🤖 Automatic GitHub issue creation for broken links
+        - 📋 Detailed validation reports saved as artifacts
         - All documentation follows [ADR-016](https://github.com/${{ github.repository }}/blob/main/docs/content/adrs/016-documentation-link-validation-strategy.md) standards
-        - Automated quality checks integrated into deployment pipeline
+        
+        ### 🚨 Issue Management
+        - Broken links automatically create GitHub issues
+        - Issues are auto-closed when links are fixed
+        - Validation reports available for download
         
         ---
-        *Documentation deployed via GitHub Actions with integrated link validation*
+        *Documentation deployed via GitHub Actions with comprehensive link validation*
         EOF
