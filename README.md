@@ -5,6 +5,15 @@
 [![ServiceNow](https://img.shields.io/badge/ServiceNow-ITSM-green.svg)](https://www.servicenow.com/)
 [![Ansible](https://img.shields.io/badge/Ansible-AAP-orange.svg)](https://www.ansible.com/)
 
+## 🚀 TL;DR
+
+**ServiceNow → Ansible → OpenShift project automation in 3 steps:**
+1. `./run_playbook.sh` - Deploy infrastructure via GitOps
+2. `./validate_integration.sh` - Configure SSO and business rules  
+3. Submit ServiceNow catalog request → Get OpenShift project automatically
+
+**Perfect for:** Enterprise IT teams wanting automated project provisioning with ServiceNow governance.
+
 > **Enterprise-grade ServiceNow to OpenShift project provisioning automation** with Ansible Automation Platform, Keycloak SSO, and GitOps deployment patterns.
 
 ## 🎯 What This Does
@@ -71,19 +80,19 @@ cd user-workflows/advanced/
 ## 📖 Documentation
 
 ### 🎓 **Getting Started**
-- **[Getting Started Guide](docs/GETTING_STARTED.md)** - Complete setup walkthrough
-- **[Keycloak Integration Guide](docs/KEYCLOAK_INTEGRATION_GUIDE.md)** - 🔐 **Identity & SSO Setup**
-- **[User Experience Guide](docs/user-experience-guide.md)** - End-user journey
-- **[End-to-End Test Guide](docs/end-to-end-test-guide.md)** - Validation workflows
+- **[Getting Started Guide](docs/content/GETTING_STARTED.md)** - Complete setup walkthrough
+- **[Keycloak Integration Guide](docs/content/KEYCLOAK_INTEGRATION_GUIDE.md)** - 🔐 **Identity & SSO Setup**
+- **[User Experience Guide](docs/content/how-to/user-experience-guide.md)** - End-user journey
+- **[End-to-End Test Guide](END_TO_END_TEST_EXECUTION_SUMMARY.md)** - Validation workflows
 
 ### 🏗️ **Architecture**
-- **[ADRs](docs/adrs/)** - 15 architectural decision records
-- **[Architecture Overview](docs/explanation/architecture-overview.md)** - System design
-- **[Four-Tier Architecture](docs/adrs/001-three-tier-orchestration-architecture.md)** - Core design
+- **[ADRs](docs/content/adrs/)** - 15 architectural decision records
+- **[Architecture Overview](docs/content/explanation/architecture-overview.md)** - System design
+- **[Four-Tier Architecture](docs/content/adrs/001-three-tier-orchestration-architecture.md)** - Core design
 
 ### 🔧 **Implementation**
-- **[Business Rules Setup](docs/BUSINESS_RULE_LOGIC_DOCUMENTATION.md)** - ServiceNow automation
-- **[AAP Integration](docs/AAP_TOKEN_SETUP_GUIDE.md)** - Ansible Automation Platform
+- **[Business Rules Setup](docs/content/how-to/business-rule-logic.md)** - ServiceNow automation
+- **[AAP Integration](docs/content/how-to/aap-token-setup.md)** - Ansible Automation Platform
 - **[Execution Environment](execution-environment/)** - Custom container builds
 
 ### 🧪 **Testing & Validation**
