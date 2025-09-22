@@ -1,4 +1,21 @@
 #!/bin/bash
+#
+# Script Name: validate_integration.sh
+# Purpose: Comprehensive health check script for ServiceNow-OpenShift integration components
+# Author: ServiceNow-OpenShift Integration Project
+# Last Modified: 2025-09-22
+# Documentation: See docs/content/reference/shell-scripts-reference.md
+#
+# Usage: ./validate_integration.sh [--skip-servicenow] [--skip-aap] [--detailed]
+#
+# This script performs automated validation of connectivity, authentication, and 
+# configuration across all four tiers: OpenShift, Keycloak, ServiceNow, and AAP.
+#
+# Exit Codes:
+#   0: All tests passed
+#   1: One or more tests failed
+#   2: Script execution error
+#
 
 # ServiceNow-OpenShift Integration Validation Script
 # This script performs automated health checks on all integration components

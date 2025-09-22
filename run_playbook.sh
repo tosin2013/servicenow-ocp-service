@@ -1,11 +1,57 @@
 #!/bin/bash
 #
-# Wrapper script to run ansible-navigator from the execution-environment directory,
-# ensuring it picks up the correct configuration and execution environment.
-# All arguments passed to this script are forwarded to ansible-navigator.
+# Script Name: run_playbook.sh
+# Purpose: Wrapper script to execute Ansible playbooks using ansible-navigator with ServiceNow execution environment
+# Author: ServiceNow-OpenShift Integration Project
+# Last Modified: 2025-09-22
+# Documentation: See docs/content/reference/shell-scripts-reference.md
+#
+# Usage: ./run_playbook.sh <playbook-path> [ansible-navigator-options]
+# 
+# Examples:
+#   ./run_playbook.sh ansible/preflight_checks.yml -e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass
+#   ./run_playbook.sh ansible/playbook.yml -m stdout --vault-password-file .vault_pass
+#
+# Prerequisites:
+#   - ansible-navigator.yml must exist in execution-environment/ directory
+#   - ServiceNow execution environment container must be available
+#   - Must be run from project root directory
 #
 
 set -euo pipefail
+
+# Usage function
+usage() {
+    echo "Usage: $0 <playbook-path> [ansible-navigator-options]"
+    echo ""
+    echo "Execute Ansible playbooks using ansible-navigator with ServiceNow execution environment"
+    echo ""
+    echo "Arguments:"
+    echo "  <playbook-path>               Path to Ansible playbook (relative to project root)"
+    echo "  [ansible-navigator-options]   Additional ansible-navigator options"
+    echo ""
+    echo "Examples:"
+    echo "  $0 ansible/preflight_checks.yml --vault-password-file .vault_pass"
+    echo "  $0 ansible/playbook.yml -e @ansible/group_vars/all/vault.yml -m stdout"
+    echo "  $0 ansible/configure_aap.yml --vault-password-file .vault_pass"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help    Show this help message"
+    echo ""
+    echo "For detailed documentation, see: docs/content/reference/shell-scripts-reference.md"
+    exit 1
+}
+
+# Check for help flag
+if [[ "${1:-}" == "-h" ]] || [[ "${1:-}" == "--help" ]]; then
+    usage
+fi
+
+# Validate arguments
+if [[ $# -eq 0 ]]; then
+    echo "Error: Playbook path is required" >&2
+    usage
+fi
 
 # The script should be run from the project root.
 PROJECT_ROOT=$(pwd)
