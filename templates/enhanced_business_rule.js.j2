@@ -1,0 +1,235 @@
+(function executeRule(current, previous) {
+    
+    // Configuration from Ansible variables
+    var DEBUG_ENABLED = {{ enable_debug_logging | default('true') | lower }};
+    var AAP_TOKEN = '{{ vault_aap_token }}';
+    var AAP_ENDPOINT = '{{ aap_controller_url }}/api/v2/job_templates/{{ aap_job_template_id | default('9') }}/launch/';
+    var TARGET_STATE = '{{ target_workflow_state | default('2') }}';
+    
+    // Logging functions
+    function logDebug(message) {
+        if (DEBUG_ENABLED) {
+            gs.log('[DEBUG] OpenShift Business Rule: ' + message);
+        }
+    }
+    
+    function logInfo(message) {
+        gs.log('[INFO] OpenShift Business Rule: ' + message);
+    }
+    
+    function logError(message) {
+        gs.error('[ERROR] OpenShift Business Rule: ' + message);
+    }
+    
+    function logSuccess(message) {
+        gs.log('[SUCCESS] OpenShift Business Rule: ' + message);
+    }
+    
+    // Main execution
+    logDebug('Business Rule triggered for RITM: ' + current.number);
+    logDebug('Current state: ' + current.state + ', Previous state: ' + (previous ? previous.state : 'null'));
+    logDebug('Catalog item: ' + current.cat_item);
+    logDebug('Target state for trigger: ' + TARGET_STATE);
+    
+    // Only trigger when state changes to target state (Work in Progress)
+    if (current.state != TARGET_STATE) {
+        logDebug('State is not ' + TARGET_STATE + ', exiting. Current state: ' + current.state);
+        return;
+    }
+    
+    if (previous && previous.state == TARGET_STATE) {
+        logDebug('Previous state was already ' + TARGET_STATE + ', exiting to avoid duplicate triggers');
+        return;
+    }
+    
+    logInfo('Proceeding with OpenShift project creation workflow');
+    
+    // Get catalog variables
+    var variables = {};
+    var gr = new GlideRecord('sc_item_option_mtom');
+    gr.addQuery('request_item', current.sys_id);
+    gr.query();
+    
+    var variableCount = 0;
+    while (gr.next()) {
+        var option = gr.sc_item_option.getRefRecord();
+        if (option) {
+            variables[option.name] = gr.sc_item_option.value;
+            variableCount++;
+            logDebug('Found variable: ' + option.name + ' = ' + gr.sc_item_option.value);
+        }
+    }
+    
+    logInfo('Found ' + variableCount + ' catalog variables');
+    
+    var projectName = variables.project_name || 'default-project';
+    var environment = variables.environment || 'development';
+    
+    logInfo('Project name: ' + projectName + ', Environment: ' + environment);
+    
+    // 1. Create Incident for Job Status Tracking
+    logInfo('Creating tracking incident...');
+    
+    var incidentGr = new GlideRecord('incident');
+    incidentGr.initialize();
+    incidentGr.short_description = 'OpenShift Project Creation: ' + projectName;
+    incidentGr.description = 'Tracking AAP job for OpenShift project creation\n' +
+                           'Project: ' + projectName + '\n' +
+                           'Environment: ' + environment + '\n' +
+                           'ServiceNow Request: ' + current.request.number + '\n' +
+                           'Requestor: ' + current.request.requested_for.user_name;
+    incidentGr.category = 'Infrastructure';
+    incidentGr.subcategory = 'Platform';
+    incidentGr.impact = '3';
+    incidentGr.urgency = '3';
+    incidentGr.priority = '4';
+    incidentGr.state = '2'; // In Progress
+    incidentGr.caller_id = current.request.requested_for;
+    incidentGr.assignment_group = 'Platform Engineering';
+    
+    var incidentId = incidentGr.insert();
+    
+    if (!incidentId) {
+        logError('Failed to create tracking incident for RITM: ' + current.number);
+        current.work_notes = '❌ Error: Could not create status tracking incident';
+        current.update();
+        return;
+    }
+    
+    logSuccess('Tracking incident created: ' + incidentGr.number + ' (ID: ' + incidentId + ') for RITM: ' + current.number);
+    
+    // 2. Get AAP token
+    logDebug('Getting AAP token...');
+    var aapToken = gs.getProperty('aap.bearer.token') || AAP_TOKEN;
+    if (!aapToken) {
+        logError('AAP Bearer token not found in system properties or template');
+        current.work_notes = '❌ Configuration error: AAP token not found';
+        incidentGr.work_notes = '❌ Failed to launch AAP job: Token not configured';
+        incidentGr.state = '7'; // Closed
+        incidentGr.close_code = 'Solved (Permanently)';
+        incidentGr.close_notes = 'Configuration error';
+        incidentGr.update();
+        current.update();
+        return;
+    }
+    
+    logDebug('AAP token found, length: ' + aapToken.length);
+    
+    // 3. Prepare AAP job variables with tracking info
+    var jobVars = {
+        project_name: projectName,
+        display_name: variables.display_name || projectName,
+        environment: environment,
+        requestor_first_name: variables.requestor_first_name || 'Unknown',
+        requestor_last_name: variables.requestor_last_name || 'User',
+        team_members: variables.team_members || 'default',
+        business_justification: variables.business_justification || 'ServiceNow Request',
+        servicenow_request_number: current.request.number.toString(),
+        servicenow_incident_number: incidentGr.number.toString(),
+        requestor: current.request.requested_for.user_name.toString()
+    };
+    
+    // Add database variables if present
+    if (variables.database_type) {
+        jobVars.database_type = variables.database_type;
+        jobVars.database_size = variables.database_size || '5Gi';
+        logDebug('Added database variables: ' + variables.database_type + ', ' + (variables.database_size || '5Gi'));
+    }
+    
+    logDebug('Job variables prepared: ' + JSON.stringify(jobVars));
+    
+    // 4. Launch AAP Job
+    logInfo('Launching AAP job...');
+    logDebug('AAP Endpoint: ' + AAP_ENDPOINT);
+    
+    try {
+        var request = new sn_ws.RESTMessageV2();
+        request.setEndpoint(AAP_ENDPOINT);
+        request.setHttpMethod('POST');
+        request.setRequestHeader('Authorization', 'Bearer ' + aapToken);
+        request.setRequestHeader('Content-Type', 'application/json');
+        
+        var payload = {
+            extra_vars: jobVars
+        };
+        
+        request.setRequestBody(JSON.stringify(payload));
+        
+        logDebug('Sending AAP request with payload: ' + JSON.stringify(payload));
+        
+        var response = request.execute();
+        var responseBody = response.getBody();
+        var httpStatus = response.getStatusCode();
+        
+        logInfo('AAP API Response - Status: ' + httpStatus + ', Body: ' + responseBody);
+        
+        if (httpStatus == 201) {
+            var jobData = JSON.parse(responseBody);
+            var jobId = jobData.job;
+            
+            logSuccess('AAP Job launched successfully! Job ID: ' + jobId);
+            
+            // Update RITM with success
+            current.work_notes = '✅ AAP Job launched successfully!\n' +
+                               '📊 Job ID: ' + jobId + '\n' +
+                               '🎫 Tracking Incident: ' + incidentGr.number + '\n' +
+                               '⏰ Started: ' + new GlideDateTime() + '\n' +
+                               '\n👀 Check incident ' + incidentGr.number + ' for real-time status updates';
+            current.update();
+            
+            // Update Incident with job tracking info
+            incidentGr.work_notes = '🚀 AAP Job launched successfully!\n' +
+                                  '📊 Job ID: ' + jobId + '\n' +
+                                  '📋 Project: ' + projectName + '\n' +
+                                  '🌍 Environment: ' + environment + '\n' +
+                                  '⏰ Started: ' + new GlideDateTime() + '\n' +
+                                  '\n🔄 Monitoring job status...';
+            incidentGr.u_aap_job_id = jobId;
+            incidentGr.update();
+            
+            logSuccess('OpenShift AAP Job launched: ' + jobId + ' for request: ' + current.number + ', tracking via incident: ' + incidentGr.number);
+            
+        } else {
+            // Handle failure
+            logError('Failed to launch AAP job. HTTP Status: ' + httpStatus + ', Response: ' + responseBody);
+            
+            var errorMsg = '❌ Failed to launch AAP job\n' +
+                          '📊 HTTP Status: ' + httpStatus + '\n' +
+                          '📝 Response: ' + responseBody + '\n' +
+                          '⏰ Failed at: ' + new GlideDateTime();
+            
+            current.work_notes = errorMsg;
+            current.state = '4'; // Closed Incomplete
+            current.close_code = 'Failed';
+            current.close_notes = 'AAP job launch failed';
+            current.update();
+            
+            incidentGr.work_notes = errorMsg;
+            incidentGr.state = '7'; // Closed
+            incidentGr.close_code = 'Solved (Permanently)';
+            incidentGr.close_notes = 'AAP job launch failed';
+            incidentGr.update();
+        }
+    } catch (ex) {
+        logError('Exception launching AAP job for request: ' + current.number + '. Error: ' + ex.message);
+        
+        var errorMsg = '💥 Exception launching AAP job\n' +
+                      '📝 Error: ' + ex.message + '\n' +
+                      '⏰ Failed at: ' + new GlideDateTime();
+        
+        current.work_notes = errorMsg;
+        current.state = '4'; // Closed Incomplete
+        current.close_code = 'Failed';
+        current.close_notes = 'AAP integration error';
+        current.update();
+        
+        incidentGr.work_notes = errorMsg;
+        incidentGr.state = '7'; // Closed
+        incidentGr.close_code = 'Solved (Permanently)';
+        incidentGr.close_notes = 'AAP integration error';
+        incidentGr.update();
+    }
+    
+    logInfo('OpenShift business rule execution completed for RITM: ' + current.number);
+    
+})(current, previous);
