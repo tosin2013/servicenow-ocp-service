@@ -7,10 +7,10 @@
 
 ## 🚀 TL;DR
 
-**ServiceNow → Ansible → OpenShift project automation in 3 steps:**
-1. `./run_playbook.sh` - Deploy infrastructure via GitOps
-2. `./validate_integration.sh` - Configure SSO and business rules  
-3. Submit ServiceNow catalog request → Get OpenShift project automatically
+**ServiceNow → Ansible → OpenShift project automation in 3 phases:**
+1. **Deploy Infrastructure**: `oc apply -k kustomize/argocd/apps/` - GitOps deployment of AAP, Keycloak, and operators
+2. **Configure Integration**: `./run_playbook.sh ansible/playbook.yml` - Setup OIDC, OAuth, and business rules
+3. **Test End-to-End**: Submit ServiceNow catalog request → Automated OpenShift project provisioning
 
 **Perfect for:** Enterprise IT teams wanting automated project provisioning with ServiceNow governance.
 
@@ -175,4 +175,4 @@ Apache License 2.0 - see [LICENSE](LICENSE) for details.
 
 ---
 
-**Ready to automate your OpenShift provisioning?** Start with the [Getting Started Guide](docs/GETTING_STARTED.md)!
+**Ready to automate your OpenShift provisioning?** Start with the [Getting Started Guide](docs/content/GETTING_STARTED.md)!
