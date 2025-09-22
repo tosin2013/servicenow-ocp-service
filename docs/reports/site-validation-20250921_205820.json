@@ -1,0 +1,14 @@
+{
+  "validation_time": "",
+  "site_url": "",
+  "overall_status": "",
+  "working_pages": [],
+  "broken_pages": [],
+  "build_info": {},
+  "summary": {
+    "total_tested": 0,
+    "working": 0,
+    "broken": 0,
+    "success_rate": 0
+  }
+}

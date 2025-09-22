@@ -1,0 +1,1547 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform" name="description"/>
+<link href="https://tosin2013.github.io/servicenow-ocp-service/explanation/deployment-architecture/" rel="canonical"/>
+<link href="../../GETTING_STARTED/" rel="prev"/>
+<link href="../user-workflows-analysis/" rel="next"/>
+<link href="../../assets/favicon.ico" rel="icon"/>
+<meta content="mkdocs-1.5.3, mkdocs-material-9.4.6" name="generator"/>
+<title>🏗️ Deployment Architecture - ServiceNow OpenShift Integration</title>
+<link href="../../assets/stylesheets/main.35e1ed30.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.356b1318.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#deployment-architecture">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="ServiceNow OpenShift Integration" class="md-header__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              🏗️ Deployment Architecture
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="slate" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+</form>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../..">
+        
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../GETTING_STARTED/">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="./">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../user-workflows-analysis/">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../adrs/">
+          
+  
+  Architecture Decision Records
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../tutorials/">
+          
+  
+  Tutorials
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../how-to/">
+          
+  
+  How-To Guides
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../reference/">
+          
+  
+  Reference
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="ServiceNow OpenShift Integration" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+    ServiceNow OpenShift Integration
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    Home
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../GETTING_STARTED/">
+<span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#architecture-overview">
+    🎯 Architecture Overview
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-patterns">
+    🚀 Deployment Patterns
+  </a>
+<nav aria-label="🚀 Deployment Patterns" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-gitops-first-approach">
+    1. GitOps-First Approach
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-layered-kustomize-structure">
+    2. Layered Kustomize Structure
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-operator-based-deployment">
+    3. Operator-Based Deployment
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#component-deployment-flow">
+    🔧 Component Deployment Flow
+  </a>
+<nav aria-label="🔧 Component Deployment Flow" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-sequence-diagram">
+    Deployment Sequence Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#phase-1-infrastructure-bootstrap">
+    Phase 1: Infrastructure Bootstrap
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#phase-2-configuration-management">
+    Phase 2: Configuration Management
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#phase-3-servicenow-integration">
+    Phase 3: ServiceNow Integration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-architecture">
+    🛡️ Security Architecture
+  </a>
+<nav aria-label="🛡️ Security Architecture" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-flow-diagram">
+    Security Flow Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-credential-management">
+    1. Credential Management
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-network-security">
+    2. Network Security
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-rbac-integration">
+    3. RBAC Integration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-environments">
+    📊 Deployment Environments
+  </a>
+<nav aria-label="📊 Deployment Environments" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#environment-comparison-diagram">
+    Environment Comparison Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-environment">
+    Development Environment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#production-environment">
+    Production Environment
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#continuous-deployment">
+    🔄 Continuous Deployment
+  </a>
+<nav aria-label="🔄 Continuous Deployment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#complete-gitops-workflow">
+    Complete GitOps Workflow
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gitops-sequence-diagram">
+    GitOps Sequence Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-validation">
+    Deployment Validation
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scaling-considerations">
+    📈 Scaling Considerations
+  </a>
+<nav aria-label="📈 Scaling Considerations" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scaling-architecture-diagram">
+    Scaling Architecture Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#horizontal-scaling">
+    Horizontal Scaling
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#vertical-scaling">
+    Vertical Scaling
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#monitoring-and-observability">
+    🔍 Monitoring and Observability
+  </a>
+<nav aria-label="🔍 Monitoring and Observability" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#built-in-openshift-monitoring">
+    Built-in OpenShift Monitoring
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#custom-metrics">
+    Custom Metrics
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#best-practices">
+    🎯 Best Practices
+  </a>
+<nav aria-label="🎯 Best Practices" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-infrastructure-as-code">
+    1. Infrastructure as Code
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-security-first">
+    2. Security First
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-operational-excellence">
+    3. Operational Excellence
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../user-workflows-analysis/">
+<span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+<span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/001-three-tier-orchestration-architecture/">
+<span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/002-decoupled-api-driven-integration/">
+<span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/003-centralized-configuration-with-connection-credential-aliases/">
+<span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/004-gitops-based-deployment-with-argocd-and-kustomize/">
+<span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/005-keycloak-deployment-on-openshift-via-operator/">
+<span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/006-servicenow-implementation-with-flow-designer-and-integrationhub/">
+<span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/007-secret-management-with-external-secrets-operator/">
+<span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/008-observability-strategy-using-openshift-built-in-monitoring/">
+<span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/009-hybrid-gitops-and-ansible-configuration/">
+<span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/010-ansible-automation-platform-integration/">
+<span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/011-custom-execution-environment-for-aap/">
+<span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/012-ansible-automation-platform-kustomize-deployment/">
+<span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/013-pdi-workaround-strategy-for-development/">
+<span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/014-business-rules-over-flow-designer/">
+<span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/015-secure-credential-management-in-user-workflows/">
+<span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/016-documentation-link-validation-strategy/">
+<span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+<span class="md-ellipsis">
+    Tutorials
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/getting-started/">
+<span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/ansible-vault-configuration/">
+<span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/execution-environment-guide/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/ansible-automation-guide/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/your-first-project/">
+<span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/user-workflows-guide/">
+<span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+<span class="md-ellipsis">
+    How-To Guides
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/aap-token-setup/">
+<span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/working-with-execution-environment/">
+<span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/working-with-ansible/">
+<span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/business-rule-logic/">
+<span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/end-to-end-testing/">
+<span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/debugging-integration-issues/">
+<span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/user-experience-guide/">
+<span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/scale-for-production/">
+<span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/backup-and-recovery/">
+<span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+<span class="md-ellipsis">
+    Reference
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/configuration-variables/">
+<span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/api-reference/">
+<span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/ansible-reference/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/execution-environment-reference/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/user-workflows-reference/">
+<span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-report/">
+<span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-monitoring-setup/">
+<span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-checklist/">
+<span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../PDI_ALTERNATIVE_SOLUTIONS/">
+<span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#architecture-overview">
+    🎯 Architecture Overview
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-patterns">
+    🚀 Deployment Patterns
+  </a>
+<nav aria-label="🚀 Deployment Patterns" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-gitops-first-approach">
+    1. GitOps-First Approach
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-layered-kustomize-structure">
+    2. Layered Kustomize Structure
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-operator-based-deployment">
+    3. Operator-Based Deployment
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#component-deployment-flow">
+    🔧 Component Deployment Flow
+  </a>
+<nav aria-label="🔧 Component Deployment Flow" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-sequence-diagram">
+    Deployment Sequence Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#phase-1-infrastructure-bootstrap">
+    Phase 1: Infrastructure Bootstrap
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#phase-2-configuration-management">
+    Phase 2: Configuration Management
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#phase-3-servicenow-integration">
+    Phase 3: ServiceNow Integration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-architecture">
+    🛡️ Security Architecture
+  </a>
+<nav aria-label="🛡️ Security Architecture" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-flow-diagram">
+    Security Flow Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-credential-management">
+    1. Credential Management
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-network-security">
+    2. Network Security
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-rbac-integration">
+    3. RBAC Integration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-environments">
+    📊 Deployment Environments
+  </a>
+<nav aria-label="📊 Deployment Environments" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#environment-comparison-diagram">
+    Environment Comparison Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-environment">
+    Development Environment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#production-environment">
+    Production Environment
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#continuous-deployment">
+    🔄 Continuous Deployment
+  </a>
+<nav aria-label="🔄 Continuous Deployment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#complete-gitops-workflow">
+    Complete GitOps Workflow
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gitops-sequence-diagram">
+    GitOps Sequence Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-validation">
+    Deployment Validation
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scaling-considerations">
+    📈 Scaling Considerations
+  </a>
+<nav aria-label="📈 Scaling Considerations" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scaling-architecture-diagram">
+    Scaling Architecture Diagram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#horizontal-scaling">
+    Horizontal Scaling
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#vertical-scaling">
+    Vertical Scaling
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#monitoring-and-observability">
+    🔍 Monitoring and Observability
+  </a>
+<nav aria-label="🔍 Monitoring and Observability" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#built-in-openshift-monitoring">
+    Built-in OpenShift Monitoring
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#custom-metrics">
+    Custom Metrics
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#best-practices">
+    🎯 Best Practices
+  </a>
+<nav aria-label="🎯 Best Practices" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-infrastructure-as-code">
+    1. Infrastructure as Code
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-security-first">
+    2. Security First
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-operational-excellence">
+    3. Operational Excellence
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="deployment-architecture">🏗️ Deployment Architecture<a class="headerlink" href="#deployment-architecture" title="Permanent link">¶</a></h1>
+<p><strong>Understanding the ServiceNow-OpenShift integration deployment patterns and infrastructure design</strong></p>
+<h2 id="architecture-overview">🎯 Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">¶</a></h2>
+<p>The ServiceNow-OpenShift integration follows a <strong>four-tier architecture</strong> with GitOps deployment patterns, designed for enterprise-scale automation and security.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Tier 1: Orchestration"
+        SN[ServiceNow ITSM]
+        SC[Service Catalog]
+        BR[Business Rules]
+        WF[Workflow Engine]
+    end
+
+    subgraph "Tier 2: Automation Execution"
+        AAP[Ansible Automation Platform]
+        JT[Job Templates]
+        EE[Execution Environment]
+        CR[Credential Store]
+    end
+
+    subgraph "Tier 3: Identity Management"
+        KC[Keycloak/RH-SSO]
+        RL[Realms]
+        CL[OAuth Clients]
+        US[User Store]
+    end
+
+    subgraph "Tier 4: Container Platform"
+        OCP[OpenShift Container Platform]
+        NS[Namespaces/Projects]
+        RB[RBAC/RoleBindings]
+        NP[Network Policies]
+    end
+
+    SN --&gt; AAP
+    AAP --&gt; KC
+    AAP --&gt; OCP
+    KC --&gt; OCP
+
+    style SN fill:#e3f2fd
+    style AAP fill:#fff3e0
+    style KC fill:#f3e5f5
+    style OCP fill:#e8f5e8</code></pre>
+<h2 id="deployment-patterns">🚀 Deployment Patterns<a class="headerlink" href="#deployment-patterns" title="Permanent link">¶</a></h2>
+<h3 id="1-gitops-first-approach">1. GitOps-First Approach<a class="headerlink" href="#1-gitops-first-approach" title="Permanent link">¶</a></h3>
+<p><strong>Infrastructure as Code</strong> with declarative deployment:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># kustomize/argocd/apps/app-of-apps.yaml</span>
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Application</span>
+<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">servicenow-ocp-apps</span>
+<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-0-7" id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="w">  </span><span class="nt">source</span><span class="p">:</span>
+<a href="#__codelineno-0-8" id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="w">    </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/tosin2013/servicenow-ocp-service.git</span>
+<a href="#__codelineno-0-9" id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kustomize/argocd/apps</span>
+<a href="#__codelineno-0-10" id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="w">    </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<a href="#__codelineno-0-11" id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="w">  </span><span class="nt">destination</span><span class="p">:</span>
+<a href="#__codelineno-0-12" id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">    </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://kubernetes.default.svc</span>
+<a href="#__codelineno-0-13" id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
+</code></pre></div>
+<p><strong>Key Benefits:</strong>
+- <strong>Declarative</strong>: All infrastructure defined in Git
+- <strong>Auditable</strong>: Complete change history
+- <strong>Consistent</strong>: Eliminates configuration drift
+- <strong>Secure</strong>: Pull-based deployment model</p>
+<h3 id="2-layered-kustomize-structure">2. Layered Kustomize Structure<a class="headerlink" href="#2-layered-kustomize-structure" title="Permanent link">¶</a></h3>
+<p><strong>Environment-specific overlays</strong> for different deployment targets:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a>kustomize/
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>├── ansible-automation-platform/
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a>│   ├── base/                    # Base AAP configuration
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a>│   └── overlays/
+<a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a>│       ├── development/         # Dev-specific settings
+<a href="#__codelineno-1-6" id="__codelineno-1-6" name="__codelineno-1-6"></a>│       ├── staging/            # Staging configuration
+<a href="#__codelineno-1-7" id="__codelineno-1-7" name="__codelineno-1-7"></a>│       └── production/         # Production hardening
+<a href="#__codelineno-1-8" id="__codelineno-1-8" name="__codelineno-1-8"></a>├── rhsso/
+<a href="#__codelineno-1-9" id="__codelineno-1-9" name="__codelineno-1-9"></a>│   ├── base/                   # Base Keycloak setup
+<a href="#__codelineno-1-10" id="__codelineno-1-10" name="__codelineno-1-10"></a>│   └── overlays/
+<a href="#__codelineno-1-11" id="__codelineno-1-11" name="__codelineno-1-11"></a>│       ├── crc/               # Local development
+<a href="#__codelineno-1-12" id="__codelineno-1-12" name="__codelineno-1-12"></a>│       └── rhpds/             # RHPDS environment
+<a href="#__codelineno-1-13" id="__codelineno-1-13" name="__codelineno-1-13"></a>└── external-secrets-operator/
+<a href="#__codelineno-1-14" id="__codelineno-1-14" name="__codelineno-1-14"></a>    ├── base/                   # ESO base configuration
+<a href="#__codelineno-1-15" id="__codelineno-1-15" name="__codelineno-1-15"></a>    └── overlays/
+<a href="#__codelineno-1-16" id="__codelineno-1-16" name="__codelineno-1-16"></a>        └── vault-integration/ # Vault backend config
+</code></pre></div>
+<h3 id="3-operator-based-deployment">3. Operator-Based Deployment<a class="headerlink" href="#3-operator-based-deployment" title="Permanent link">¶</a></h3>
+<p><strong>Kubernetes Operators</strong> manage complex application lifecycles:</p>
+<ul>
+<li><strong>RH-SSO Operator</strong>: Keycloak deployment and management</li>
+<li><strong>AAP Operator</strong>: Ansible Automation Platform lifecycle</li>
+<li><strong>External Secrets Operator</strong>: Secure credential management</li>
+<li><strong>OpenShift GitOps</strong>: ArgoCD deployment and configuration</li>
+</ul>
+<h2 id="component-deployment-flow">🔧 Component Deployment Flow<a class="headerlink" href="#component-deployment-flow" title="Permanent link">¶</a></h2>
+<h3 id="deployment-sequence-diagram">Deployment Sequence Diagram<a class="headerlink" href="#deployment-sequence-diagram" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Admin as Administrator
+    participant Git as Git Repository
+    participant ArgoCD as ArgoCD
+    participant OCP as OpenShift
+    participant Ops as Operators
+
+    Admin-&gt;&gt;Git: Push infrastructure manifests
+    Admin-&gt;&gt;OCP: Deploy ArgoCD bootstrap
+    OCP-&gt;&gt;ArgoCD: ArgoCD starts
+    ArgoCD-&gt;&gt;Git: Sync app-of-apps
+    ArgoCD-&gt;&gt;OCP: Deploy operator subscriptions
+    OCP-&gt;&gt;Ops: Install operators
+    Ops-&gt;&gt;OCP: Create CRDs and controllers
+    ArgoCD-&gt;&gt;Git: Sync application instances
+    ArgoCD-&gt;&gt;OCP: Deploy AAP, Keycloak, ESO
+    OCP-&gt;&gt;Admin: Infrastructure ready
+
+    Note over Admin,OCP: Total deployment time: 10-15 minutes</code></pre>
+<h3 id="phase-1-infrastructure-bootstrap">Phase 1: Infrastructure Bootstrap<a class="headerlink" href="#phase-1-infrastructure-bootstrap" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    A[Administrator] --&gt; B[Deploy ArgoCD Bootstrap]
+    B --&gt; C[ArgoCD Starts]
+    C --&gt; D[Deploy App-of-Apps]
+    D --&gt; E[Sync Operator Subscriptions]
+    E --&gt; F[Install Operators]
+    F --&gt; G{All Operators Ready?}
+    G --&gt;|No| H[Wait for Operators]
+    H --&gt; G
+    G --&gt;|Yes| I[Deploy Application Instances]
+    I --&gt; J[Infrastructure Complete]
+
+    style A fill:#e3f2fd
+    style J fill:#c8e6c9
+    style G fill:#fff3e0</code></pre>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1"># 1. Deploy ArgoCD (OpenShift GitOps)</span>
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a>oc<span class="w"> </span>apply<span class="w"> </span>-k<span class="w"> </span>kustomize/argocd/bootstrap/
+<a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a>
+<a href="#__codelineno-2-4" id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="c1"># 2. Deploy App-of-Apps pattern</span>
+<a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a>oc<span class="w"> </span>apply<span class="w"> </span>-k<span class="w"> </span>kustomize/argocd/apps/
+<a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a>
+<a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="c1"># 3. Wait for operator deployments</span>
+<a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a>oc<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>sso
+<a href="#__codelineno-2-9" id="__codelineno-2-9" name="__codelineno-2-9"></a>oc<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>aap
+<a href="#__codelineno-2-10" id="__codelineno-2-10" name="__codelineno-2-10"></a>oc<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>external-secrets-operator
+</code></pre></div>
+<h3 id="phase-2-configuration-management">Phase 2: Configuration Management<a class="headerlink" href="#phase-2-configuration-management" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="c1"># 1. Configure base Keycloak realms and clients</span>
+<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a>./run_playbook.sh<span class="w"> </span>ansible/playbook.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="w">  </span>-e<span class="w"> </span>@ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass
+<a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a>
+<a href="#__codelineno-3-6" id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="c1"># 2. Set up OpenShift OIDC integration</span>
+<a href="#__codelineno-3-7" id="__codelineno-3-7" name="__codelineno-3-7"></a>./run_playbook.sh<span class="w"> </span>ansible/openshift_oidc_playbook.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-8" id="__codelineno-3-8" name="__codelineno-3-8"></a><span class="w">  </span>-e<span class="w"> </span>@ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-9" id="__codelineno-3-9" name="__codelineno-3-9"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass
+<a href="#__codelineno-3-10" id="__codelineno-3-10" name="__codelineno-3-10"></a>
+<a href="#__codelineno-3-11" id="__codelineno-3-11" name="__codelineno-3-11"></a><span class="c1"># 3. Configure AAP job templates and credentials</span>
+<a href="#__codelineno-3-12" id="__codelineno-3-12" name="__codelineno-3-12"></a>./run_playbook.sh<span class="w"> </span>ansible/configure_aap.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-13" id="__codelineno-3-13" name="__codelineno-3-13"></a><span class="w">  </span>-e<span class="w"> </span>@ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-14" id="__codelineno-3-14" name="__codelineno-3-14"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass
+</code></pre></div>
+<h3 id="phase-3-servicenow-integration">Phase 3: ServiceNow Integration<a class="headerlink" href="#phase-3-servicenow-integration" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1"># 1. Set up OAuth integration with Keycloak</span>
+<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a>./run_playbook.sh<span class="w"> </span>ansible/oauth_integration_playbook.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="w">  </span>-e<span class="w"> </span>@ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass
+<a href="#__codelineno-4-5" id="__codelineno-4-5" name="__codelineno-4-5"></a>
+<a href="#__codelineno-4-6" id="__codelineno-4-6" name="__codelineno-4-6"></a><span class="c1"># 2. Configure ServiceNow business rules</span>
+<a href="#__codelineno-4-7" id="__codelineno-4-7" name="__codelineno-4-7"></a>./run_playbook.sh<span class="w"> </span>ansible/servicenow_business_rules.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-4-8" id="__codelineno-4-8" name="__codelineno-4-8"></a><span class="w">  </span>-e<span class="w"> </span>@ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-4-9" id="__codelineno-4-9" name="__codelineno-4-9"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass
+</code></pre></div>
+<h2 id="security-architecture">🛡️ Security Architecture<a class="headerlink" href="#security-architecture" title="Permanent link">¶</a></h2>
+<h3 id="security-flow-diagram">Security Flow Diagram<a class="headerlink" href="#security-flow-diagram" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>flowchart TB
+    subgraph "Security Layers"
+        TLS[TLS/SSL Termination]
+        AUTH[Authentication Layer]
+        AUTHZ[Authorization Layer]
+        NET[Network Policies]
+        VAULT[Credential Management]
+    end
+
+    subgraph "Authentication Flow"
+        USER[User] --&gt; SN[ServiceNow]
+        SN --&gt; KC[Keycloak OAuth2]
+        KC --&gt; OCP[OpenShift OIDC]
+        OCP --&gt; RBAC[RBAC Policies]
+    end
+
+    subgraph "Credential Flow"
+        ESO[External Secrets Operator]
+        VAULT_SRV[HashiCorp Vault]
+        K8S_SEC[Kubernetes Secrets]
+
+        ESO --&gt; VAULT_SRV
+        VAULT_SRV --&gt; K8S_SEC
+        K8S_SEC --&gt; AAP[AAP Credentials]
+        K8S_SEC --&gt; KC
+    end
+
+    USER --&gt; TLS
+    TLS --&gt; AUTH
+    AUTH --&gt; AUTHZ
+    AUTHZ --&gt; NET
+
+    style TLS fill:#ffcdd2
+    style AUTH fill:#f8bbd9
+    style AUTHZ fill:#e1bee7
+    style NET fill:#c5cae9
+    style VAULT fill:#bbdefb</code></pre>
+<h3 id="1-credential-management">1. Credential Management<a class="headerlink" href="#1-credential-management" title="Permanent link">¶</a></h3>
+<p><strong>External Secrets Operator</strong> with HashiCorp Vault integration:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets.io/v1beta1</span>
+<a href="#__codelineno-5-2" id="__codelineno-5-2" name="__codelineno-5-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SecretStore</span>
+<a href="#__codelineno-5-3" id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-5-4" id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault-backend</span>
+<a href="#__codelineno-5-5" id="__codelineno-5-5" name="__codelineno-5-5"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-5-6" id="__codelineno-5-6" name="__codelineno-5-6"></a><span class="w">  </span><span class="nt">provider</span><span class="p">:</span>
+<a href="#__codelineno-5-7" id="__codelineno-5-7" name="__codelineno-5-7"></a><span class="w">    </span><span class="nt">vault</span><span class="p">:</span>
+<a href="#__codelineno-5-8" id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">"https://vault.example.com"</span>
+<a href="#__codelineno-5-9" id="__codelineno-5-9" name="__codelineno-5-9"></a><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">"secret"</span>
+<a href="#__codelineno-5-10" id="__codelineno-5-10" name="__codelineno-5-10"></a><span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">"v2"</span>
+<a href="#__codelineno-5-11" id="__codelineno-5-11" name="__codelineno-5-11"></a><span class="w">      </span><span class="nt">auth</span><span class="p">:</span>
+<a href="#__codelineno-5-12" id="__codelineno-5-12" name="__codelineno-5-12"></a><span class="w">        </span><span class="nt">kubernetes</span><span class="p">:</span>
+<a href="#__codelineno-5-13" id="__codelineno-5-13" name="__codelineno-5-13"></a><span class="w">          </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">"kubernetes"</span>
+<a href="#__codelineno-5-14" id="__codelineno-5-14" name="__codelineno-5-14"></a><span class="w">          </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="s">"external-secrets"</span>
+</code></pre></div>
+<h3 id="2-network-security">2. Network Security<a class="headerlink" href="#2-network-security" title="Permanent link">¶</a></h3>
+<p><strong>Network Policies</strong> for micro-segmentation:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-6-1" id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a href="#__codelineno-6-2" id="__codelineno-6-2" name="__codelineno-6-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span>
+<a href="#__codelineno-6-3" id="__codelineno-6-3" name="__codelineno-6-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-6-4" id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap-controller-policy</span>
+<a href="#__codelineno-6-5" id="__codelineno-6-5" name="__codelineno-6-5"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-6-6" id="__codelineno-6-6" name="__codelineno-6-6"></a><span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span>
+<a href="#__codelineno-6-7" id="__codelineno-6-7" name="__codelineno-6-7"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a href="#__codelineno-6-8" id="__codelineno-6-8" name="__codelineno-6-8"></a><span class="w">      </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">automation-controller</span>
+<a href="#__codelineno-6-9" id="__codelineno-6-9" name="__codelineno-6-9"></a><span class="w">  </span><span class="nt">policyTypes</span><span class="p">:</span>
+<a href="#__codelineno-6-10" id="__codelineno-6-10" name="__codelineno-6-10"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a href="#__codelineno-6-11" id="__codelineno-6-11" name="__codelineno-6-11"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Egress</span>
+<a href="#__codelineno-6-12" id="__codelineno-6-12" name="__codelineno-6-12"></a><span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<a href="#__codelineno-6-13" id="__codelineno-6-13" name="__codelineno-6-13"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
+<a href="#__codelineno-6-14" id="__codelineno-6-14" name="__codelineno-6-14"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span>
+<a href="#__codelineno-6-15" id="__codelineno-6-15" name="__codelineno-6-15"></a><span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a href="#__codelineno-6-16" id="__codelineno-6-16" name="__codelineno-6-16"></a><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">servicenow-integration</span>
+</code></pre></div>
+<h3 id="3-rbac-integration">3. RBAC Integration<a class="headerlink" href="#3-rbac-integration" title="Permanent link">¶</a></h3>
+<p><strong>OpenShift RBAC</strong> with Keycloak group mapping:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-7-1" id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
+<a href="#__codelineno-7-2" id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRoleBinding</span>
+<a href="#__codelineno-7-3" id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-7-4" id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">servicenow-project-admins</span>
+<a href="#__codelineno-7-5" id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="nt">subjects</span><span class="p">:</span>
+<a href="#__codelineno-7-6" id="__codelineno-7-6" name="__codelineno-7-6"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Group</span>
+<a href="#__codelineno-7-7" id="__codelineno-7-7" name="__codelineno-7-7"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">servicenow-admins</span>
+<a href="#__codelineno-7-8" id="__codelineno-7-8" name="__codelineno-7-8"></a><span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io</span>
+<a href="#__codelineno-7-9" id="__codelineno-7-9" name="__codelineno-7-9"></a><span class="nt">roleRef</span><span class="p">:</span>
+<a href="#__codelineno-7-10" id="__codelineno-7-10" name="__codelineno-7-10"></a><span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
+<a href="#__codelineno-7-11" id="__codelineno-7-11" name="__codelineno-7-11"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<a href="#__codelineno-7-12" id="__codelineno-7-12" name="__codelineno-7-12"></a><span class="w">  </span><span class="nt">apiGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io</span>
+</code></pre></div>
+<h2 id="deployment-environments">📊 Deployment Environments<a class="headerlink" href="#deployment-environments" title="Permanent link">¶</a></h2>
+<h3 id="environment-comparison-diagram">Environment Comparison Diagram<a class="headerlink" href="#environment-comparison-diagram" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Development Environment"
+        DEV_SN[ServiceNow PDI]
+        DEV_OCP[Single-node OpenShift]
+        DEV_KC[Keycloak Basic]
+        DEV_AAP[AAP Single Instance]
+
+        DEV_SN -.-&gt;|Manual Trigger| DEV_AAP
+        DEV_AAP --&gt; DEV_KC
+        DEV_AAP --&gt; DEV_OCP
+    end
+
+    subgraph "Production Environment"
+        PROD_SN[ServiceNow Enterprise&lt;br/&gt;Multi-Instance]
+        PROD_OCP[Multi-node OpenShift&lt;br/&gt;HA Cluster]
+        PROD_KC[Keycloak Cluster&lt;br/&gt;External DB]
+        PROD_AAP[AAP HA&lt;br/&gt;3+ Replicas]
+
+        PROD_SN --&gt;|Business Rules| PROD_AAP
+        PROD_AAP --&gt; PROD_KC
+        PROD_AAP --&gt; PROD_OCP
+    end
+
+    style DEV_SN fill:#e3f2fd
+    style PROD_SN fill:#c8e6c9
+    style DEV_OCP fill:#fff3e0
+    style PROD_OCP fill:#e8f5e8</code></pre>
+<h3 id="development-environment">Development Environment<a class="headerlink" href="#development-environment" title="Permanent link">¶</a></h3>
+<p><strong>Characteristics:</strong>
+- Single-node OpenShift (CRC) or RHPDS
+- ServiceNow PDI instance
+- Simplified authentication (htpasswd + Keycloak)
+- Local vault for secrets
+- Manual workflow execution due to PDI limitations</p>
+<p><strong>Configuration:</strong>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-8-1" id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="c1"># kustomize/rhsso/overlays/crc/kustomization.yaml</span>
+<a href="#__codelineno-8-2" id="__codelineno-8-2" name="__codelineno-8-2"></a><span class="nt">resources</span><span class="p">:</span>
+<a href="#__codelineno-8-3" id="__codelineno-8-3" name="__codelineno-8-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../base</span>
+<a href="#__codelineno-8-4" id="__codelineno-8-4" name="__codelineno-8-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth-rhsso-openid.yaml</span>
+<a href="#__codelineno-8-5" id="__codelineno-8-5" name="__codelineno-8-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">client-secret.yaml</span>
+<a href="#__codelineno-8-6" id="__codelineno-8-6" name="__codelineno-8-6"></a>
+<a href="#__codelineno-8-7" id="__codelineno-8-7" name="__codelineno-8-7"></a><span class="nt">patches</span><span class="p">:</span>
+<a href="#__codelineno-8-8" id="__codelineno-8-8" name="__codelineno-8-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">patch-issuer.yaml</span>
+<a href="#__codelineno-8-9" id="__codelineno-8-9" name="__codelineno-8-9"></a><span class="w">    </span><span class="nt">target</span><span class="p">:</span>
+<a href="#__codelineno-8-10" id="__codelineno-8-10" name="__codelineno-8-10"></a><span class="w">      </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OAuth</span>
+<a href="#__codelineno-8-11" id="__codelineno-8-11" name="__codelineno-8-11"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster</span>
+</code></pre></div></p>
+<h3 id="production-environment">Production Environment<a class="headerlink" href="#production-environment" title="Permanent link">¶</a></h3>
+<p><strong>Characteristics:</strong>
+- Multi-node OpenShift cluster
+- Enterprise ServiceNow instance
+- External identity providers
+- Enterprise vault integration
+- Monitoring and alerting</p>
+<p><strong>Configuration:</strong>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-9-1" id="__codelineno-9-1" name="__codelineno-9-1"></a><span class="c1"># kustomize/rhsso/overlays/production/kustomization.yaml</span>
+<a href="#__codelineno-9-2" id="__codelineno-9-2" name="__codelineno-9-2"></a><span class="nt">resources</span><span class="p">:</span>
+<a href="#__codelineno-9-3" id="__codelineno-9-3" name="__codelineno-9-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../base</span>
+<a href="#__codelineno-9-4" id="__codelineno-9-4" name="__codelineno-9-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production-oauth.yaml</span>
+<a href="#__codelineno-9-5" id="__codelineno-9-5" name="__codelineno-9-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-db-secret.yaml</span>
+<a href="#__codelineno-9-6" id="__codelineno-9-6" name="__codelineno-9-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring-config.yaml</span>
+<a href="#__codelineno-9-7" id="__codelineno-9-7" name="__codelineno-9-7"></a>
+<a href="#__codelineno-9-8" id="__codelineno-9-8" name="__codelineno-9-8"></a><span class="nt">patches</span><span class="p">:</span>
+<a href="#__codelineno-9-9" id="__codelineno-9-9" name="__codelineno-9-9"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production-hardening.yaml</span>
+</code></pre></div></p>
+<h2 id="continuous-deployment">🔄 Continuous Deployment<a class="headerlink" href="#continuous-deployment" title="Permanent link">¶</a></h2>
+<h3 id="complete-gitops-workflow">Complete GitOps Workflow<a class="headerlink" href="#complete-gitops-workflow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    DEV[Developer] --&gt; PR[Create Pull Request]
+    PR --&gt; REVIEW[Code Review]
+    REVIEW --&gt; MERGE[Merge to Main]
+    MERGE --&gt; WEBHOOK[Git Webhook]
+    WEBHOOK --&gt; ARGOCD[ArgoCD Sync]
+    ARGOCD --&gt; VALIDATE[Validate Manifests]
+    VALIDATE --&gt; APPLY[Apply to Cluster]
+    APPLY --&gt; HEALTH[Health Check]
+    HEALTH --&gt; NOTIFY[Notification]
+
+    HEALTH --&gt;|Failed| ROLLBACK[Automatic Rollback]
+    ROLLBACK --&gt; ALERT[Alert Team]
+
+    style DEV fill:#e3f2fd
+    style MERGE fill:#c8e6c9
+    style HEALTH fill:#fff3e0
+    style ROLLBACK fill:#ffcdd2</code></pre>
+<h3 id="gitops-sequence-diagram">GitOps Sequence Diagram<a class="headerlink" href="#gitops-sequence-diagram" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Dev as Developer
+    participant Git as Git Repository
+    participant ArgoCD as ArgoCD
+    participant OCP as OpenShift
+    participant Monitor as Monitoring
+
+    Dev-&gt;&gt;Git: Push configuration changes
+    Git-&gt;&gt;ArgoCD: Webhook notification
+    ArgoCD-&gt;&gt;Git: Pull latest changes
+    ArgoCD-&gt;&gt;ArgoCD: Validate manifests
+    ArgoCD-&gt;&gt;OCP: Apply manifests
+    OCP--&gt;&gt;ArgoCD: Deployment status
+    ArgoCD-&gt;&gt;Monitor: Update metrics
+    Monitor-&gt;&gt;Dev: Notification (Slack/Email)
+
+    Note over Dev,Monitor: Continuous feedback loop</code></pre>
+<h3 id="deployment-validation">Deployment Validation<a class="headerlink" href="#deployment-validation" title="Permanent link">¶</a></h3>
+<p><strong>Automated health checks</strong> ensure deployment success:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-10-1" id="__codelineno-10-1" name="__codelineno-10-1"></a><span class="c1"># Health check script</span>
+<a href="#__codelineno-10-2" id="__codelineno-10-2" name="__codelineno-10-2"></a>./scripts/validate-deployment.sh<span class="w"> </span>--environment<span class="w"> </span>production
+<a href="#__codelineno-10-3" id="__codelineno-10-3" name="__codelineno-10-3"></a>
+<a href="#__codelineno-10-4" id="__codelineno-10-4" name="__codelineno-10-4"></a><span class="c1"># Checks performed:</span>
+<a href="#__codelineno-10-5" id="__codelineno-10-5" name="__codelineno-10-5"></a><span class="c1"># ✅ All pods running</span>
+<a href="#__codelineno-10-6" id="__codelineno-10-6" name="__codelineno-10-6"></a><span class="c1"># ✅ Services accessible</span>
+<a href="#__codelineno-10-7" id="__codelineno-10-7" name="__codelineno-10-7"></a><span class="c1"># ✅ OAuth integration working</span>
+<a href="#__codelineno-10-8" id="__codelineno-10-8" name="__codelineno-10-8"></a><span class="c1"># ✅ AAP job templates configured</span>
+<a href="#__codelineno-10-9" id="__codelineno-10-9" name="__codelineno-10-9"></a><span class="c1"># ✅ ServiceNow connectivity</span>
+</code></pre></div>
+<h2 id="scaling-considerations">📈 Scaling Considerations<a class="headerlink" href="#scaling-considerations" title="Permanent link">¶</a></h2>
+<h3 id="scaling-architecture-diagram">Scaling Architecture Diagram<a class="headerlink" href="#scaling-architecture-diagram" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Horizontal Scaling"
+        AAP1[AAP Controller 1]
+        AAP2[AAP Controller 2]
+        AAP3[AAP Controller 3]
+        LB_AAP[Load Balancer]
+
+        KC1[Keycloak 1]
+        KC2[Keycloak 2]
+        KC3[Keycloak 3]
+        LB_KC[Load Balancer]
+
+        LB_AAP --&gt; AAP1
+        LB_AAP --&gt; AAP2
+        LB_AAP --&gt; AAP3
+
+        LB_KC --&gt; KC1
+        LB_KC --&gt; KC2
+        LB_KC --&gt; KC3
+    end
+
+    subgraph "Vertical Scaling"
+        CPU[CPU Scaling&lt;br/&gt;2-8 cores]
+        MEM[Memory Scaling&lt;br/&gt;4-16 GB]
+        STORAGE[Storage Scaling&lt;br/&gt;100GB-1TB]
+    end
+
+    subgraph "Database Scaling"
+        DB_PRIMARY[Primary DB]
+        DB_REPLICA1[Read Replica 1]
+        DB_REPLICA2[Read Replica 2]
+
+        DB_PRIMARY --&gt; DB_REPLICA1
+        DB_PRIMARY --&gt; DB_REPLICA2
+    end
+
+    AAP1 --&gt; DB_PRIMARY
+    KC1 --&gt; DB_PRIMARY
+
+    style LB_AAP fill:#e3f2fd
+    style LB_KC fill:#f3e5f5
+    style DB_PRIMARY fill:#c8e6c9</code></pre>
+<h3 id="horizontal-scaling">Horizontal Scaling<a class="headerlink" href="#horizontal-scaling" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>AAP Controller</strong>: Multiple replicas with load balancing</li>
+<li><strong>Keycloak</strong>: Clustered deployment with external database</li>
+<li><strong>ServiceNow</strong>: Multiple instances with load balancer</li>
+</ul>
+<h3 id="vertical-scaling">Vertical Scaling<a class="headerlink" href="#vertical-scaling" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Resource Quotas</strong>: Per-namespace limits</li>
+<li><strong>Node Affinity</strong>: Workload placement optimization</li>
+<li><strong>Storage Classes</strong>: Performance-optimized storage</li>
+</ul>
+<h2 id="monitoring-and-observability">🔍 Monitoring and Observability<a class="headerlink" href="#monitoring-and-observability" title="Permanent link">¶</a></h2>
+<h3 id="built-in-openshift-monitoring">Built-in OpenShift Monitoring<a class="headerlink" href="#built-in-openshift-monitoring" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Prometheus</strong>: Metrics collection</li>
+<li><strong>Grafana</strong>: Visualization dashboards</li>
+<li><strong>AlertManager</strong>: Alert routing and notification</li>
+</ul>
+<h3 id="custom-metrics">Custom Metrics<a class="headerlink" href="#custom-metrics" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-11-1" id="__codelineno-11-1" name="__codelineno-11-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring.coreos.com/v1</span>
+<a href="#__codelineno-11-2" id="__codelineno-11-2" name="__codelineno-11-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceMonitor</span>
+<a href="#__codelineno-11-3" id="__codelineno-11-3" name="__codelineno-11-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-11-4" id="__codelineno-11-4" name="__codelineno-11-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap-controller-metrics</span>
+<a href="#__codelineno-11-5" id="__codelineno-11-5" name="__codelineno-11-5"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-11-6" id="__codelineno-11-6" name="__codelineno-11-6"></a><span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<a href="#__codelineno-11-7" id="__codelineno-11-7" name="__codelineno-11-7"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a href="#__codelineno-11-8" id="__codelineno-11-8" name="__codelineno-11-8"></a><span class="w">      </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">automation-controller</span>
+<a href="#__codelineno-11-9" id="__codelineno-11-9" name="__codelineno-11-9"></a><span class="w">  </span><span class="nt">endpoints</span><span class="p">:</span>
+<a href="#__codelineno-11-10" id="__codelineno-11-10" name="__codelineno-11-10"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metrics</span>
+<a href="#__codelineno-11-11" id="__codelineno-11-11" name="__codelineno-11-11"></a><span class="w">    </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+</code></pre></div>
+<h2 id="best-practices">🎯 Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">¶</a></h2>
+<h3 id="1-infrastructure-as-code">1. Infrastructure as Code<a class="headerlink" href="#1-infrastructure-as-code" title="Permanent link">¶</a></h3>
+<ul>
+<li>All configurations in Git</li>
+<li>Environment-specific overlays</li>
+<li>Automated testing of manifests</li>
+</ul>
+<h3 id="2-security-first">2. Security First<a class="headerlink" href="#2-security-first" title="Permanent link">¶</a></h3>
+<ul>
+<li>Least privilege access</li>
+<li>Network segmentation</li>
+<li>Credential rotation</li>
+</ul>
+<h3 id="3-operational-excellence">3. Operational Excellence<a class="headerlink" href="#3-operational-excellence" title="Permanent link">¶</a></h3>
+<ul>
+<li>Comprehensive monitoring</li>
+<li>Automated backups</li>
+<li>Disaster recovery procedures</li>
+</ul>
+<hr/>
+<p><strong>Next Steps</strong>: Review the <a href="../../GETTING_STARTED/">Getting Started Guide</a> for step-by-step deployment instructions.</p>
+<hr/>
+<div class="md-source-file">
+<small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+<br/>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+</small>
+</div>
+</article>
+</div>
+</div>
+<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"></path></svg>
+  Back to top
+</button>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+<script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+</body>
+</html>

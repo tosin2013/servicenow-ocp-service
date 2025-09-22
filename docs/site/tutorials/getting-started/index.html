@@ -1,0 +1,1247 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform" name="description"/>
+<link href="https://tosin2013.github.io/servicenow-ocp-service/tutorials/getting-started/" rel="canonical"/>
+<link href="../" rel="prev"/>
+<link href="../ansible-vault-configuration/" rel="next"/>
+<link href="../../assets/favicon.ico" rel="icon"/>
+<meta content="mkdocs-1.5.3, mkdocs-material-9.4.6" name="generator"/>
+<title>Getting Started - Quick Overview - ServiceNow OpenShift Integration</title>
+<link href="../../assets/stylesheets/main.35e1ed30.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.356b1318.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#getting-started-with-servicenow-openshift-integration">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="ServiceNow OpenShift Integration" class="md-header__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Getting Started - Quick Overview
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="slate" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+</form>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../..">
+        
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../GETTING_STARTED/">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../explanation/deployment-architecture/">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../explanation/user-workflows-analysis/">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../adrs/">
+          
+  
+  Architecture Decision Records
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  Tutorials
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../how-to/">
+          
+  
+  How-To Guides
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../reference/">
+          
+  
+  Reference
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="ServiceNow OpenShift Integration" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+    ServiceNow OpenShift Integration
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    Home
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../GETTING_STARTED/">
+<span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../explanation/deployment-architecture/">
+<span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../explanation/user-workflows-analysis/">
+<span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+<span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/001-three-tier-orchestration-architecture/">
+<span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/002-decoupled-api-driven-integration/">
+<span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/003-centralized-configuration-with-connection-credential-aliases/">
+<span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/004-gitops-based-deployment-with-argocd-and-kustomize/">
+<span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/005-keycloak-deployment-on-openshift-via-operator/">
+<span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/006-servicenow-implementation-with-flow-designer-and-integrationhub/">
+<span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/007-secret-management-with-external-secrets-operator/">
+<span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/008-observability-strategy-using-openshift-built-in-monitoring/">
+<span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/009-hybrid-gitops-and-ansible-configuration/">
+<span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/010-ansible-automation-platform-integration/">
+<span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/011-custom-execution-environment-for-aap/">
+<span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/012-ansible-automation-platform-kustomize-deployment/">
+<span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/013-pdi-workaround-strategy-for-development/">
+<span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/014-business-rules-over-flow-designer/">
+<span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/015-secure-credential-management-in-user-workflows/">
+<span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/016-documentation-link-validation-strategy/">
+<span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+<span class="md-ellipsis">
+    Tutorials
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-youll-build">
+    What You'll Build
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#prerequisites">
+    Prerequisites
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#quick-start-options">
+    Quick Start Options
+  </a>
+<nav aria-label="Quick Start Options" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#option-a-step-by-step-tutorial-recommended-for-learning">
+    Option A: Step-by-Step Tutorial (Recommended for Learning)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#option-b-complete-implementation-guide">
+    Option B: Complete Implementation Guide
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-by-step-tutorial-path">
+    Step-by-Step Tutorial Path
+  </a>
+<nav aria-label="Step-by-Step Tutorial Path" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-infrastructure-setup">
+    1. 🏗️ Infrastructure Setup
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-credential-configuration">
+    2. 🔐 Credential Configuration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-infrastructure-configuration">
+    3. ⚙️ Infrastructure Configuration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-servicenow-integration">
+    4. 🔧 ServiceNow Integration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-end-to-end-testing">
+    5. ✅ End-to-End Testing
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#architecture-overview">
+    Architecture Overview
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#total-time-estimate">
+    Total Time Estimate
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#success-criteria">
+    Success Criteria
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validation-results">
+    Validation Results
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#need-help">
+    Need Help?
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#detailed-implementation-steps">
+    Detailed Implementation Steps
+  </a>
+<nav aria-label="Detailed Implementation Steps" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-1-infrastructure-deployment">
+    Step 1: Infrastructure Deployment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-2-credential-configuration">
+    Step 2: Credential Configuration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-3-infrastructure-configuration">
+    Step 3: Infrastructure Configuration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-4-servicenow-integration">
+    Step 4: ServiceNow Integration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-5-end-to-end-testing">
+    Step 5: End-to-End Testing
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#production-workflow-testing">
+    Production Workflow Testing
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validation-and-monitoring">
+    Validation and Monitoring
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#final-success-validation">
+    Final Success Validation
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#troubleshooting">
+    Troubleshooting
+  </a>
+<nav aria-label="Troubleshooting" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#infrastructure-issues">
+    Infrastructure Issues
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#servicenow-integration-issues">
+    ServiceNow Integration Issues
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ansible-playbook-issues">
+    Ansible Playbook Issues
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#next-steps">
+    Next Steps
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../ansible-vault-configuration/">
+<span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../execution-environment-guide/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../ansible-automation-guide/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../your-first-project/">
+<span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../user-workflows-guide/">
+<span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+<span class="md-ellipsis">
+    How-To Guides
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/aap-token-setup/">
+<span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/working-with-execution-environment/">
+<span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/working-with-ansible/">
+<span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/business-rule-logic/">
+<span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/end-to-end-testing/">
+<span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/debugging-integration-issues/">
+<span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/user-experience-guide/">
+<span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/scale-for-production/">
+<span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/backup-and-recovery/">
+<span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+<span class="md-ellipsis">
+    Reference
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/configuration-variables/">
+<span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/api-reference/">
+<span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/ansible-reference/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/execution-environment-reference/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/user-workflows-reference/">
+<span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-report/">
+<span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-monitoring-setup/">
+<span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-checklist/">
+<span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../PDI_ALTERNATIVE_SOLUTIONS/">
+<span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-youll-build">
+    What You'll Build
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#prerequisites">
+    Prerequisites
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#quick-start-options">
+    Quick Start Options
+  </a>
+<nav aria-label="Quick Start Options" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#option-a-step-by-step-tutorial-recommended-for-learning">
+    Option A: Step-by-Step Tutorial (Recommended for Learning)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#option-b-complete-implementation-guide">
+    Option B: Complete Implementation Guide
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-by-step-tutorial-path">
+    Step-by-Step Tutorial Path
+  </a>
+<nav aria-label="Step-by-Step Tutorial Path" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-infrastructure-setup">
+    1. 🏗️ Infrastructure Setup
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-credential-configuration">
+    2. 🔐 Credential Configuration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-infrastructure-configuration">
+    3. ⚙️ Infrastructure Configuration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-servicenow-integration">
+    4. 🔧 ServiceNow Integration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-end-to-end-testing">
+    5. ✅ End-to-End Testing
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#architecture-overview">
+    Architecture Overview
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#total-time-estimate">
+    Total Time Estimate
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#success-criteria">
+    Success Criteria
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validation-results">
+    Validation Results
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#need-help">
+    Need Help?
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#detailed-implementation-steps">
+    Detailed Implementation Steps
+  </a>
+<nav aria-label="Detailed Implementation Steps" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-1-infrastructure-deployment">
+    Step 1: Infrastructure Deployment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-2-credential-configuration">
+    Step 2: Credential Configuration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-3-infrastructure-configuration">
+    Step 3: Infrastructure Configuration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-4-servicenow-integration">
+    Step 4: ServiceNow Integration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-5-end-to-end-testing">
+    Step 5: End-to-End Testing
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#production-workflow-testing">
+    Production Workflow Testing
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validation-and-monitoring">
+    Validation and Monitoring
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#final-success-validation">
+    Final Success Validation
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#troubleshooting">
+    Troubleshooting
+  </a>
+<nav aria-label="Troubleshooting" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#infrastructure-issues">
+    Infrastructure Issues
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#servicenow-integration-issues">
+    ServiceNow Integration Issues
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ansible-playbook-issues">
+    Ansible Playbook Issues
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#next-steps">
+    Next Steps
+  </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="getting-started-with-servicenow-openshift-integration">Getting Started with ServiceNow-OpenShift Integration<a class="headerlink" href="#getting-started-with-servicenow-openshift-integration" title="Permanent link">¶</a></h1>
+<p>This is a <strong>quick overview</strong> to get you started with the ServiceNow-OpenShift integration. This tutorial provides a streamlined path through the complete setup process.</p>
+<h2 id="what-youll-build">What You'll Build<a class="headerlink" href="#what-youll-build" title="Permanent link">¶</a></h2>
+<p>A complete ServiceNow-OpenShift integration with:
+- ✅ <strong>Automated project creation</strong> via ServiceNow catalog requests
+- ✅ <strong>Business Rules automation</strong> (95% confidence score)
+- ✅ <strong>GitOps infrastructure</strong> deployment
+- ✅ <strong>Production-ready workflow</strong> with comprehensive testing</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¶</a></h2>
+<p>Before starting, ensure you have:
+- <strong>OpenShift Cluster</strong> with admin access (<code>oc login</code> working)
+- <strong>ServiceNow Developer Instance</strong> (PDI) with admin access
+- <strong>Linux environment</strong> with Ansible and oc CLI installed
+- <strong>Basic knowledge</strong> of ServiceNow, Ansible, and OpenShift concepts</p>
+<h2 id="quick-start-options">Quick Start Options<a class="headerlink" href="#quick-start-options" title="Permanent link">¶</a></h2>
+<p>Choose your preferred approach:</p>
+<h3 id="option-a-step-by-step-tutorial-recommended-for-learning">Option A: Step-by-Step Tutorial (Recommended for Learning)<a class="headerlink" href="#option-a-step-by-step-tutorial-recommended-for-learning" title="Permanent link">¶</a></h3>
+<p>Follow the focused tutorials below in order for a guided learning experience.</p>
+<h3 id="option-b-complete-implementation-guide">Option B: Complete Implementation Guide<a class="headerlink" href="#option-b-complete-implementation-guide" title="Permanent link">¶</a></h3>
+<p>For experienced users, jump directly to the <a href="../../GETTING_STARTED/">Implementation Guide</a> for the full step-by-step process.</p>
+<h2 id="step-by-step-tutorial-path">Step-by-Step Tutorial Path<a class="headerlink" href="#step-by-step-tutorial-path" title="Permanent link">¶</a></h2>
+<h3 id="1-infrastructure-setup">1. 🏗️ Infrastructure Setup<a class="headerlink" href="#1-infrastructure-setup" title="Permanent link">¶</a></h3>
+<p><strong>Goal</strong>: Deploy core infrastructure via GitOps</p>
+<p><strong>What you'll do</strong>:
+- Deploy ArgoCD app-of-apps
+- Install Ansible Automation Platform (AAP)
+- Set up Red Hat SSO (Keycloak)
+- Configure External Secrets Operator</p>
+<p><strong>Time</strong>: ~20 minutes
+<strong>Reference</strong>: <a href="../../GETTING_STARTED/#2-deploy-infrastructure-via-gitops">Implementation Guide - Section 2</a></p>
+<h3 id="2-credential-configuration">2. 🔐 Credential Configuration<a class="headerlink" href="#2-credential-configuration" title="Permanent link">¶</a></h3>
+<p><strong>Goal</strong>: Configure all required credentials securely</p>
+<p><strong>What you'll do</strong>:
+- Set up ServiceNow admin credentials
+- Configure Keycloak/RH-SSO passwords
+- Generate OpenShift tokens
+- Create AAP API tokens (critical for ServiceNow integration)</p>
+<p><strong>Time</strong>: ~15 minutes
+<strong>Reference</strong>: <a href="../ansible-vault-configuration/">Ansible Vault Configuration Guide</a></p>
+<h3 id="3-infrastructure-configuration">3. ⚙️ Infrastructure Configuration<a class="headerlink" href="#3-infrastructure-configuration" title="Permanent link">¶</a></h3>
+<p><strong>Goal</strong>: Configure deployed infrastructure using Ansible</p>
+<p><strong>What you'll do</strong>:
+- Run pre-flight connectivity checks
+- Configure RH-SSO realms and clients
+- Set up OpenShift OIDC integration
+- Configure ServiceNow OAuth integration
+- Set up AAP projects and job templates</p>
+<p><strong>Time</strong>: ~30 minutes
+<strong>Reference</strong>: <a href="../../GETTING_STARTED/#5-prerequisite-configure-base-rh-sso-realms-and-clients">Implementation Guide - Sections 5-8</a></p>
+<h3 id="4-servicenow-integration">4. 🔧 ServiceNow Integration<a class="headerlink" href="#4-servicenow-integration" title="Permanent link">¶</a></h3>
+<p><strong>Goal</strong>: Set up ServiceNow Business Rules and catalog items</p>
+<p><strong>What you'll do</strong>:
+- Configure Business Rules for automation
+- Create catalog items
+- Set up AAP job template integration</p>
+<p><strong>Time</strong>: ~25 minutes
+<strong>Reference</strong>: <a href="../../how-to/business-rule-logic/">Business Rule Logic Documentation</a></p>
+<h3 id="5-end-to-end-testing">5. ✅ End-to-End Testing<a class="headerlink" href="#5-end-to-end-testing" title="Permanent link">¶</a></h3>
+<p><strong>Goal</strong>: Validate the complete integration</p>
+<p><strong>What you'll do</strong>:
+- Execute comprehensive test suite
+- Validate production workflow
+- Review troubleshooting procedures</p>
+<p><strong>Time</strong>: ~15 minutes
+<strong>Reference</strong>: <a href="../../how-to/end-to-end-testing/">End-to-End Test Guide</a></p>
+<h2 id="architecture-overview">Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">¶</a></h2>
+<pre class="mermaid"><code>graph TB
+    A[ServiceNow&lt;br/&gt;Catalog Request] --&gt; B[Business Rules&lt;br/&gt;Trigger]
+    B --&gt; C[AAP Job Template&lt;br/&gt;Execution]
+    C --&gt; D[OpenShift Project&lt;br/&gt;Creation]
+    C --&gt; E[Keycloak User&lt;br/&gt;Management]</code></pre>
+<h2 id="total-time-estimate">Total Time Estimate<a class="headerlink" href="#total-time-estimate" title="Permanent link">¶</a></h2>
+<p><strong>~105 minutes</strong> (1 hour 45 minutes) for complete setup</p>
+<h2 id="success-criteria">Success Criteria<a class="headerlink" href="#success-criteria" title="Permanent link">¶</a></h2>
+<p>✅ <strong>You're successful when:</strong>
+1. Infrastructure deployed via GitOps (ArgoCD, AAP, RH-SSO, ESO)
+2. All credentials properly configured in Ansible vault
+3. Infrastructure components configured and integrated
+4. ServiceNow catalog request creates OpenShift projects
+5. End-to-end test shows 95%+ confidence score
+6. All validation steps pass</p>
+<h2 id="validation-results">Validation Results<a class="headerlink" href="#validation-results" title="Permanent link">¶</a></h2>
+<p>This tutorial is based on <strong>validated implementation</strong> documented in <a href="../../END_TO_END_TEST_EXECUTION_SUMMARY/">End-to-End Test Execution Summary</a>:
+- <strong>95% confidence score</strong> from comprehensive testing
+- <strong>Production-ready</strong> Business Rules implementation
+- <strong>Comprehensive error handling</strong> and fallback mechanisms
+- <strong>Full integration</strong> across ServiceNow → AAP → OpenShift → Keycloak</p>
+<h2 id="need-help">Need Help?<a class="headerlink" href="#need-help" title="Permanent link">¶</a></h2>
+<ul>
+<li>📖 <strong><a href="../../how-to/">How-to Guides</a></strong> - Specific tasks and solutions</li>
+<li>🔧 <strong><a href="../../reference/">Reference</a></strong> - API docs and configuration</li>
+<li>🏗️ <strong><a href="../../explanation/architecture-overview/">Architecture</a></strong> - Design decisions</li>
+<li>📋 <strong><a href="../../GETTING_STARTED/">Complete Implementation Guide</a></strong> - Detailed step-by-step process</li>
+</ul>
+<hr/>
+<p><em>Based on validated implementation with 95% confidence score</em></p>
+<h2 id="detailed-implementation-steps">Detailed Implementation Steps<a class="headerlink" href="#detailed-implementation-steps" title="Permanent link">¶</a></h2>
+<h3 id="step-1-infrastructure-deployment">Step 1: Infrastructure Deployment<a class="headerlink" href="#step-1-infrastructure-deployment" title="Permanent link">¶</a></h3>
+<p>Deploy the core infrastructure using GitOps:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Deploy via ArgoCD app-of-apps</span>
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>oc<span class="w"> </span>apply<span class="w"> </span>-k<span class="w"> </span>kustomize/argocd/apps/
+</code></pre></div>
+<p>Wait for deployments in <code>sso</code>, <code>aap</code>, and <code>external-secrets-operator</code> namespaces to become healthy.</p>
+<h3 id="step-2-credential-configuration">Step 2: Credential Configuration<a class="headerlink" href="#step-2-credential-configuration" title="Permanent link">¶</a></h3>
+<p>Set up all required credentials following the <a href="../ansible-vault-configuration/">Ansible Vault Configuration Guide</a>:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># Copy the vault template</span>
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>cp<span class="w"> </span>ansible/group_vars/all/vault.yml.template<span class="w"> </span>ansible/group_vars/all/vault.yml
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a>
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="c1"># Edit vault file with your credentials (see guide for details)</span>
+<a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a>vi<span class="w"> </span>ansible/group_vars/all/vault.yml
+<a href="#__codelineno-1-6" id="__codelineno-1-6" name="__codelineno-1-6"></a>
+<a href="#__codelineno-1-7" id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="c1"># Encrypt the vault file (NEVER commit unencrypted!)</span>
+<a href="#__codelineno-1-8" id="__codelineno-1-8" name="__codelineno-1-8"></a>ansible-vault<span class="w"> </span>encrypt<span class="w"> </span>ansible/group_vars/all/vault.yml<span class="w"> </span>--vault-password-file<span class="w"> </span>.vault_pass
+</code></pre></div>
+<p><strong>Critical</strong>: Ensure you create the AAP API token as described in the vault configuration guide - this is essential for ServiceNow integration.</p>
+<h3 id="step-3-infrastructure-configuration">Step 3: Infrastructure Configuration<a class="headerlink" href="#step-3-infrastructure-configuration" title="Permanent link">¶</a></h3>
+<p>Run the configuration playbooks in sequence:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1"># 1. Pre-flight checks</span>
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a>./run_playbook.sh<span class="w"> </span>../ansible/preflight_checks.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-4" id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+<a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a>
+<a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a><span class="c1"># 2. Configure base RH-SSO realms and clients</span>
+<a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a>./run_playbook.sh<span class="w"> </span>../ansible/playbook.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-9" id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+<a href="#__codelineno-2-10" id="__codelineno-2-10" name="__codelineno-2-10"></a>
+<a href="#__codelineno-2-11" id="__codelineno-2-11" name="__codelineno-2-11"></a><span class="c1"># 3. Configure OpenShift OIDC with Keycloak</span>
+<a href="#__codelineno-2-12" id="__codelineno-2-12" name="__codelineno-2-12"></a>./run_playbook.sh<span class="w"> </span>../ansible/openshift_oidc_playbook.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-13" id="__codelineno-2-13" name="__codelineno-2-13"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-14" id="__codelineno-2-14" name="__codelineno-2-14"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+<a href="#__codelineno-2-15" id="__codelineno-2-15" name="__codelineno-2-15"></a>
+<a href="#__codelineno-2-16" id="__codelineno-2-16" name="__codelineno-2-16"></a><span class="c1"># 4. Configure ServiceNow and Keycloak OAuth integration</span>
+<a href="#__codelineno-2-17" id="__codelineno-2-17" name="__codelineno-2-17"></a>./run_playbook.sh<span class="w"> </span>../ansible/oauth_integration_playbook.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-18" id="__codelineno-2-18" name="__codelineno-2-18"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-19" id="__codelineno-2-19" name="__codelineno-2-19"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+<a href="#__codelineno-2-20" id="__codelineno-2-20" name="__codelineno-2-20"></a>
+<a href="#__codelineno-2-21" id="__codelineno-2-21" name="__codelineno-2-21"></a><span class="c1"># 5. Configure Ansible Automation Platform (AAP)</span>
+<a href="#__codelineno-2-22" id="__codelineno-2-22" name="__codelineno-2-22"></a>./run_playbook.sh<span class="w"> </span>../ansible/configure_aap.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-23" id="__codelineno-2-23" name="__codelineno-2-23"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-24" id="__codelineno-2-24" name="__codelineno-2-24"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+</code></pre></div>
+<h3 id="step-4-servicenow-integration">Step 4: ServiceNow Integration<a class="headerlink" href="#step-4-servicenow-integration" title="Permanent link">¶</a></h3>
+<p>Configure ServiceNow Business Rules and catalog items:</p>
+<p><strong>Important</strong>: This project uses <strong>Business Rules</strong>, not Flow Designer, based on comprehensive research (see <a href="../../adrs/014-business-rules-over-flow-designer/">ADR-014</a>).</p>
+<p><strong>Why Business Rules?</strong>
+- Direct state change triggers (no additional layers needed)
+- Better alignment with GitOps principles (code-based, version controlled)
+- Superior error handling and debugging capabilities
+- No PDI environment limitations</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="c1"># Configure Business Rules for AAP integration</span>
+<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a>./run_playbook.sh<span class="w"> </span>../ansible/servicenow_business_rules_setup.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+<a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a>
+<a href="#__codelineno-3-6" id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="c1"># Create ServiceNow catalog items</span>
+<a href="#__codelineno-3-7" id="__codelineno-3-7" name="__codelineno-3-7"></a>./run_playbook.sh<span class="w"> </span>../ansible/servicenow_catalog_setup.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-8" id="__codelineno-3-8" name="__codelineno-3-8"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-3-9" id="__codelineno-3-9" name="__codelineno-3-9"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+</code></pre></div>
+<p><strong>Validation Steps</strong>:
+1. Navigate to ServiceNow: <strong>System Definition &gt; Business Rules</strong>
+2. Look for: "OpenShift Project AAP Trigger"
+3. Ensure it's <strong>Active</strong> and configured for the <code>sc_req_item</code> table</p>
+<p>For detailed Business Rules implementation, see <a href="../../how-to/business-rule-logic/">Business Rule Logic Documentation</a>.</p>
+<h3 id="step-5-end-to-end-testing">Step 5: End-to-End Testing<a class="headerlink" href="#step-5-end-to-end-testing" title="Permanent link">¶</a></h3>
+<p>Execute the comprehensive test suite to validate the complete integration:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1"># Run the validated end-to-end test (95% confidence score)</span>
+<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a>./run_playbook.sh<span class="w"> </span>../ansible/idempotent_end_to_end_test.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+</code></pre></div>
+<p><strong>Tag-based testing</strong> for targeted debugging:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="c1"># Test setup configuration</span>
+<a href="#__codelineno-5-2" id="__codelineno-5-2" name="__codelineno-5-2"></a>./run_playbook.sh<span class="w"> </span>../ansible/idempotent_end_to_end_test.yml<span class="w"> </span>--tags<span class="w"> </span><span class="s2">"setup"</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-3" id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-4" id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+<a href="#__codelineno-5-5" id="__codelineno-5-5" name="__codelineno-5-5"></a>
+<a href="#__codelineno-5-6" id="__codelineno-5-6" name="__codelineno-5-6"></a><span class="c1"># Test catalog creation</span>
+<a href="#__codelineno-5-7" id="__codelineno-5-7" name="__codelineno-5-7"></a>./run_playbook.sh<span class="w"> </span>../ansible/idempotent_end_to_end_test.yml<span class="w"> </span>--tags<span class="w"> </span><span class="s2">"catalog"</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-8" id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-9" id="__codelineno-5-9" name="__codelineno-5-9"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+</code></pre></div>
+<p>For detailed testing procedures, see the <a href="../../how-to/end-to-end-testing/">End-to-End Test Guide</a>.</p>
+<h2 id="production-workflow-testing">Production Workflow Testing<a class="headerlink" href="#production-workflow-testing" title="Permanent link">¶</a></h2>
+<p>Test the complete workflow using the validated approach:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-6-1" id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="c1"># Test complete workflow (PDI-compatible approach)</span>
+<a href="#__codelineno-6-2" id="__codelineno-6-2" name="__codelineno-6-2"></a>./user-workflows/advanced/start-simplified-workflow.sh<span class="w"> </span>test-project<span class="w"> </span>development<span class="w"> </span>full
+<a href="#__codelineno-6-3" id="__codelineno-6-3" name="__codelineno-6-3"></a>
+<a href="#__codelineno-6-4" id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="c1"># Verify OpenShift project creation</span>
+<a href="#__codelineno-6-5" id="__codelineno-6-5" name="__codelineno-6-5"></a>oc<span class="w"> </span>get<span class="w"> </span>projects<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>test-project
+<a href="#__codelineno-6-6" id="__codelineno-6-6" name="__codelineno-6-6"></a>oc<span class="w"> </span>describe<span class="w"> </span>project<span class="w"> </span>test-project
+<a href="#__codelineno-6-7" id="__codelineno-6-7" name="__codelineno-6-7"></a>
+<a href="#__codelineno-6-8" id="__codelineno-6-8" name="__codelineno-6-8"></a><span class="c1"># Use comprehensive verification script</span>
+<a href="#__codelineno-6-9" id="__codelineno-6-9" name="__codelineno-6-9"></a>./verify_complete_servicenow_integration.sh
+</code></pre></div>
+<h2 id="validation-and-monitoring">Validation and Monitoring<a class="headerlink" href="#validation-and-monitoring" title="Permanent link">¶</a></h2>
+<p><strong>Check ServiceNow Request Status</strong>:
+- Navigate to your ServiceNow instance
+- Go to <strong>Service Catalog &gt; Requests</strong>
+- Look for your test request (e.g., REQ0010044)
+- Verify status progression: Requested → In Process → Completed</p>
+<p><strong>Monitor AAP Job Execution</strong>:
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-7-1" id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="c1"># Check AAP connectivity and job status</span>
+<a href="#__codelineno-7-2" id="__codelineno-7-2" name="__codelineno-7-2"></a>./debug/aap/01-check-aap-connectivity.sh
+<a href="#__codelineno-7-3" id="__codelineno-7-3" name="__codelineno-7-3"></a>./debug/aap/02-check-specific-job.sh<span class="w"> </span><span class="o">[</span>JOB_ID<span class="o">]</span>
+</code></pre></div></p>
+<h2 id="final-success-validation">Final Success Validation<a class="headerlink" href="#final-success-validation" title="Permanent link">¶</a></h2>
+<p>✅ <strong>You've successfully completed the tutorial when:</strong>
+1. ServiceNow request created (REQ number generated)
+2. Business Rules trigger AAP job template
+3. OpenShift project created and accessible
+4. End-to-end test shows 95%+ confidence score
+5. All validation steps pass</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<p>For common issues and solutions:</p>
+<h3 id="infrastructure-issues">Infrastructure Issues<a class="headerlink" href="#infrastructure-issues" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>ArgoCD Applications Not Syncing</strong>: Check application status and server logs</li>
+<li><strong>AAP Pods Stuck in Pending</strong>: Usually storage-related, check PVCs in AAP namespace</li>
+<li><strong>RH-SSO/Keycloak Not Starting</strong>: Check Keycloak instance status and operator logs</li>
+</ul>
+<h3 id="servicenow-integration-issues">ServiceNow Integration Issues<a class="headerlink" href="#servicenow-integration-issues" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Business Rules Not Triggering</strong>: Use simplified workflow as PDI workaround</li>
+<li><strong>AAP Authentication Errors</strong>: Verify AAP API token configuration in vault</li>
+<li><strong>OpenShift Project Creation Fails</strong>: Check oc CLI authentication and permissions</li>
+</ul>
+<h3 id="ansible-playbook-issues">Ansible Playbook Issues<a class="headerlink" href="#ansible-playbook-issues" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Vault Password Errors</strong>: Verify vault file permissions and test decryption</li>
+<li><strong>Connectivity Issues</strong>: Re-run preflight checks to validate connections</li>
+</ul>
+<p>For detailed troubleshooting procedures, see the <a href="../../GETTING_STARTED/#troubleshooting">Implementation Guide</a>.</p>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">¶</a></h2>
+<p>After completing this tutorial:
+- 📖 <strong><a href="../../how-to/">How-to Guides</a></strong> - Production deployment guides
+- 🔧 <strong><a href="../../reference/">Reference</a></strong> - API documentation and configuration
+- 🏗️ <strong><a href="../../explanation/architecture-overview/">Architecture</a></strong> - Deep dive into design decisions
+- 📋 <strong><a href="../../GETTING_STARTED/">Implementation Guide</a></strong> - Detailed step-by-step process</p>
+<hr/>
+<p><em>Based on validated implementation with 95% confidence score - September 19, 2025</em></p>
+<hr/>
+<div class="md-source-file">
+<small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+<br/>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+</small>
+</div>
+</article>
+</div>
+</div>
+<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"></path></svg>
+  Back to top
+</button>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+<script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+</body>
+</html>

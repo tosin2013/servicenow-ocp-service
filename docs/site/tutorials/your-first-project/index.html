@@ -1,0 +1,1557 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform" name="description"/>
+<link href="https://tosin2013.github.io/servicenow-ocp-service/tutorials/your-first-project/" rel="canonical"/>
+<link href="../ansible-automation-guide/" rel="prev"/>
+<link href="../user-workflows-guide/" rel="next"/>
+<link href="../../assets/favicon.ico" rel="icon"/>
+<meta content="mkdocs-1.5.3, mkdocs-material-9.4.6" name="generator"/>
+<title>🎯 Your First Project - ServiceNow OpenShift Integration</title>
+<link href="../../assets/stylesheets/main.35e1ed30.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.356b1318.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#your-first-servicenow-openshift-project">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="ServiceNow OpenShift Integration" class="md-header__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              🎯 Your First Project
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="slate" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+</form>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../..">
+        
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../GETTING_STARTED/">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../explanation/deployment-architecture/">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../explanation/user-workflows-analysis/">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../adrs/">
+          
+  
+  Architecture Decision Records
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  Tutorials
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../how-to/">
+          
+  
+  How-To Guides
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../reference/">
+          
+  
+  Reference
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="ServiceNow OpenShift Integration" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+    ServiceNow OpenShift Integration
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    Home
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../GETTING_STARTED/">
+<span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../explanation/deployment-architecture/">
+<span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../explanation/user-workflows-analysis/">
+<span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+<span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/001-three-tier-orchestration-architecture/">
+<span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/002-decoupled-api-driven-integration/">
+<span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/003-centralized-configuration-with-connection-credential-aliases/">
+<span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/004-gitops-based-deployment-with-argocd-and-kustomize/">
+<span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/005-keycloak-deployment-on-openshift-via-operator/">
+<span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/006-servicenow-implementation-with-flow-designer-and-integrationhub/">
+<span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/007-secret-management-with-external-secrets-operator/">
+<span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/008-observability-strategy-using-openshift-built-in-monitoring/">
+<span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/009-hybrid-gitops-and-ansible-configuration/">
+<span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/010-ansible-automation-platform-integration/">
+<span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/011-custom-execution-environment-for-aap/">
+<span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/012-ansible-automation-platform-kustomize-deployment/">
+<span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/013-pdi-workaround-strategy-for-development/">
+<span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/014-business-rules-over-flow-designer/">
+<span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/015-secure-credential-management-in-user-workflows/">
+<span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/016-documentation-link-validation-strategy/">
+<span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+<span class="md-ellipsis">
+    Tutorials
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../getting-started/">
+<span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../ansible-vault-configuration/">
+<span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../execution-environment-guide/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../ansible-automation-guide/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-youll-learn">
+    🎯 What You'll Learn
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#prerequisites">
+    📋 Prerequisites
+  </a>
+<nav aria-label="📋 Prerequisites" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#required-access">
+    Required Access
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-environment-note">
+    Development Environment Note
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-you-dont-need">
+    What You Don't Need
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-1-access-the-servicenow-service-catalog">
+    🎬 Step 1: Access the ServiceNow Service Catalog
+  </a>
+<nav aria-label="🎬 Step 1: Access the ServiceNow Service Catalog" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#11-log-into-servicenow-pdi">
+    1.1 Log into ServiceNow PDI
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#12-navigate-to-service-catalog">
+    1.2 Navigate to Service Catalog
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#13-what-youll-see">
+    1.3 What You'll See
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-2-fill-out-your-project-request">
+    🎬 Step 2: Fill Out Your Project Request
+  </a>
+<nav aria-label="🎬 Step 2: Fill Out Your Project Request" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#21-choose-a-project-name">
+    2.1 Choose a Project Name
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#22-provide-business-justification">
+    2.2 Provide Business Justification
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#23-add-project-description-optional">
+    2.3 Add Project Description (Optional)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#24-additional-users-optional">
+    2.4 Additional Users (Optional)
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-3-submit-your-request">
+    🎬 Step 3: Submit Your Request
+  </a>
+<nav aria-label="🎬 Step 3: Submit Your Request" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#31-review-your-information">
+    3.1 Review Your Information
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#32-submit-the-request">
+    3.2 Submit the Request
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#33-what-happens-in-pdi-environment">
+    3.3 What Happens in PDI Environment
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-4-execute-the-simplified-workflow">
+    🎬 Step 4: Execute the Simplified Workflow
+  </a>
+<nav aria-label="🎬 Step 4: Execute the Simplified Workflow" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#41-open-terminal-and-navigate-to-project">
+    4.1 Open Terminal and Navigate to Project
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#42-run-the-simplified-workflow-script">
+    4.2 Run the Simplified Workflow Script
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#43-what-the-script-does">
+    4.3 What the Script Does
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-5-access-your-new-project">
+    🎬 Step 5: Access Your New Project
+  </a>
+<nav aria-label="🎬 Step 5: Access Your New Project" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-get-your-openshift-console-url">
+    5.1 Get Your OpenShift Console URL
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-verify-your-project-access">
+    5.2 Verify Your Project Access
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-explore-your-project">
+    5.3 Explore Your Project
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-6-deploy-your-first-application">
+    🎬 Step 6: Deploy Your First Application
+  </a>
+<nav aria-label="🎬 Step 6: Deploy Your First Application" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-quick-application-deployment">
+    6.1 Quick Application Deployment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-verify-deployment">
+    6.2 Verify Deployment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#63-success">
+    6.3 Success! 🎉
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#troubleshooting-common-issues">
+    🔧 Troubleshooting Common Issues
+  </a>
+<nav aria-label="🔧 Troubleshooting Common Issues" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-1-script-fails-to-find-servicenow-request">
+    Issue 1: Script Fails to Find ServiceNow Request
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-2-aap-job-template-fails">
+    Issue 2: AAP Job Template Fails
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-3-cant-access-openshift-console">
+    Issue 3: Can't Access OpenShift Console
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-4-project-created-but-no-permissions">
+    Issue 4: Project Created But No Permissions
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-5-script-execution-errors">
+    Issue 5: Script Execution Errors
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-youve-learned">
+    🎓 What You've Learned
+  </a>
+<nav aria-label="🎓 What You've Learned" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#servicenow-skills">
+    ✅ ServiceNow Skills
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#openshift-skills">
+    ✅ OpenShift Skills
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#integration-understanding">
+    ✅ Integration Understanding
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-workflow-skills">
+    ✅ Development Workflow Skills
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#next-steps">
+    🚀 Next Steps
+  </a>
+<nav aria-label="🚀 Next Steps" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#immediate-next-steps">
+    Immediate Next Steps
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#learning-resources">
+    Learning Resources
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-resources">
+    Development Resources
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#community-resources">
+    Community Resources
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../user-workflows-guide/">
+<span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+<span class="md-ellipsis">
+    How-To Guides
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/aap-token-setup/">
+<span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/working-with-execution-environment/">
+<span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/working-with-ansible/">
+<span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/business-rule-logic/">
+<span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/end-to-end-testing/">
+<span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/debugging-integration-issues/">
+<span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/user-experience-guide/">
+<span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/scale-for-production/">
+<span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../how-to/backup-and-recovery/">
+<span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+<span class="md-ellipsis">
+    Reference
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/configuration-variables/">
+<span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/api-reference/">
+<span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/ansible-reference/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/execution-environment-reference/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/user-workflows-reference/">
+<span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-report/">
+<span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-monitoring-setup/">
+<span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-checklist/">
+<span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../PDI_ALTERNATIVE_SOLUTIONS/">
+<span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-youll-learn">
+    🎯 What You'll Learn
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#prerequisites">
+    📋 Prerequisites
+  </a>
+<nav aria-label="📋 Prerequisites" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#required-access">
+    Required Access
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-environment-note">
+    Development Environment Note
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-you-dont-need">
+    What You Don't Need
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-1-access-the-servicenow-service-catalog">
+    🎬 Step 1: Access the ServiceNow Service Catalog
+  </a>
+<nav aria-label="🎬 Step 1: Access the ServiceNow Service Catalog" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#11-log-into-servicenow-pdi">
+    1.1 Log into ServiceNow PDI
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#12-navigate-to-service-catalog">
+    1.2 Navigate to Service Catalog
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#13-what-youll-see">
+    1.3 What You'll See
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-2-fill-out-your-project-request">
+    🎬 Step 2: Fill Out Your Project Request
+  </a>
+<nav aria-label="🎬 Step 2: Fill Out Your Project Request" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#21-choose-a-project-name">
+    2.1 Choose a Project Name
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#22-provide-business-justification">
+    2.2 Provide Business Justification
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#23-add-project-description-optional">
+    2.3 Add Project Description (Optional)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#24-additional-users-optional">
+    2.4 Additional Users (Optional)
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-3-submit-your-request">
+    🎬 Step 3: Submit Your Request
+  </a>
+<nav aria-label="🎬 Step 3: Submit Your Request" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#31-review-your-information">
+    3.1 Review Your Information
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#32-submit-the-request">
+    3.2 Submit the Request
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#33-what-happens-in-pdi-environment">
+    3.3 What Happens in PDI Environment
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-4-execute-the-simplified-workflow">
+    🎬 Step 4: Execute the Simplified Workflow
+  </a>
+<nav aria-label="🎬 Step 4: Execute the Simplified Workflow" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#41-open-terminal-and-navigate-to-project">
+    4.1 Open Terminal and Navigate to Project
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#42-run-the-simplified-workflow-script">
+    4.2 Run the Simplified Workflow Script
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#43-what-the-script-does">
+    4.3 What the Script Does
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-5-access-your-new-project">
+    🎬 Step 5: Access Your New Project
+  </a>
+<nav aria-label="🎬 Step 5: Access Your New Project" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-get-your-openshift-console-url">
+    5.1 Get Your OpenShift Console URL
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-verify-your-project-access">
+    5.2 Verify Your Project Access
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-explore-your-project">
+    5.3 Explore Your Project
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-6-deploy-your-first-application">
+    🎬 Step 6: Deploy Your First Application
+  </a>
+<nav aria-label="🎬 Step 6: Deploy Your First Application" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-quick-application-deployment">
+    6.1 Quick Application Deployment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-verify-deployment">
+    6.2 Verify Deployment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#63-success">
+    6.3 Success! 🎉
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#troubleshooting-common-issues">
+    🔧 Troubleshooting Common Issues
+  </a>
+<nav aria-label="🔧 Troubleshooting Common Issues" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-1-script-fails-to-find-servicenow-request">
+    Issue 1: Script Fails to Find ServiceNow Request
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-2-aap-job-template-fails">
+    Issue 2: AAP Job Template Fails
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-3-cant-access-openshift-console">
+    Issue 3: Can't Access OpenShift Console
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-4-project-created-but-no-permissions">
+    Issue 4: Project Created But No Permissions
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#issue-5-script-execution-errors">
+    Issue 5: Script Execution Errors
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-youve-learned">
+    🎓 What You've Learned
+  </a>
+<nav aria-label="🎓 What You've Learned" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#servicenow-skills">
+    ✅ ServiceNow Skills
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#openshift-skills">
+    ✅ OpenShift Skills
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#integration-understanding">
+    ✅ Integration Understanding
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-workflow-skills">
+    ✅ Development Workflow Skills
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#next-steps">
+    🚀 Next Steps
+  </a>
+<nav aria-label="🚀 Next Steps" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#immediate-next-steps">
+    Immediate Next Steps
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#learning-resources">
+    Learning Resources
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-resources">
+    Development Resources
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#community-resources">
+    Community Resources
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="your-first-servicenow-openshift-project">🚀 Your First ServiceNow-OpenShift Project<a class="headerlink" href="#your-first-servicenow-openshift-project" title="Permanent link">¶</a></h1>
+<p><strong>A complete beginner's guide to creating your first project using the ServiceNow-OpenShift integration</strong></p>
+<h2 id="what-youll-learn">🎯 What You'll Learn<a class="headerlink" href="#what-youll-learn" title="Permanent link">¶</a></h2>
+<p>By the end of this tutorial, you'll have:
+- ✅ Created a ServiceNow catalog request for an OpenShift project
+- ✅ Executed the automated workflow using the simplified script
+- ✅ Verified your project creation in OpenShift
+- ✅ Understood the development workflow approach</p>
+<p><strong>⏱️ Estimated Time</strong>: 15-20 minutes</p>
+<h2 id="prerequisites">📋 Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¶</a></h2>
+<p>Before starting, ensure you have:</p>
+<h3 id="required-access">Required Access<a class="headerlink" href="#required-access" title="Permanent link">¶</a></h3>
+<ul>
+<li>[ ] <strong>ServiceNow PDI account</strong> (Personal Developer Instance)</li>
+<li>[ ] <strong>OpenShift cluster access</strong> with <code>oc</code> CLI configured</li>
+<li>[ ] <strong>Terminal/command line access</strong> to the project repository</li>
+<li>[ ] <strong>Basic understanding</strong> of ServiceNow navigation</li>
+</ul>
+<h3 id="development-environment-note">Development Environment Note<a class="headerlink" href="#development-environment-note" title="Permanent link">¶</a></h3>
+<p>This tutorial uses the <strong>PDI workaround strategy</strong> (ADR-013) because ServiceNow Personal Developer Instances have limitations with outbound REST API calls. In production environments, this workflow would be fully automated through Business Rules.</p>
+<h3 id="what-you-dont-need">What You Don't Need<a class="headerlink" href="#what-you-dont-need" title="Permanent link">¶</a></h3>
+<ul>
+<li>❌ Production ServiceNow instance</li>
+<li>❌ Advanced Kubernetes knowledge</li>
+<li>❌ Ansible expertise</li>
+<li>❌ Administrative privileges</li>
+</ul>
+<h2 id="step-1-access-the-servicenow-service-catalog">🎬 Step 1: Access the ServiceNow Service Catalog<a class="headerlink" href="#step-1-access-the-servicenow-service-catalog" title="Permanent link">¶</a></h2>
+<h3 id="11-log-into-servicenow-pdi">1.1 Log into ServiceNow PDI<a class="headerlink" href="#11-log-into-servicenow-pdi" title="Permanent link">¶</a></h3>
+<ol>
+<li>Open your browser and navigate to your ServiceNow PDI instance</li>
+<li>Example: <code>https://dev295398.service-now.com</code></li>
+<li>Log in with your PDI credentials</li>
+<li>You should see the ServiceNow homepage</li>
+</ol>
+<h3 id="12-navigate-to-service-catalog">1.2 Navigate to Service Catalog<a class="headerlink" href="#12-navigate-to-service-catalog" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>flowchart LR
+    A[ServiceNow PDI Homepage] --&gt; B[Service Catalog]
+    B --&gt; C[OpenShift Services]
+    C --&gt; D[Basic OpenShift Project Request]
+
+    style A fill:#e3f2fd
+    style D fill:#c8e6c9</code></pre>
+<ol>
+<li>Click on <strong>"Service Catalog"</strong> in the main navigation</li>
+<li>Look for <strong>"OpenShift Services"</strong> category</li>
+<li>Click on <strong>"Basic OpenShift Project Request"</strong></li>
+</ol>
+<h3 id="13-what-youll-see">1.3 What You'll See<a class="headerlink" href="#13-what-youll-see" title="Permanent link">¶</a></h3>
+<p>The catalog item form will display with several fields:
+- <strong>Project Name</strong> (required)
+- <strong>Business Justification</strong> (required)
+- <strong>Project Description</strong> (optional)
+- <strong>Additional Users</strong> (optional)</p>
+<p><strong>Note</strong>: In the PDI environment, this request will be created but won't automatically trigger the AAP job due to PDI limitations. We'll handle the automation in Step 4.</p>
+<h2 id="step-2-fill-out-your-project-request">🎬 Step 2: Fill Out Your Project Request<a class="headerlink" href="#step-2-fill-out-your-project-request" title="Permanent link">¶</a></h2>
+<h3 id="21-choose-a-project-name">2.1 Choose a Project Name<a class="headerlink" href="#21-choose-a-project-name" title="Permanent link">¶</a></h3>
+<p><strong>Best Practices:</strong>
+- Use lowercase letters and hyphens only
+- Keep it descriptive but concise
+- Examples: <code>my-first-app</code>, <code>team-dashboard</code>, <code>test-environment</code></p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Good examples:</span>
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>my-first-project
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>web-application-dev
+<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a>data-processing-test
+<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a>
+<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="c1"># Avoid these:</span>
+<a href="#__codelineno-0-7" id="__codelineno-0-7" name="__codelineno-0-7"></a>MyProject<span class="w"> </span><span class="o">(</span>uppercase<span class="o">)</span>
+<a href="#__codelineno-0-8" id="__codelineno-0-8" name="__codelineno-0-8"></a>my_project<span class="w"> </span><span class="o">(</span>underscores<span class="o">)</span>
+<a href="#__codelineno-0-9" id="__codelineno-0-9" name="__codelineno-0-9"></a>project<span class="w"> </span>with<span class="w"> </span>spaces<span class="w"> </span><span class="o">(</span>spaces<span class="o">)</span>
+</code></pre></div>
+<h3 id="22-provide-business-justification">2.2 Provide Business Justification<a class="headerlink" href="#22-provide-business-justification" title="Permanent link">¶</a></h3>
+<p><strong>Example justifications:</strong>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a>"Learning OpenShift platform capabilities for future application deployment"
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a>"Development environment for new microservices application"
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a>
+<a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a>"Testing container deployment workflows for team training"
+</code></pre></div></p>
+<h3 id="23-add-project-description-optional">2.3 Add Project Description (Optional)<a class="headerlink" href="#23-add-project-description-optional" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a>"This project will be used to deploy and test a simple web application 
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a>as part of learning OpenShift container platform capabilities."
+</code></pre></div>
+<h3 id="24-additional-users-optional">2.4 Additional Users (Optional)<a class="headerlink" href="#24-additional-users-optional" title="Permanent link">¶</a></h3>
+<p>If you want to grant access to teammates:
+- Enter their ServiceNow usernames
+- Separate multiple users with commas
+- Example: <code>john.doe, jane.smith</code></p>
+<h2 id="step-3-submit-your-request">🎬 Step 3: Submit Your Request<a class="headerlink" href="#step-3-submit-your-request" title="Permanent link">¶</a></h2>
+<h3 id="31-review-your-information">3.1 Review Your Information<a class="headerlink" href="#31-review-your-information" title="Permanent link">¶</a></h3>
+<p>Double-check:
+- [ ] Project name follows naming conventions
+- [ ] Business justification is clear and professional
+- [ ] Additional users (if any) are spelled correctly</p>
+<h3 id="32-submit-the-request">3.2 Submit the Request<a class="headerlink" href="#32-submit-the-request" title="Permanent link">¶</a></h3>
+<ol>
+<li>Click <strong>"Order Now"</strong> button</li>
+<li>You'll see a confirmation message</li>
+<li>Note your <strong>Request Number</strong> (e.g., REQ0001234)</li>
+</ol>
+<h3 id="33-what-happens-in-pdi-environment">3.3 What Happens in PDI Environment<a class="headerlink" href="#33-what-happens-in-pdi-environment" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant You as You
+    participant SN as ServiceNow PDI
+    participant Script as Simplified Workflow
+    participant AAP as Ansible Automation
+    participant KC as Keycloak
+    participant OCP as OpenShift
+
+    You-&gt;&gt;SN: Submit project request
+    SN-&gt;&gt;SN: Create request (no auto-trigger)
+    You-&gt;&gt;Script: Run simplified workflow script
+    Script-&gt;&gt;AAP: Trigger automation job manually
+    AAP-&gt;&gt;KC: Create user account
+    AAP-&gt;&gt;OCP: Create project namespace
+    AAP-&gt;&gt;OCP: Set up role bindings
+    Script-&gt;&gt;You: Show completion status
+
+    Note over You,OCP: Manual execution due to PDI limitations</code></pre>
+<p><strong>PDI Workflow Steps:</strong>
+1. <strong>Request Creation</strong> in ServiceNow (immediate)
+2. <strong>Manual Script Execution</strong> (you'll do this in Step 4)
+3. <strong>User Account Creation</strong> in Keycloak (1 minute)
+4. <strong>OpenShift Project Creation</strong> (1 minute)
+5. <strong>Permission Assignment</strong> (30 seconds)</p>
+<h2 id="step-4-execute-the-simplified-workflow">🎬 Step 4: Execute the Simplified Workflow<a class="headerlink" href="#step-4-execute-the-simplified-workflow" title="Permanent link">¶</a></h2>
+<h3 id="41-open-terminal-and-navigate-to-project">4.1 Open Terminal and Navigate to Project<a class="headerlink" href="#41-open-terminal-and-navigate-to-project" title="Permanent link">¶</a></h3>
+<ol>
+<li>Open your terminal/command line</li>
+<li>Navigate to the project directory:
+   <div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="nb">cd</span><span class="w"> </span>/path/to/servicenow-ocp-service
+</code></pre></div></li>
+<li>Ensure you're logged into OpenShift:
+   <div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a>oc<span class="w"> </span>whoami
+<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a><span class="c1"># Should show your username</span>
+</code></pre></div></li>
+</ol>
+<h3 id="42-run-the-simplified-workflow-script">4.2 Run the Simplified Workflow Script<a class="headerlink" href="#42-run-the-simplified-workflow-script" title="Permanent link">¶</a></h3>
+<p>Execute the working script that handles the automation:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="c1"># Navigate to the workflow directory</span>
+<a href="#__codelineno-5-2" id="__codelineno-5-2" name="__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>user-workflows/advanced/
+<a href="#__codelineno-5-3" id="__codelineno-5-3" name="__codelineno-5-3"></a>
+<a href="#__codelineno-5-4" id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="c1"># Run the simplified workflow script</span>
+<a href="#__codelineno-5-5" id="__codelineno-5-5" name="__codelineno-5-5"></a>./start-simplified-workflow.sh<span class="w"> </span>my-first-project<span class="w"> </span>development<span class="w"> </span>full
+</code></pre></div>
+<p><strong>Script Parameters:</strong>
+- <code>my-first-project</code>: Your project name (use the same name from ServiceNow)
+- <code>development</code>: Environment (development/staging/production)
+- <code>full</code>: Mode (full workflow with request creation and validation)</p>
+<h3 id="43-what-the-script-does">4.3 What the Script Does<a class="headerlink" href="#43-what-the-script-does" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    A[Script Starts] --&gt; B[Check ServiceNow Request]
+    B --&gt; C[Trigger AAP Job Template]
+    C --&gt; D[Create Keycloak User]
+    D --&gt; E[Create OpenShift Project]
+    E --&gt; F[Set Up RBAC]
+    F --&gt; G[Verify Integration]
+    G --&gt; H[Show Results]
+
+    style A fill:#e3f2fd
+    style H fill:#c8e6c9</code></pre>
+<p><strong>Expected Output:</strong>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-6-1" id="__codelineno-6-1" name="__codelineno-6-1"></a>🚀<span class="w"> </span>Starting<span class="w"> </span>ServiceNow-OpenShift<span class="w"> </span>Integration<span class="w"> </span>Workflow
+<a href="#__codelineno-6-2" id="__codelineno-6-2" name="__codelineno-6-2"></a>📋<span class="w"> </span>Project:<span class="w"> </span>my-first-project
+<a href="#__codelineno-6-3" id="__codelineno-6-3" name="__codelineno-6-3"></a>🌍<span class="w"> </span>Environment:<span class="w"> </span>development
+<a href="#__codelineno-6-4" id="__codelineno-6-4" name="__codelineno-6-4"></a>🔄<span class="w"> </span>Mode:<span class="w"> </span>full
+<a href="#__codelineno-6-5" id="__codelineno-6-5" name="__codelineno-6-5"></a>
+<a href="#__codelineno-6-6" id="__codelineno-6-6" name="__codelineno-6-6"></a>✅<span class="w"> </span>ServiceNow<span class="w"> </span>request<span class="w"> </span>found:<span class="w"> </span>REQ0001234
+<a href="#__codelineno-6-7" id="__codelineno-6-7" name="__codelineno-6-7"></a>✅<span class="w"> </span>AAP<span class="w"> </span>job<span class="w"> </span>template<span class="w"> </span>triggered<span class="w"> </span>successfully
+<a href="#__codelineno-6-8" id="__codelineno-6-8" name="__codelineno-6-8"></a>✅<span class="w"> </span>Keycloak<span class="w"> </span>user<span class="w"> </span>created:<span class="w"> </span>your-username
+<a href="#__codelineno-6-9" id="__codelineno-6-9" name="__codelineno-6-9"></a>✅<span class="w"> </span>OpenShift<span class="w"> </span>project<span class="w"> </span>created:<span class="w"> </span>my-first-project
+<a href="#__codelineno-6-10" id="__codelineno-6-10" name="__codelineno-6-10"></a>✅<span class="w"> </span>RBAC<span class="w"> </span>configured:<span class="w"> </span>admin<span class="w"> </span>permissions<span class="w"> </span>granted
+<a href="#__codelineno-6-11" id="__codelineno-6-11" name="__codelineno-6-11"></a>✅<span class="w"> </span>Integration<span class="w"> </span>verified:<span class="w"> </span>End-to-end<span class="w"> </span><span class="nb">test</span><span class="w"> </span>passed
+<a href="#__codelineno-6-12" id="__codelineno-6-12" name="__codelineno-6-12"></a>
+<a href="#__codelineno-6-13" id="__codelineno-6-13" name="__codelineno-6-13"></a>🎉<span class="w"> </span>Project<span class="w"> </span>ready!<span class="w"> </span>Access<span class="w"> </span>via<span class="w"> </span>OpenShift<span class="w"> </span>console.
+</code></pre></div></p>
+<h2 id="step-5-access-your-new-project">🎬 Step 5: Access Your New Project<a class="headerlink" href="#step-5-access-your-new-project" title="Permanent link">¶</a></h2>
+<h3 id="51-get-your-openshift-console-url">5.1 Get Your OpenShift Console URL<a class="headerlink" href="#51-get-your-openshift-console-url" title="Permanent link">¶</a></h3>
+<p>From the completion email, click the <strong>OpenShift Console</strong> link, or:</p>
+<ol>
+<li>Navigate to: <code>https://console-openshift-console.apps.your-cluster.com</code></li>
+<li>Click <strong>"Log in with Keycloak"</strong></li>
+<li>Use your ServiceNow credentials</li>
+</ol>
+<h3 id="52-verify-your-project-access">5.2 Verify Your Project Access<a class="headerlink" href="#52-verify-your-project-access" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    A[OpenShift Console] --&gt; B{Login Successful?}
+    B --&gt;|Yes| C[View Projects List]
+    B --&gt;|No| D[Check Credentials]
+    C --&gt; E{See Your Project?}
+    E --&gt;|Yes| F[✅ Success!]
+    E --&gt;|No| G[Wait 5 minutes, refresh]
+    D --&gt; A
+    G --&gt; C
+
+    style F fill:#c8e6c9
+    style D fill:#ffecb3
+    style G fill:#ffecb3</code></pre>
+<p><strong>What to look for:</strong>
+1. Your project appears in the projects list
+2. You can click on it and see the project overview
+3. You have "Admin" role in the project</p>
+<h3 id="53-explore-your-project">5.3 Explore Your Project<a class="headerlink" href="#53-explore-your-project" title="Permanent link">¶</a></h3>
+<p><strong>Key areas to explore:</strong>
+- <strong>Overview</strong>: Project summary and resource usage
+- <strong>Workloads</strong>: Where your applications will run
+- <strong>Networking</strong>: Services and routes
+- <strong>Storage</strong>: Persistent volumes
+- <strong>Administration</strong>: Project settings and permissions</p>
+<h2 id="step-6-deploy-your-first-application">🎬 Step 6: Deploy Your First Application<a class="headerlink" href="#step-6-deploy-your-first-application" title="Permanent link">¶</a></h2>
+<h3 id="61-quick-application-deployment">6.1 Quick Application Deployment<a class="headerlink" href="#61-quick-application-deployment" title="Permanent link">¶</a></h3>
+<p>Let's deploy a simple "Hello World" application:</p>
+<ol>
+<li>In your project, click <strong>"Add"</strong> → <strong>"Container Image"</strong></li>
+<li>Enter image name: <code>quay.io/redhat-training/hello-world-nginx:v1.0</code></li>
+<li>Set application name: <code>hello-world</code></li>
+<li>Click <strong>"Create"</strong></li>
+</ol>
+<h3 id="62-verify-deployment">6.2 Verify Deployment<a class="headerlink" href="#62-verify-deployment" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-7-1" id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="c1"># Your application will go through these phases:</span>
+<a href="#__codelineno-7-2" id="__codelineno-7-2" name="__codelineno-7-2"></a>Pending<span class="w"> </span>→<span class="w"> </span>ContainerCreating<span class="w"> </span>→<span class="w"> </span>Running
+</code></pre></div>
+<ol>
+<li>Go to <strong>Workloads</strong> → <strong>Pods</strong></li>
+<li>Wait for your pod to show "Running" status</li>
+<li>Go to <strong>Networking</strong> → <strong>Routes</strong></li>
+<li>Click on the route URL to see your application</li>
+</ol>
+<h3 id="63-success">6.3 Success! 🎉<a class="headerlink" href="#63-success" title="Permanent link">¶</a></h3>
+<p>You should see a "Hello World" webpage, confirming:
+- ✅ Your project was created successfully
+- ✅ You have proper permissions
+- ✅ The integration is working correctly</p>
+<h2 id="troubleshooting-common-issues">🔧 Troubleshooting Common Issues<a class="headerlink" href="#troubleshooting-common-issues" title="Permanent link">¶</a></h2>
+<h3 id="issue-1-script-fails-to-find-servicenow-request">Issue 1: Script Fails to Find ServiceNow Request<a class="headerlink" href="#issue-1-script-fails-to-find-servicenow-request" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms:</strong> Script reports "ServiceNow request not found"</p>
+<p><strong>Solutions:</strong>
+1. <strong>Verify request number</strong> in ServiceNow "My Requests"
+2. <strong>Wait 2-3 minutes</strong> after submitting request
+3. <strong>Check ServiceNow credentials</strong> in vault configuration
+4. <strong>Run script with correct project name</strong> (must match ServiceNow request)</p>
+<h3 id="issue-2-aap-job-template-fails">Issue 2: AAP Job Template Fails<a class="headerlink" href="#issue-2-aap-job-template-fails" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms:</strong> Script reports "AAP job template execution failed"</p>
+<p><strong>Solutions:</strong>
+1. <strong>Check AAP credentials</strong> in vault file
+2. <strong>Verify AAP controller URL</strong> is accessible
+3. <strong>Ensure job template ID 9 exists</strong> in AAP
+4. <strong>Check AAP logs</strong> for detailed error information</p>
+<h3 id="issue-3-cant-access-openshift-console">Issue 3: Can't Access OpenShift Console<a class="headerlink" href="#issue-3-cant-access-openshift-console" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms:</strong> Login fails or project not visible</p>
+<p><strong>Solutions:</strong>
+1. <strong>Wait 5 minutes</strong> after script completion
+2. <strong>Clear browser cache</strong> and try again
+3. <strong>Use incognito/private browsing</strong> mode
+4. <strong>Verify OpenShift login</strong>: <code>oc whoami</code></p>
+<h3 id="issue-4-project-created-but-no-permissions">Issue 4: Project Created But No Permissions<a class="headerlink" href="#issue-4-project-created-but-no-permissions" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms:</strong> Can see project but can't deploy applications</p>
+<p><strong>Solutions:</strong>
+1. <strong>Check Keycloak user creation</strong> in Keycloak admin console
+2. <strong>Verify OIDC integration</strong> is working
+3. <strong>Log out and log back in</strong> to refresh permissions
+4. <strong>Run script again</strong> with <code>verify-only</code> mode</p>
+<h3 id="issue-5-script-execution-errors">Issue 5: Script Execution Errors<a class="headerlink" href="#issue-5-script-execution-errors" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms:</strong> Script fails with permission or command errors</p>
+<p><strong>Solutions:</strong>
+1. <strong>Ensure you're in the correct directory</strong>: <code>user-workflows/advanced/</code>
+2. <strong>Make script executable</strong>: <code>chmod +x start-simplified-workflow.sh</code>
+3. <strong>Check vault password file</strong>: <code>.vault_pass</code> should exist
+4. <strong>Verify OpenShift login</strong>: <code>oc login</code> before running script</p>
+<h2 id="what-youve-learned">🎓 What You've Learned<a class="headerlink" href="#what-youve-learned" title="Permanent link">¶</a></h2>
+<p>Congratulations! You've successfully:</p>
+<h3 id="servicenow-skills">✅ <strong>ServiceNow Skills</strong><a class="headerlink" href="#servicenow-skills" title="Permanent link">¶</a></h3>
+<ul>
+<li>Navigated the Service Catalog</li>
+<li>Submitted a project request</li>
+<li>Tracked request status</li>
+<li>Understood approval workflows</li>
+</ul>
+<h3 id="openshift-skills">✅ <strong>OpenShift Skills</strong><a class="headerlink" href="#openshift-skills" title="Permanent link">¶</a></h3>
+<ul>
+<li>Accessed the OpenShift console</li>
+<li>Explored project structure</li>
+<li>Deployed your first application</li>
+<li>Verified application deployment</li>
+</ul>
+<h3 id="integration-understanding">✅ <strong>Integration Understanding</strong><a class="headerlink" href="#integration-understanding" title="Permanent link">¶</a></h3>
+<ul>
+<li>Experienced the PDI workaround workflow</li>
+<li>Understood the four-tier architecture</li>
+<li>Learned about the simplified workflow script</li>
+<li>Gained troubleshooting experience with development environment</li>
+</ul>
+<h3 id="development-workflow-skills">✅ <strong>Development Workflow Skills</strong><a class="headerlink" href="#development-workflow-skills" title="Permanent link">¶</a></h3>
+<ul>
+<li>Used the <code>start-simplified-workflow.sh</code> script</li>
+<li>Understood PDI limitations and workarounds</li>
+<li>Learned manual AAP job execution</li>
+<li>Experienced end-to-end validation</li>
+</ul>
+<h2 id="next-steps">🚀 Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">¶</a></h2>
+<h3 id="immediate-next-steps"><strong>Immediate Next Steps</strong><a class="headerlink" href="#immediate-next-steps" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Explore OpenShift Features</strong></li>
+<li>Try different application deployment methods</li>
+<li>Experiment with scaling applications</li>
+<li>
+<p>Learn about persistent storage</p>
+</li>
+<li>
+<p><strong>Understand Production Differences</strong></p>
+</li>
+<li>Read <a href="../../adrs/013-pdi-workaround-strategy-for-development/">ADR-013: PDI Workaround Strategy</a></li>
+<li>Learn about <a href="../../adrs/014-business-rules-over-flow-designer/">Business Rules implementation</a></li>
+<li>
+<p>Understand production automation differences</p>
+</li>
+<li>
+<p><strong>Advanced Development</strong></p>
+</li>
+<li>Test Business Rules logic locally with <code>test_business_rule_logic.js</code></li>
+<li>Run end-to-end tests with <code>ansible/idempotent_end_to_end_test.yml</code></li>
+<li>Explore different workflow modes (check-first, verify-only)</li>
+</ol>
+<h3 id="learning-resources"><strong>Learning Resources</strong><a class="headerlink" href="#learning-resources" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong><a href="../../GETTING_STARTED/">Getting Started Guide</a></strong> - Complete administrative setup</li>
+<li><strong><a href="../KEYCLOAK_INTEGRATION_GUIDE.md">Keycloak Integration Guide</a></strong> - Identity management details</li>
+<li><strong><a href="../../how-to/end-to-end-testing/">End-to-End Test Guide</a></strong> - Comprehensive testing</li>
+<li><strong><a href="../../explanation/architecture-overview/">Architecture Overview</a></strong> - System design</li>
+</ul>
+<h3 id="development-resources"><strong>Development Resources</strong><a class="headerlink" href="#development-resources" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong><a href="../../PDI_ALTERNATIVE_SOLUTIONS/">PDI Alternative Solutions</a></strong> - Development environment options</li>
+<li><strong><a href="../../how-to/business-rule-logic/">Business Rule Logic Documentation</a></strong> - Production automation</li>
+<li><strong><a href="../user-workflows-guide/">User Workflows Guide</a></strong> - Advanced workflow usage</li>
+</ul>
+<h3 id="community-resources"><strong>Community Resources</strong><a class="headerlink" href="#community-resources" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong><a href="../../CONTRIBUTING.md">Contributing Guide</a></strong> - Help improve the project</li>
+<li><strong><a href="https://github.com/tosin2013/servicenow-ocp-service/issues">GitHub Issues</a></strong> - Report problems or suggestions</li>
+</ul>
+<hr/>
+<p><strong>🎉 Congratulations on completing your first ServiceNow-OpenShift project using the development workflow!</strong></p>
+<p>You now understand both the development approach (PDI workaround) and the production approach (Business Rules automation). This knowledge will help you contribute to the project and deploy it in enterprise environments.</p>
+<hr/>
+<div class="md-source-file">
+<small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+<br/>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+</small>
+</div>
+</article>
+</div>
+</div>
+<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"></path></svg>
+  Back to top
+</button>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+<script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+</body>
+</html>

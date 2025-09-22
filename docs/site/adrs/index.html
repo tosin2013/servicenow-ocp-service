@@ -1,0 +1,2440 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/servicenow-ocp-service/adrs/">
+      
+      
+        <link rel="prev" href="../explanation/user-workflows-analysis/">
+      
+      
+        <link rel="next" href="001-three-tier-orchestration-architecture/">
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+    
+    
+      
+        <title>Overview - ServiceNow OpenShift Integration</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35e1ed30.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architectural-decision-records-adrs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="ServiceNow OpenShift Integration" class="md-header__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../GETTING_STARTED/" class="md-tabs__link">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../explanation/deployment-architecture/" class="md-tabs__link">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../explanation/user-workflows-analysis/" class="md-tabs__link">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  Architecture Decision Records
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorials/" class="md-tabs__link">
+          
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../how-to/" class="md-tabs__link">
+          
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../reference/" class="md-tabs__link">
+          
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="ServiceNow OpenShift Integration" class="md-nav__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    ServiceNow OpenShift Integration
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GETTING_STARTED/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/deployment-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/user-workflows-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adr-index" class="md-nav__link">
+    📋 ADR Index
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 ADR Index">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#foundation-layer-adrs-001-003" class="md-nav__link">
+    Foundation Layer (ADRs 001-003)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-and-infrastructure-adrs-004-005" class="md-nav__link">
+    Deployment and Infrastructure (ADRs 004-005)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-layer-adrs-006-007" class="md-nav__link">
+    Integration Layer (ADRs 006-007)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operations-and-monitoring-adrs-008-009" class="md-nav__link">
+    Operations and Monitoring (ADRs 008-009)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automation-platform-adrs-010-012" class="md-nav__link">
+    Automation Platform (ADRs 010-012)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-and-production-strategy-adrs-013-014" class="md-nav__link">
+    Development and Production Strategy (ADRs 013-014)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation-and-quality-assurance-adrs-015-016" class="md-nav__link">
+    Documentation and Quality Assurance (ADRs 015-016)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-evolution" class="md-nav__link">
+    🏗️ Architectural Evolution
+  </a>
+  
+    <nav class="md-nav" aria-label="🏗️ Architectural Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-foundation-adrs-001-003" class="md-nav__link">
+    Phase 1: Foundation (ADRs 001-003)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-infrastructure-adrs-004-005" class="md-nav__link">
+    Phase 2: Infrastructure (ADRs 004-005)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-integration-adrs-006-007" class="md-nav__link">
+    Phase 3: Integration (ADRs 006-007)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-operations-adrs-008-009" class="md-nav__link">
+    Phase 4: Operations (ADRs 008-009)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-automation-platform-adrs-010-012" class="md-nav__link">
+    Phase 5: Automation Platform (ADRs 010-012)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-architectural-decisions" class="md-nav__link">
+    🔄 Key Architectural Decisions
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Key Architectural Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accepted-patterns" class="md-nav__link">
+    ✅ Accepted Patterns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#superseded-decisions" class="md-nav__link">
+    ⚠️ Superseded Decisions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolving-areas" class="md-nav__link">
+    🔄 Evolving Areas
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-impact-analysis" class="md-nav__link">
+    📊 Decision Impact Analysis
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Decision Impact Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-impact-decisions" class="md-nav__link">
+    High Impact Decisions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#medium-impact-decisions" class="md-nav__link">
+    Medium Impact Decisions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#low-impact-decisions" class="md-nav__link">
+    Low Impact Decisions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-adrs" class="md-nav__link">
+    🎯 Future ADRs
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Future ADRs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planned-decisions" class="md-nav__link">
+    Planned Decisions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#under-consideration" class="md-nav__link">
+    Under Consideration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-template" class="md-nav__link">
+    📚 ADR Template
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing-to-adrs" class="md-nav__link">
+    🤝 Contributing to ADRs
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="001-three-tier-orchestration-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="002-decoupled-api-driven-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="003-centralized-configuration-with-connection-credential-aliases/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="004-gitops-based-deployment-with-argocd-and-kustomize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="005-keycloak-deployment-on-openshift-via-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="006-servicenow-implementation-with-flow-designer-and-integrationhub/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="007-secret-management-with-external-secrets-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="008-observability-strategy-using-openshift-built-in-monitoring/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="009-hybrid-gitops-and-ansible-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="010-ansible-automation-platform-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="011-custom-execution-environment-for-aap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="012-ansible-automation-platform-kustomize-deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="013-pdi-workaround-strategy-for-development/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="014-business-rules-over-flow-designer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="015-secure-credential-management-in-user-workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="016-documentation-link-validation-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/ansible-vault-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/execution-environment-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/ansible-automation-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/your-first-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/user-workflows-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/aap-token-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/working-with-execution-environment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/working-with-ansible/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/business-rule-logic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/end-to-end-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/debugging-integration-issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/user-experience-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/scale-for-production/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/backup-and-recovery/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/configuration-variables/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/api-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/ansible-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/execution-environment-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/user-workflows-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/link-validation-report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/link-monitoring-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/link-validation-checklist/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PDI_ALTERNATIVE_SOLUTIONS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adr-index" class="md-nav__link">
+    📋 ADR Index
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 ADR Index">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#foundation-layer-adrs-001-003" class="md-nav__link">
+    Foundation Layer (ADRs 001-003)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-and-infrastructure-adrs-004-005" class="md-nav__link">
+    Deployment and Infrastructure (ADRs 004-005)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-layer-adrs-006-007" class="md-nav__link">
+    Integration Layer (ADRs 006-007)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operations-and-monitoring-adrs-008-009" class="md-nav__link">
+    Operations and Monitoring (ADRs 008-009)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automation-platform-adrs-010-012" class="md-nav__link">
+    Automation Platform (ADRs 010-012)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-and-production-strategy-adrs-013-014" class="md-nav__link">
+    Development and Production Strategy (ADRs 013-014)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation-and-quality-assurance-adrs-015-016" class="md-nav__link">
+    Documentation and Quality Assurance (ADRs 015-016)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-evolution" class="md-nav__link">
+    🏗️ Architectural Evolution
+  </a>
+  
+    <nav class="md-nav" aria-label="🏗️ Architectural Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-foundation-adrs-001-003" class="md-nav__link">
+    Phase 1: Foundation (ADRs 001-003)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-infrastructure-adrs-004-005" class="md-nav__link">
+    Phase 2: Infrastructure (ADRs 004-005)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-integration-adrs-006-007" class="md-nav__link">
+    Phase 3: Integration (ADRs 006-007)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-operations-adrs-008-009" class="md-nav__link">
+    Phase 4: Operations (ADRs 008-009)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-automation-platform-adrs-010-012" class="md-nav__link">
+    Phase 5: Automation Platform (ADRs 010-012)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-architectural-decisions" class="md-nav__link">
+    🔄 Key Architectural Decisions
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Key Architectural Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accepted-patterns" class="md-nav__link">
+    ✅ Accepted Patterns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#superseded-decisions" class="md-nav__link">
+    ⚠️ Superseded Decisions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolving-areas" class="md-nav__link">
+    🔄 Evolving Areas
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-impact-analysis" class="md-nav__link">
+    📊 Decision Impact Analysis
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Decision Impact Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-impact-decisions" class="md-nav__link">
+    High Impact Decisions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#medium-impact-decisions" class="md-nav__link">
+    Medium Impact Decisions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#low-impact-decisions" class="md-nav__link">
+    Low Impact Decisions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-adrs" class="md-nav__link">
+    🎯 Future ADRs
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Future ADRs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planned-decisions" class="md-nav__link">
+    Planned Decisions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#under-consideration" class="md-nav__link">
+    Under Consideration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-template" class="md-nav__link">
+    📚 ADR Template
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing-to-adrs" class="md-nav__link">
+    🤝 Contributing to ADRs
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="architectural-decision-records-adrs">Architectural Decision Records (ADRs)<a class="headerlink" href="#architectural-decision-records-adrs" title="Permanent link">&para;</a></h1>
+<p>This directory contains the architectural decision records for the ServiceNow-OpenShift integration project. ADRs document the key architectural decisions made during the development of this system.</p>
+<h2 id="adr-index">📋 <strong>ADR Index</strong><a class="headerlink" href="#adr-index" title="Permanent link">&para;</a></h2>
+<h3 id="foundation-layer-adrs-001-003"><strong>Foundation Layer (ADRs 001-003)</strong><a class="headerlink" href="#foundation-layer-adrs-001-003" title="Permanent link">&para;</a></h3>
+<p>These ADRs establish the core architectural foundation:</p>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="001-three-tier-orchestration-architecture/">001</a></td>
+<td>Three-Tier Orchestration Architecture</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Establishes ServiceNow → AAP → Keycloak → OpenShift architecture</td>
+</tr>
+<tr>
+<td><a href="002-decoupled-api-driven-integration/">002</a></td>
+<td>Decoupled API-Driven Integration</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Defines REST API integration patterns</td>
+</tr>
+<tr>
+<td><a href="003-centralized-configuration-with-connection-credential-aliases/">003</a></td>
+<td>Centralized Configuration</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Centralizes credential management</td>
+</tr>
+</tbody>
+</table>
+<h3 id="deployment-and-infrastructure-adrs-004-005"><strong>Deployment and Infrastructure (ADRs 004-005)</strong><a class="headerlink" href="#deployment-and-infrastructure-adrs-004-005" title="Permanent link">&para;</a></h3>
+<p>These ADRs define deployment and infrastructure patterns:</p>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="004-gitops-based-deployment-with-argocd-and-kustomize/">004</a></td>
+<td>GitOps Deployment</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Establishes GitOps with ArgoCD and Kustomize</td>
+</tr>
+<tr>
+<td><a href="005-keycloak-deployment-on-openshift-via-operator/">005</a></td>
+<td>Keycloak Deployment</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Defines identity platform deployment strategy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="integration-layer-adrs-006-007"><strong>Integration Layer (ADRs 006-007)</strong><a class="headerlink" href="#integration-layer-adrs-006-007" title="Permanent link">&para;</a></h3>
+<p>These ADRs define integration patterns and security:</p>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="006-servicenow-implementation-with-flow-designer-and-integrationhub/">006</a></td>
+<td>ServiceNow Implementation</td>
+<td>⚠️ Superseded</td>
+<td>2025-09-05</td>
+<td>Original Flow Designer approach - superseded by ADR-014</td>
+</tr>
+<tr>
+<td><a href="007-secret-management-with-external-secrets-operator/">007</a></td>
+<td>Secret Management</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Secure secret management with ESO</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operations-and-monitoring-adrs-008-009"><strong>Operations and Monitoring (ADRs 008-009)</strong><a class="headerlink" href="#operations-and-monitoring-adrs-008-009" title="Permanent link">&para;</a></h3>
+<p>These ADRs define operational concerns:</p>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="008-observability-strategy-using-openshift-built-in-monitoring/">008</a></td>
+<td>Observability Strategy</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Monitoring and observability approach</td>
+</tr>
+<tr>
+<td><a href="009-hybrid-gitops-and-ansible-configuration/">009</a></td>
+<td>Hybrid GitOps</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Hybrid deployment approach</td>
+</tr>
+</tbody>
+</table>
+<h3 id="automation-platform-adrs-010-012"><strong>Automation Platform (ADRs 010-012)</strong><a class="headerlink" href="#automation-platform-adrs-010-012" title="Permanent link">&para;</a></h3>
+<p>These ADRs introduce and define the Ansible Automation Platform tier:</p>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="010-ansible-automation-platform-integration/">010</a></td>
+<td>AAP Integration</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Introduces AAP as automation execution tier</td>
+</tr>
+<tr>
+<td><a href="011-custom-execution-environment-for-aap/">011</a></td>
+<td>Custom Execution Environment</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>Custom EE for ServiceNow dependencies</td>
+</tr>
+<tr>
+<td><a href="012-ansible-automation-platform-kustomize-deployment/">012</a></td>
+<td>AAP Kustomize Deployment</td>
+<td>✅ Accepted</td>
+<td>2025-09-05</td>
+<td>AAP deployment via Kustomize</td>
+</tr>
+</tbody>
+</table>
+<h3 id="development-and-production-strategy-adrs-013-014"><strong>Development and Production Strategy (ADRs 013-014)</strong><a class="headerlink" href="#development-and-production-strategy-adrs-013-014" title="Permanent link">&para;</a></h3>
+<p>These ADRs address development environment constraints and production deployment decisions:</p>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="013-pdi-workaround-strategy-for-development/">013</a></td>
+<td>PDI Workaround Strategy</td>
+<td>✅ Accepted</td>
+<td>2025-09-19</td>
+<td>Development environment strategy for PDI limitations</td>
+</tr>
+<tr>
+<td><a href="014-business-rules-over-flow-designer/">014</a></td>
+<td>Business Rules Over Flow Designer</td>
+<td>✅ Accepted</td>
+<td>2025-09-19</td>
+<td>ServiceNow automation approach decision</td>
+</tr>
+</tbody>
+</table>
+<h3 id="documentation-and-quality-assurance-adrs-015-016"><strong>Documentation and Quality Assurance (ADRs 015-016)</strong><a class="headerlink" href="#documentation-and-quality-assurance-adrs-015-016" title="Permanent link">&para;</a></h3>
+<p>These ADRs establish documentation standards and quality assurance processes:</p>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="015-secure-credential-management-in-user-workflows/">015</a></td>
+<td>Secure Credential Management</td>
+<td>✅ Accepted</td>
+<td>2025-09-19</td>
+<td>Security patterns for user workflow credentials</td>
+</tr>
+<tr>
+<td><a href="016-documentation-link-validation-strategy/">016</a></td>
+<td>Documentation Link Validation Strategy</td>
+<td>✅ Accepted</td>
+<td>2025-09-21</td>
+<td>MCP-based link validation and maintenance strategy</td>
+</tr>
+</tbody>
+</table>
+<h2 id="architectural-evolution">🏗️ <strong>Architectural Evolution</strong><a class="headerlink" href="#architectural-evolution" title="Permanent link">&para;</a></h2>
+<h3 id="phase-1-foundation-adrs-001-003"><strong>Phase 1: Foundation (ADRs 001-003)</strong><a class="headerlink" href="#phase-1-foundation-adrs-001-003" title="Permanent link">&para;</a></h3>
+<p>Established the core three-tier architecture with clear separation of concerns:
+- <strong>ServiceNow</strong>: Orchestration and workflow management
+- <strong>Keycloak</strong>: Identity and access management<br />
+- <strong>OpenShift</strong>: Container platform and resource management</p>
+<h3 id="phase-2-infrastructure-adrs-004-005"><strong>Phase 2: Infrastructure (ADRs 004-005)</strong><a class="headerlink" href="#phase-2-infrastructure-adrs-004-005" title="Permanent link">&para;</a></h3>
+<p>Defined deployment and infrastructure patterns:
+- <strong>GitOps</strong>: Declarative infrastructure management
+- <strong>Operator-based</strong>: Leveraging OpenShift operators for lifecycle management</p>
+<h3 id="phase-3-integration-adrs-006-007"><strong>Phase 3: Integration (ADRs 006-007)</strong><a class="headerlink" href="#phase-3-integration-adrs-006-007" title="Permanent link">&para;</a></h3>
+<p>Established integration patterns and security:
+- <strong>API-driven</strong>: RESTful integration between all components
+- <strong>Secure</strong>: Centralized secret management and secure communication</p>
+<h3 id="phase-4-operations-adrs-008-009"><strong>Phase 4: Operations (ADRs 008-009)</strong><a class="headerlink" href="#phase-4-operations-adrs-008-009" title="Permanent link">&para;</a></h3>
+<p>Addressed operational concerns:
+- <strong>Observability</strong>: Comprehensive monitoring and alerting
+- <strong>Hybrid Approach</strong>: Balancing GitOps with imperative configuration</p>
+<h3 id="phase-5-automation-platform-adrs-010-012"><strong>Phase 5: Automation Platform (ADRs 010-012)</strong><a class="headerlink" href="#phase-5-automation-platform-adrs-010-012" title="Permanent link">&para;</a></h3>
+<p>Introduced Ansible Automation Platform as the automation execution tier:
+- <strong>Four-Tier Architecture</strong>: Added AAP between ServiceNow and infrastructure
+- <strong>Custom Execution Environment</strong>: Specialized container for ServiceNow integrations
+- <strong>Kustomize Deployment</strong>: Consistent deployment patterns</p>
+<h2 id="key-architectural-decisions">🔄 <strong>Key Architectural Decisions</strong><a class="headerlink" href="#key-architectural-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="accepted-patterns"><strong>✅ Accepted Patterns</strong><a class="headerlink" href="#accepted-patterns" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Four-Tier Architecture</strong>: ServiceNow → AAP → Keycloak/OpenShift</li>
+<li><strong>API-Driven Integration</strong>: REST APIs for all inter-service communication</li>
+<li><strong>GitOps Deployment</strong>: Declarative infrastructure management</li>
+<li><strong>Business Rules Approach</strong>: Direct ServiceNow Business Rules (not Flow Designer)</li>
+<li><strong>Custom Execution Environment</strong>: Specialized container for dependencies</li>
+</ul>
+<h3 id="superseded-decisions"><strong>⚠️ Superseded Decisions</strong><a class="headerlink" href="#superseded-decisions" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Flow Designer</strong>: Originally planned but superseded by Business Rules approach</li>
+<li>See <a href="014-business-rules-over-flow-designer/">ADR-014</a> for detailed analysis</li>
+</ul>
+<h3 id="evolving-areas"><strong>🔄 Evolving Areas</strong><a class="headerlink" href="#evolving-areas" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ServiceNow Integration</strong>: Business Rules vs Flow Designer evaluation ongoing</li>
+<li><strong>Monitoring Strategy</strong>: Expanding observability capabilities</li>
+<li><strong>Security Patterns</strong>: Continuous security improvements</li>
+</ul>
+<h2 id="decision-impact-analysis">📊 <strong>Decision Impact Analysis</strong><a class="headerlink" href="#decision-impact-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="high-impact-decisions"><strong>High Impact Decisions</strong><a class="headerlink" href="#high-impact-decisions" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Four-Tier Architecture (ADR-001, ADR-010)</strong>: Fundamental system structure</li>
+<li><strong>API-Driven Integration (ADR-002)</strong>: All integration patterns</li>
+<li><strong>GitOps Deployment (ADR-004)</strong>: Infrastructure management approach</li>
+<li><strong>Business Rules Approach</strong>: ServiceNow integration method</li>
+</ol>
+<h3 id="medium-impact-decisions"><strong>Medium Impact Decisions</strong><a class="headerlink" href="#medium-impact-decisions" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Custom Execution Environment (ADR-011)</strong>: Development and deployment</li>
+<li><strong>Secret Management (ADR-007)</strong>: Security and operations</li>
+<li><strong>Observability Strategy (ADR-008)</strong>: Monitoring and troubleshooting</li>
+</ol>
+<h3 id="low-impact-decisions"><strong>Low Impact Decisions</strong><a class="headerlink" href="#low-impact-decisions" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Hybrid GitOps (ADR-009)</strong>: Deployment flexibility</li>
+<li><strong>Kustomize Patterns (ADR-004, ADR-012)</strong>: Configuration management</li>
+</ol>
+<h2 id="future-adrs">🎯 <strong>Future ADRs</strong><a class="headerlink" href="#future-adrs" title="Permanent link">&para;</a></h2>
+<h3 id="planned-decisions"><strong>Planned Decisions</strong><a class="headerlink" href="#planned-decisions" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Production Deployment Strategy</strong>: Production-specific configurations</li>
+<li><strong>Disaster Recovery</strong>: Backup and recovery procedures</li>
+<li><strong>Performance Optimization</strong>: Scaling and performance patterns</li>
+<li><strong>Multi-Tenant Support</strong>: Supporting multiple organizations</li>
+</ul>
+<h3 id="under-consideration"><strong>Under Consideration</strong><a class="headerlink" href="#under-consideration" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Alternative Identity Providers</strong>: Beyond Keycloak/RH-SSO</li>
+<li><strong>Cloud Provider Integration</strong>: AWS, Azure, GCP specific patterns</li>
+<li><strong>Advanced Monitoring</strong>: APM and distributed tracing</li>
+<li><strong>Security Hardening</strong>: Additional security measures</li>
+</ul>
+<h2 id="adr-template">📚 <strong>ADR Template</strong><a class="headerlink" href="#adr-template" title="Permanent link">&para;</a></h2>
+<p>When creating new ADRs, use this structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gh"># ADR-XXX: [Title]</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gs">**Status:**</span> [Proposed | Accepted | Deprecated | Superseded]
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gs">**Date:**</span> YYYY-MM-DD
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gu">## Context</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>[Describe the context and problem statement]
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="gu">## Decision</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>[Describe the architectural decision]
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="gu">## Rationale</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>[Explain why this decision was made]
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="gu">## Consequences</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>[Describe the positive and negative consequences]
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="gu">## Implementation</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>[Describe implementation details if applicable]
+</code></pre></div>
+<h2 id="contributing-to-adrs">🤝 <strong>Contributing to ADRs</strong><a class="headerlink" href="#contributing-to-adrs" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Review Existing ADRs</strong>: Understand current architectural decisions</li>
+<li><strong>Identify Decision Points</strong>: Look for areas needing architectural guidance</li>
+<li><strong>Draft ADR</strong>: Use the template above</li>
+<li><strong>Seek Review</strong>: Get feedback from the architecture team</li>
+<li><strong>Update Documentation</strong>: Ensure consistency across all documentation</li>
+</ol>
+<hr />
+<p><strong>These ADRs provide the architectural foundation for the ServiceNow-OpenShift integration. They guide development decisions and ensure consistency across the system.</strong></p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+        <br>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+    
+  </body>
+</html>

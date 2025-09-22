@@ -1,0 +1,1569 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform" name="description"/>
+<link href="https://tosin2013.github.io/servicenow-ocp-service/how-to/scale-for-production/" rel="canonical"/>
+<link href="../user-experience-guide/" rel="prev"/>
+<link href="../backup-and-recovery/" rel="next"/>
+<link href="../../assets/favicon.ico" rel="icon"/>
+<meta content="mkdocs-1.5.3, mkdocs-material-9.4.6" name="generator"/>
+<title>🚀 Scale for Production - ServiceNow OpenShift Integration</title>
+<link href="../../assets/stylesheets/main.35e1ed30.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.356b1318.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#scale-for-production">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="ServiceNow OpenShift Integration" class="md-header__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              🚀 Scale for Production
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="slate" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+</form>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../..">
+        
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../GETTING_STARTED/">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../explanation/deployment-architecture/">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../explanation/user-workflows-analysis/">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../adrs/">
+          
+  
+  Architecture Decision Records
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../tutorials/">
+          
+  
+  Tutorials
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  How-To Guides
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../reference/">
+          
+  
+  Reference
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="ServiceNow OpenShift Integration" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+    ServiceNow OpenShift Integration
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    Home
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../GETTING_STARTED/">
+<span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../explanation/deployment-architecture/">
+<span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../explanation/user-workflows-analysis/">
+<span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+<span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/001-three-tier-orchestration-architecture/">
+<span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/002-decoupled-api-driven-integration/">
+<span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/003-centralized-configuration-with-connection-credential-aliases/">
+<span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/004-gitops-based-deployment-with-argocd-and-kustomize/">
+<span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/005-keycloak-deployment-on-openshift-via-operator/">
+<span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/006-servicenow-implementation-with-flow-designer-and-integrationhub/">
+<span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/007-secret-management-with-external-secrets-operator/">
+<span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/008-observability-strategy-using-openshift-built-in-monitoring/">
+<span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/009-hybrid-gitops-and-ansible-configuration/">
+<span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/010-ansible-automation-platform-integration/">
+<span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/011-custom-execution-environment-for-aap/">
+<span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/012-ansible-automation-platform-kustomize-deployment/">
+<span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/013-pdi-workaround-strategy-for-development/">
+<span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/014-business-rules-over-flow-designer/">
+<span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/015-secure-credential-management-in-user-workflows/">
+<span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/016-documentation-link-validation-strategy/">
+<span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+<span class="md-ellipsis">
+    Tutorials
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/getting-started/">
+<span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/ansible-vault-configuration/">
+<span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/execution-environment-guide/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/ansible-automation-guide/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/your-first-project/">
+<span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/user-workflows-guide/">
+<span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+<span class="md-ellipsis">
+    How-To Guides
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../aap-token-setup/">
+<span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../working-with-execution-environment/">
+<span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../working-with-ansible/">
+<span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../business-rule-logic/">
+<span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../end-to-end-testing/">
+<span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../debugging-integration-issues/">
+<span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../user-experience-guide/">
+<span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#overview">
+    🎯 Overview
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#prerequisites">
+    📋 Prerequisites
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#architecture-scaling-overview">
+    🏗️ Architecture Scaling Overview
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-1-scale-ansible-automation-platform">
+    🎬 Step 1: Scale Ansible Automation Platform
+  </a>
+<nav aria-label="🎬 Step 1: Scale Ansible Automation Platform" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#11-assess-current-resource-usage">
+    1.1 Assess Current Resource Usage
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#12-configure-high-availability">
+    1.2 Configure High Availability
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#13-configure-external-database">
+    1.3 Configure External Database
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#14-apply-production-configuration">
+    1.4 Apply Production Configuration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-2-scale-keycloakrh-sso">
+    🎬 Step 2: Scale Keycloak/RH-SSO
+  </a>
+<nav aria-label="🎬 Step 2: Scale Keycloak/RH-SSO" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#21-configure-keycloak-clustering">
+    2.1 Configure Keycloak Clustering
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#22-configure-external-database-for-keycloak">
+    2.2 Configure External Database for Keycloak
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#23-apply-keycloak-production-configuration">
+    2.3 Apply Keycloak Production Configuration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-3-configure-production-resource-quotas">
+    🎬 Step 3: Configure Production Resource Quotas
+  </a>
+<nav aria-label="🎬 Step 3: Configure Production Resource Quotas" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#31-set-namespace-resource-limits">
+    3.1 Set Namespace Resource Limits
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#32-apply-resource-quotas">
+    3.2 Apply Resource Quotas
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-4-configure-network-policies">
+    🎬 Step 4: Configure Network Policies
+  </a>
+<nav aria-label="🎬 Step 4: Configure Network Policies" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#41-create-production-network-policies">
+    4.1 Create Production Network Policies
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#42-apply-network-policies">
+    4.2 Apply Network Policies
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-5-configure-monitoring-and-alerting">
+    🎬 Step 5: Configure Monitoring and Alerting
+  </a>
+<nav aria-label="🎬 Step 5: Configure Monitoring and Alerting" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-enable-servicemonitor-for-aap">
+    5.1 Enable ServiceMonitor for AAP
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-create-production-alerts">
+    5.2 Create Production Alerts
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-apply-monitoring-configuration">
+    5.3 Apply Monitoring Configuration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-6-performance-tuning">
+    🎬 Step 6: Performance Tuning
+  </a>
+<nav aria-label="🎬 Step 6: Performance Tuning" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-tune-aap-job-execution">
+    6.1 Tune AAP Job Execution
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-optimize-keycloak-performance">
+    6.2 Optimize Keycloak Performance
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-7-backup-and-disaster-recovery">
+    🎬 Step 7: Backup and Disaster Recovery
+  </a>
+<nav aria-label="🎬 Step 7: Backup and Disaster Recovery" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#71-configure-automated-backups">
+    7.1 Configure Automated Backups
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#72-schedule-regular-backups">
+    7.2 Schedule Regular Backups
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-8-validate-production-deployment">
+    🎬 Step 8: Validate Production Deployment
+  </a>
+<nav aria-label="🎬 Step 8: Validate Production Deployment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#81-run-production-readiness-tests">
+    8.1 Run Production Readiness Tests
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#82-performance-validation">
+    8.2 Performance Validation
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#production-readiness-checklist">
+    ✅ Production Readiness Checklist
+  </a>
+<nav aria-label="✅ Production Readiness Checklist" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#infrastructure">
+    Infrastructure
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security">
+    Security
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#monitoring">
+    Monitoring
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backup-recovery">
+    Backup &amp; Recovery
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance">
+    Performance
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backup-and-recovery/">
+<span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+<span class="md-ellipsis">
+    Reference
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/configuration-variables/">
+<span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/api-reference/">
+<span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/ansible-reference/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/execution-environment-reference/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/user-workflows-reference/">
+<span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-report/">
+<span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-monitoring-setup/">
+<span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-checklist/">
+<span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../PDI_ALTERNATIVE_SOLUTIONS/">
+<span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#overview">
+    🎯 Overview
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#prerequisites">
+    📋 Prerequisites
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#architecture-scaling-overview">
+    🏗️ Architecture Scaling Overview
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-1-scale-ansible-automation-platform">
+    🎬 Step 1: Scale Ansible Automation Platform
+  </a>
+<nav aria-label="🎬 Step 1: Scale Ansible Automation Platform" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#11-assess-current-resource-usage">
+    1.1 Assess Current Resource Usage
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#12-configure-high-availability">
+    1.2 Configure High Availability
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#13-configure-external-database">
+    1.3 Configure External Database
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#14-apply-production-configuration">
+    1.4 Apply Production Configuration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-2-scale-keycloakrh-sso">
+    🎬 Step 2: Scale Keycloak/RH-SSO
+  </a>
+<nav aria-label="🎬 Step 2: Scale Keycloak/RH-SSO" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#21-configure-keycloak-clustering">
+    2.1 Configure Keycloak Clustering
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#22-configure-external-database-for-keycloak">
+    2.2 Configure External Database for Keycloak
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#23-apply-keycloak-production-configuration">
+    2.3 Apply Keycloak Production Configuration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-3-configure-production-resource-quotas">
+    🎬 Step 3: Configure Production Resource Quotas
+  </a>
+<nav aria-label="🎬 Step 3: Configure Production Resource Quotas" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#31-set-namespace-resource-limits">
+    3.1 Set Namespace Resource Limits
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#32-apply-resource-quotas">
+    3.2 Apply Resource Quotas
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-4-configure-network-policies">
+    🎬 Step 4: Configure Network Policies
+  </a>
+<nav aria-label="🎬 Step 4: Configure Network Policies" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#41-create-production-network-policies">
+    4.1 Create Production Network Policies
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#42-apply-network-policies">
+    4.2 Apply Network Policies
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-5-configure-monitoring-and-alerting">
+    🎬 Step 5: Configure Monitoring and Alerting
+  </a>
+<nav aria-label="🎬 Step 5: Configure Monitoring and Alerting" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-enable-servicemonitor-for-aap">
+    5.1 Enable ServiceMonitor for AAP
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-create-production-alerts">
+    5.2 Create Production Alerts
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-apply-monitoring-configuration">
+    5.3 Apply Monitoring Configuration
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-6-performance-tuning">
+    🎬 Step 6: Performance Tuning
+  </a>
+<nav aria-label="🎬 Step 6: Performance Tuning" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-tune-aap-job-execution">
+    6.1 Tune AAP Job Execution
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-optimize-keycloak-performance">
+    6.2 Optimize Keycloak Performance
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-7-backup-and-disaster-recovery">
+    🎬 Step 7: Backup and Disaster Recovery
+  </a>
+<nav aria-label="🎬 Step 7: Backup and Disaster Recovery" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#71-configure-automated-backups">
+    7.1 Configure Automated Backups
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#72-schedule-regular-backups">
+    7.2 Schedule Regular Backups
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-8-validate-production-deployment">
+    🎬 Step 8: Validate Production Deployment
+  </a>
+<nav aria-label="🎬 Step 8: Validate Production Deployment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#81-run-production-readiness-tests">
+    8.1 Run Production Readiness Tests
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#82-performance-validation">
+    8.2 Performance Validation
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#production-readiness-checklist">
+    ✅ Production Readiness Checklist
+  </a>
+<nav aria-label="✅ Production Readiness Checklist" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#infrastructure">
+    Infrastructure
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security">
+    Security
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#monitoring">
+    Monitoring
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backup-recovery">
+    Backup &amp; Recovery
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance">
+    Performance
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="scale-for-production">🚀 Scale for Production<a class="headerlink" href="#scale-for-production" title="Permanent link">¶</a></h1>
+<p><strong>Step-by-step guide for scaling Ansible Automation Platform and other components for production workloads</strong></p>
+<h2 id="overview">🎯 Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>This guide helps you scale the ServiceNow-OpenShift integration from development/testing to production-ready deployment. We'll cover scaling strategies for each tier of the four-tier architecture.</p>
+<h2 id="prerequisites">📋 Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¶</a></h2>
+<p>Before scaling to production:</p>
+<ul>
+<li>[ ] <strong>Working development environment</strong> validated with end-to-end tests</li>
+<li>[ ] <strong>Production OpenShift cluster</strong> with sufficient resources</li>
+<li>[ ] <strong>Enterprise ServiceNow instance</strong> (not PDI)</li>
+<li>[ ] <strong>Production Keycloak/RH-SSO</strong> deployment</li>
+<li>[ ] <strong>Monitoring and alerting</strong> infrastructure in place</li>
+</ul>
+<h2 id="architecture-scaling-overview">🏗️ Architecture Scaling Overview<a class="headerlink" href="#architecture-scaling-overview" title="Permanent link">¶</a></h2>
+<pre class="mermaid"><code>graph TB
+    subgraph "Production Scaling Targets"
+        SN[ServiceNow Enterprise&lt;br/&gt;Multiple Instances]
+        AAP[AAP Controller&lt;br/&gt;High Availability]
+        KC[Keycloak Cluster&lt;br/&gt;External Database]
+        OCP[OpenShift&lt;br/&gt;Multi-Node Production]
+    end
+
+    subgraph "Scaling Considerations"
+        LB[Load Balancing]
+        DB[External Databases]
+        ST[Persistent Storage]
+        NET[Network Policies]
+    end
+
+    SN --&gt; AAP
+    AAP --&gt; KC
+    AAP --&gt; OCP
+    KC --&gt; OCP
+
+    style SN fill:#e3f2fd
+    style AAP fill:#fff3e0
+    style KC fill:#f3e5f5
+    style OCP fill:#e8f5e8</code></pre>
+<h2 id="step-1-scale-ansible-automation-platform">🎬 Step 1: Scale Ansible Automation Platform<a class="headerlink" href="#step-1-scale-ansible-automation-platform" title="Permanent link">¶</a></h2>
+<h3 id="11-assess-current-resource-usage">1.1 Assess Current Resource Usage<a class="headerlink" href="#11-assess-current-resource-usage" title="Permanent link">¶</a></h3>
+<p>First, analyze your current AAP resource consumption:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Check current AAP controller resource usage</span>
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>oc<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>aap<span class="w"> </span>-o<span class="w"> </span>wide
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>oc<span class="w"> </span>top<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>aap
+<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a>
+<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="c1"># Check resource requests and limits</span>
+<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a>oc<span class="w"> </span>describe<span class="w"> </span>deployment<span class="w"> </span>automation-controller<span class="w"> </span>-n<span class="w"> </span>aap
+</code></pre></div>
+<h3 id="12-configure-high-availability">1.2 Configure High Availability<a class="headerlink" href="#12-configure-high-availability" title="Permanent link">¶</a></h3>
+<p>Update your AAP deployment for production scale:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># kustomize/ansible-automation-platform/overlays/production/aap-instance.yaml</span>
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">automationcontroller.ansible.com/v1beta1</span>
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AutomationController</span>
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">automation-controller</span>
+<a href="#__codelineno-1-6" id="__codelineno-1-6" name="__codelineno-1-6"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap</span>
+<a href="#__codelineno-1-7" id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-1-8" id="__codelineno-1-8" name="__codelineno-1-8"></a><span class="w">  </span><span class="c1"># High Availability Configuration</span>
+<a href="#__codelineno-1-9" id="__codelineno-1-9" name="__codelineno-1-9"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">  </span><span class="c1"># Increased from 1</span>
+<a href="#__codelineno-1-10" id="__codelineno-1-10" name="__codelineno-1-10"></a>
+<a href="#__codelineno-1-11" id="__codelineno-1-11" name="__codelineno-1-11"></a><span class="w">  </span><span class="c1"># Resource Requirements</span>
+<a href="#__codelineno-1-12" id="__codelineno-1-12" name="__codelineno-1-12"></a><span class="w">  </span><span class="nt">web_resource_requirements</span><span class="p">:</span>
+<a href="#__codelineno-1-13" id="__codelineno-1-13" name="__codelineno-1-13"></a><span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
+<a href="#__codelineno-1-14" id="__codelineno-1-14" name="__codelineno-1-14"></a><span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"2"</span>
+<a href="#__codelineno-1-15" id="__codelineno-1-15" name="__codelineno-1-15"></a><span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"4Gi"</span>
+<a href="#__codelineno-1-16" id="__codelineno-1-16" name="__codelineno-1-16"></a><span class="w">    </span><span class="nt">limits</span><span class="p">:</span>
+<a href="#__codelineno-1-17" id="__codelineno-1-17" name="__codelineno-1-17"></a><span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"4"</span>
+<a href="#__codelineno-1-18" id="__codelineno-1-18" name="__codelineno-1-18"></a><span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"8Gi"</span>
+<a href="#__codelineno-1-19" id="__codelineno-1-19" name="__codelineno-1-19"></a>
+<a href="#__codelineno-1-20" id="__codelineno-1-20" name="__codelineno-1-20"></a><span class="w">  </span><span class="nt">task_resource_requirements</span><span class="p">:</span>
+<a href="#__codelineno-1-21" id="__codelineno-1-21" name="__codelineno-1-21"></a><span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
+<a href="#__codelineno-1-22" id="__codelineno-1-22" name="__codelineno-1-22"></a><span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"2"</span>
+<a href="#__codelineno-1-23" id="__codelineno-1-23" name="__codelineno-1-23"></a><span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"4Gi"</span>
+<a href="#__codelineno-1-24" id="__codelineno-1-24" name="__codelineno-1-24"></a><span class="w">    </span><span class="nt">limits</span><span class="p">:</span>
+<a href="#__codelineno-1-25" id="__codelineno-1-25" name="__codelineno-1-25"></a><span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"4"</span>
+<a href="#__codelineno-1-26" id="__codelineno-1-26" name="__codelineno-1-26"></a><span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"8Gi"</span>
+<a href="#__codelineno-1-27" id="__codelineno-1-27" name="__codelineno-1-27"></a>
+<a href="#__codelineno-1-28" id="__codelineno-1-28" name="__codelineno-1-28"></a><span class="w">  </span><span class="c1"># External Database (Production Requirement)</span>
+<a href="#__codelineno-1-29" id="__codelineno-1-29" name="__codelineno-1-29"></a><span class="w">  </span><span class="nt">postgres_configuration_secret</span><span class="p">:</span><span class="w"> </span><span class="s">"aap-postgres-configuration"</span>
+<a href="#__codelineno-1-30" id="__codelineno-1-30" name="__codelineno-1-30"></a>
+<a href="#__codelineno-1-31" id="__codelineno-1-31" name="__codelineno-1-31"></a><span class="w">  </span><span class="c1"># Persistent Storage</span>
+<a href="#__codelineno-1-32" id="__codelineno-1-32" name="__codelineno-1-32"></a><span class="w">  </span><span class="nt">projects_persistence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a href="#__codelineno-1-33" id="__codelineno-1-33" name="__codelineno-1-33"></a><span class="w">  </span><span class="nt">projects_storage_class</span><span class="p">:</span><span class="w"> </span><span class="s">"fast-ssd"</span>
+<a href="#__codelineno-1-34" id="__codelineno-1-34" name="__codelineno-1-34"></a><span class="w">  </span><span class="nt">projects_storage_size</span><span class="p">:</span><span class="w"> </span><span class="s">"100Gi"</span>
+<a href="#__codelineno-1-35" id="__codelineno-1-35" name="__codelineno-1-35"></a>
+<a href="#__codelineno-1-36" id="__codelineno-1-36" name="__codelineno-1-36"></a><span class="w">  </span><span class="c1"># Load Balancer Configuration</span>
+<a href="#__codelineno-1-37" id="__codelineno-1-37" name="__codelineno-1-37"></a><span class="w">  </span><span class="nt">loadbalancer_protocol</span><span class="p">:</span><span class="w"> </span><span class="s">"https"</span>
+<a href="#__codelineno-1-38" id="__codelineno-1-38" name="__codelineno-1-38"></a><span class="w">  </span><span class="nt">loadbalancer_port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+</code></pre></div>
+<h3 id="13-configure-external-database">1.3 Configure External Database<a class="headerlink" href="#13-configure-external-database" title="Permanent link">¶</a></h3>
+<p>Set up external PostgreSQL for production:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1"># Create database configuration secret</span>
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a>oc<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>aap-postgres-configuration<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">host</span><span class="o">=</span>postgres.production.com<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-4" id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">port</span><span class="o">=</span><span class="m">5432</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">database</span><span class="o">=</span>aap_production<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">username</span><span class="o">=</span>aap_user<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">password</span><span class="o">=</span>SecurePassword123!<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">sslmode</span><span class="o">=</span>require<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-2-9" id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="w">  </span>-n<span class="w"> </span>aap
+</code></pre></div>
+<h3 id="14-apply-production-configuration">1.4 Apply Production Configuration<a class="headerlink" href="#14-apply-production-configuration" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="c1"># Apply production AAP configuration</span>
+<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a>oc<span class="w"> </span>apply<span class="w"> </span>-k<span class="w"> </span>kustomize/ansible-automation-platform/overlays/production/
+<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a>
+<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="c1"># Wait for rollout to complete</span>
+<a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a>oc<span class="w"> </span>rollout<span class="w"> </span>status<span class="w"> </span>deployment/automation-controller<span class="w"> </span>-n<span class="w"> </span>aap
+<a href="#__codelineno-3-6" id="__codelineno-3-6" name="__codelineno-3-6"></a>
+<a href="#__codelineno-3-7" id="__codelineno-3-7" name="__codelineno-3-7"></a><span class="c1"># Verify high availability</span>
+<a href="#__codelineno-3-8" id="__codelineno-3-8" name="__codelineno-3-8"></a>oc<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>aap<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/name<span class="o">=</span>automation-controller
+</code></pre></div>
+<h2 id="step-2-scale-keycloakrh-sso">🎬 Step 2: Scale Keycloak/RH-SSO<a class="headerlink" href="#step-2-scale-keycloakrh-sso" title="Permanent link">¶</a></h2>
+<h3 id="21-configure-keycloak-clustering">2.1 Configure Keycloak Clustering<a class="headerlink" href="#21-configure-keycloak-clustering" title="Permanent link">¶</a></h3>
+<p>Update Keycloak for production clustering:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1"># kustomize/rhsso/overlays/production/keycloak-instance.yaml</span>
+<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak.org/v1alpha1</span>
+<a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Keycloak</span>
+<a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-4-5" id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
+<a href="#__codelineno-4-6" id="__codelineno-4-6" name="__codelineno-4-6"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sso</span>
+<a href="#__codelineno-4-7" id="__codelineno-4-7" name="__codelineno-4-7"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-4-8" id="__codelineno-4-8" name="__codelineno-4-8"></a><span class="w">  </span><span class="c1"># Clustering Configuration</span>
+<a href="#__codelineno-4-9" id="__codelineno-4-9" name="__codelineno-4-9"></a><span class="w">  </span><span class="nt">instances</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">  </span><span class="c1"># Increased from 1</span>
+<a href="#__codelineno-4-10" id="__codelineno-4-10" name="__codelineno-4-10"></a>
+<a href="#__codelineno-4-11" id="__codelineno-4-11" name="__codelineno-4-11"></a><span class="w">  </span><span class="c1"># External Database</span>
+<a href="#__codelineno-4-12" id="__codelineno-4-12" name="__codelineno-4-12"></a><span class="w">  </span><span class="nt">externalDatabase</span><span class="p">:</span>
+<a href="#__codelineno-4-13" id="__codelineno-4-13" name="__codelineno-4-13"></a><span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a href="#__codelineno-4-14" id="__codelineno-4-14" name="__codelineno-4-14"></a>
+<a href="#__codelineno-4-15" id="__codelineno-4-15" name="__codelineno-4-15"></a><span class="w">  </span><span class="c1"># Resource Requirements</span>
+<a href="#__codelineno-4-16" id="__codelineno-4-16" name="__codelineno-4-16"></a><span class="w">  </span><span class="nt">keycloakDeploymentSpec</span><span class="p">:</span>
+<a href="#__codelineno-4-17" id="__codelineno-4-17" name="__codelineno-4-17"></a><span class="w">    </span><span class="nt">resources</span><span class="p">:</span>
+<a href="#__codelineno-4-18" id="__codelineno-4-18" name="__codelineno-4-18"></a><span class="w">      </span><span class="nt">requests</span><span class="p">:</span>
+<a href="#__codelineno-4-19" id="__codelineno-4-19" name="__codelineno-4-19"></a><span class="w">        </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
+<a href="#__codelineno-4-20" id="__codelineno-4-20" name="__codelineno-4-20"></a><span class="w">        </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"2Gi"</span>
+<a href="#__codelineno-4-21" id="__codelineno-4-21" name="__codelineno-4-21"></a><span class="w">      </span><span class="nt">limits</span><span class="p">:</span>
+<a href="#__codelineno-4-22" id="__codelineno-4-22" name="__codelineno-4-22"></a><span class="w">        </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"2"</span>
+<a href="#__codelineno-4-23" id="__codelineno-4-23" name="__codelineno-4-23"></a><span class="w">        </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"4Gi"</span>
+<a href="#__codelineno-4-24" id="__codelineno-4-24" name="__codelineno-4-24"></a>
+<a href="#__codelineno-4-25" id="__codelineno-4-25" name="__codelineno-4-25"></a><span class="w">  </span><span class="c1"># Persistent Storage</span>
+<a href="#__codelineno-4-26" id="__codelineno-4-26" name="__codelineno-4-26"></a><span class="w">  </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="s">"fast-ssd"</span>
+<a href="#__codelineno-4-27" id="__codelineno-4-27" name="__codelineno-4-27"></a>
+<a href="#__codelineno-4-28" id="__codelineno-4-28" name="__codelineno-4-28"></a><span class="w">  </span><span class="c1"># Performance Tuning</span>
+<a href="#__codelineno-4-29" id="__codelineno-4-29" name="__codelineno-4-29"></a><span class="w">  </span><span class="nt">podDisruptionBudget</span><span class="p">:</span>
+<a href="#__codelineno-4-30" id="__codelineno-4-30" name="__codelineno-4-30"></a><span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a href="#__codelineno-4-31" id="__codelineno-4-31" name="__codelineno-4-31"></a><span class="w">    </span><span class="nt">minAvailable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</code></pre></div>
+<h3 id="22-configure-external-database-for-keycloak">2.2 Configure External Database for Keycloak<a class="headerlink" href="#22-configure-external-database-for-keycloak" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="c1"># Create Keycloak database configuration</span>
+<a href="#__codelineno-5-2" id="__codelineno-5-2" name="__codelineno-5-2"></a>oc<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>keycloak-db-secret<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-3" id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">POSTGRES_HOST</span><span class="o">=</span>postgres.production.com<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-4" id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">POSTGRES_PORT</span><span class="o">=</span><span class="m">5432</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-5" id="__codelineno-5-5" name="__codelineno-5-5"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">POSTGRES_DATABASE</span><span class="o">=</span>keycloak_production<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-6" id="__codelineno-5-6" name="__codelineno-5-6"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">POSTGRES_USER</span><span class="o">=</span>keycloak_user<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-7" id="__codelineno-5-7" name="__codelineno-5-7"></a><span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">POSTGRES_PASSWORD</span><span class="o">=</span>SecurePassword123!<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-5-8" id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="w">  </span>-n<span class="w"> </span>sso
+</code></pre></div>
+<h3 id="23-apply-keycloak-production-configuration">2.3 Apply Keycloak Production Configuration<a class="headerlink" href="#23-apply-keycloak-production-configuration" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-6-1" id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="c1"># Apply production Keycloak configuration</span>
+<a href="#__codelineno-6-2" id="__codelineno-6-2" name="__codelineno-6-2"></a>oc<span class="w"> </span>apply<span class="w"> </span>-k<span class="w"> </span>kustomize/rhsso/overlays/production/
+<a href="#__codelineno-6-3" id="__codelineno-6-3" name="__codelineno-6-3"></a>
+<a href="#__codelineno-6-4" id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="c1"># Monitor deployment</span>
+<a href="#__codelineno-6-5" id="__codelineno-6-5" name="__codelineno-6-5"></a>oc<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>sso<span class="w"> </span>-w
+<a href="#__codelineno-6-6" id="__codelineno-6-6" name="__codelineno-6-6"></a>
+<a href="#__codelineno-6-7" id="__codelineno-6-7" name="__codelineno-6-7"></a><span class="c1"># Verify clustering</span>
+<a href="#__codelineno-6-8" id="__codelineno-6-8" name="__codelineno-6-8"></a>oc<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>deployment/keycloak<span class="w"> </span>-n<span class="w"> </span>sso<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>cluster
+</code></pre></div>
+<h2 id="step-3-configure-production-resource-quotas">🎬 Step 3: Configure Production Resource Quotas<a class="headerlink" href="#step-3-configure-production-resource-quotas" title="Permanent link">¶</a></h2>
+<h3 id="31-set-namespace-resource-limits">3.1 Set Namespace Resource Limits<a class="headerlink" href="#31-set-namespace-resource-limits" title="Permanent link">¶</a></h3>
+<p>Create production-appropriate resource quotas:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-7-1" id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="c1"># production-resource-quota.yaml</span>
+<a href="#__codelineno-7-2" id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<a href="#__codelineno-7-3" id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ResourceQuota</span>
+<a href="#__codelineno-7-4" id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-7-5" id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production-quota</span>
+<a href="#__codelineno-7-6" id="__codelineno-7-6" name="__codelineno-7-6"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap</span>
+<a href="#__codelineno-7-7" id="__codelineno-7-7" name="__codelineno-7-7"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-7-8" id="__codelineno-7-8" name="__codelineno-7-8"></a><span class="w">  </span><span class="nt">hard</span><span class="p">:</span>
+<a href="#__codelineno-7-9" id="__codelineno-7-9" name="__codelineno-7-9"></a><span class="w">    </span><span class="nt">requests.cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"20"</span>
+<a href="#__codelineno-7-10" id="__codelineno-7-10" name="__codelineno-7-10"></a><span class="w">    </span><span class="nt">requests.memory</span><span class="p">:</span><span class="w"> </span><span class="s">"40Gi"</span>
+<a href="#__codelineno-7-11" id="__codelineno-7-11" name="__codelineno-7-11"></a><span class="w">    </span><span class="nt">limits.cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"40"</span>
+<a href="#__codelineno-7-12" id="__codelineno-7-12" name="__codelineno-7-12"></a><span class="w">    </span><span class="nt">limits.memory</span><span class="p">:</span><span class="w"> </span><span class="s">"80Gi"</span>
+<a href="#__codelineno-7-13" id="__codelineno-7-13" name="__codelineno-7-13"></a><span class="w">    </span><span class="nt">persistentvolumeclaims</span><span class="p">:</span><span class="w"> </span><span class="s">"10"</span>
+<a href="#__codelineno-7-14" id="__codelineno-7-14" name="__codelineno-7-14"></a><span class="w">    </span><span class="nt">services.loadbalancers</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span>
+<a href="#__codelineno-7-15" id="__codelineno-7-15" name="__codelineno-7-15"></a><span class="nn">---</span>
+<a href="#__codelineno-7-16" id="__codelineno-7-16" name="__codelineno-7-16"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<a href="#__codelineno-7-17" id="__codelineno-7-17" name="__codelineno-7-17"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ResourceQuota</span>
+<a href="#__codelineno-7-18" id="__codelineno-7-18" name="__codelineno-7-18"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-7-19" id="__codelineno-7-19" name="__codelineno-7-19"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production-quota</span>
+<a href="#__codelineno-7-20" id="__codelineno-7-20" name="__codelineno-7-20"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sso</span>
+<a href="#__codelineno-7-21" id="__codelineno-7-21" name="__codelineno-7-21"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-7-22" id="__codelineno-7-22" name="__codelineno-7-22"></a><span class="w">  </span><span class="nt">hard</span><span class="p">:</span>
+<a href="#__codelineno-7-23" id="__codelineno-7-23" name="__codelineno-7-23"></a><span class="w">    </span><span class="nt">requests.cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"10"</span>
+<a href="#__codelineno-7-24" id="__codelineno-7-24" name="__codelineno-7-24"></a><span class="w">    </span><span class="nt">requests.memory</span><span class="p">:</span><span class="w"> </span><span class="s">"20Gi"</span>
+<a href="#__codelineno-7-25" id="__codelineno-7-25" name="__codelineno-7-25"></a><span class="w">    </span><span class="nt">limits.cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"20"</span>
+<a href="#__codelineno-7-26" id="__codelineno-7-26" name="__codelineno-7-26"></a><span class="w">    </span><span class="nt">limits.memory</span><span class="p">:</span><span class="w"> </span><span class="s">"40Gi"</span>
+<a href="#__codelineno-7-27" id="__codelineno-7-27" name="__codelineno-7-27"></a><span class="w">    </span><span class="nt">persistentvolumeclaims</span><span class="p">:</span><span class="w"> </span><span class="s">"5"</span>
+</code></pre></div>
+<h3 id="32-apply-resource-quotas">3.2 Apply Resource Quotas<a class="headerlink" href="#32-apply-resource-quotas" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-8-1" id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="c1"># Apply resource quotas</span>
+<a href="#__codelineno-8-2" id="__codelineno-8-2" name="__codelineno-8-2"></a>oc<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>production-resource-quota.yaml
+<a href="#__codelineno-8-3" id="__codelineno-8-3" name="__codelineno-8-3"></a>
+<a href="#__codelineno-8-4" id="__codelineno-8-4" name="__codelineno-8-4"></a><span class="c1"># Verify quotas</span>
+<a href="#__codelineno-8-5" id="__codelineno-8-5" name="__codelineno-8-5"></a>oc<span class="w"> </span>describe<span class="w"> </span>quota<span class="w"> </span>production-quota<span class="w"> </span>-n<span class="w"> </span>aap
+<a href="#__codelineno-8-6" id="__codelineno-8-6" name="__codelineno-8-6"></a>oc<span class="w"> </span>describe<span class="w"> </span>quota<span class="w"> </span>production-quota<span class="w"> </span>-n<span class="w"> </span>sso
+</code></pre></div>
+<h2 id="step-4-configure-network-policies">🎬 Step 4: Configure Network Policies<a class="headerlink" href="#step-4-configure-network-policies" title="Permanent link">¶</a></h2>
+<h3 id="41-create-production-network-policies">4.1 Create Production Network Policies<a class="headerlink" href="#41-create-production-network-policies" title="Permanent link">¶</a></h3>
+<p>Implement micro-segmentation for security:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-9-1" id="__codelineno-9-1" name="__codelineno-9-1"></a><span class="c1"># production-network-policies.yaml</span>
+<a href="#__codelineno-9-2" id="__codelineno-9-2" name="__codelineno-9-2"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a href="#__codelineno-9-3" id="__codelineno-9-3" name="__codelineno-9-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span>
+<a href="#__codelineno-9-4" id="__codelineno-9-4" name="__codelineno-9-4"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-9-5" id="__codelineno-9-5" name="__codelineno-9-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap-controller-policy</span>
+<a href="#__codelineno-9-6" id="__codelineno-9-6" name="__codelineno-9-6"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap</span>
+<a href="#__codelineno-9-7" id="__codelineno-9-7" name="__codelineno-9-7"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-9-8" id="__codelineno-9-8" name="__codelineno-9-8"></a><span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span>
+<a href="#__codelineno-9-9" id="__codelineno-9-9" name="__codelineno-9-9"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a href="#__codelineno-9-10" id="__codelineno-9-10" name="__codelineno-9-10"></a><span class="w">      </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">automation-controller</span>
+<a href="#__codelineno-9-11" id="__codelineno-9-11" name="__codelineno-9-11"></a><span class="w">  </span><span class="nt">policyTypes</span><span class="p">:</span>
+<a href="#__codelineno-9-12" id="__codelineno-9-12" name="__codelineno-9-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a href="#__codelineno-9-13" id="__codelineno-9-13" name="__codelineno-9-13"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Egress</span>
+<a href="#__codelineno-9-14" id="__codelineno-9-14" name="__codelineno-9-14"></a><span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<a href="#__codelineno-9-15" id="__codelineno-9-15" name="__codelineno-9-15"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
+<a href="#__codelineno-9-16" id="__codelineno-9-16" name="__codelineno-9-16"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span>
+<a href="#__codelineno-9-17" id="__codelineno-9-17" name="__codelineno-9-17"></a><span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a href="#__codelineno-9-18" id="__codelineno-9-18" name="__codelineno-9-18"></a><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">servicenow-integration</span>
+<a href="#__codelineno-9-19" id="__codelineno-9-19" name="__codelineno-9-19"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span>
+<a href="#__codelineno-9-20" id="__codelineno-9-20" name="__codelineno-9-20"></a><span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a href="#__codelineno-9-21" id="__codelineno-9-21" name="__codelineno-9-21"></a><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openshift-ingress</span>
+<a href="#__codelineno-9-22" id="__codelineno-9-22" name="__codelineno-9-22"></a><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<a href="#__codelineno-9-23" id="__codelineno-9-23" name="__codelineno-9-23"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<a href="#__codelineno-9-24" id="__codelineno-9-24" name="__codelineno-9-24"></a><span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<a href="#__codelineno-9-25" id="__codelineno-9-25" name="__codelineno-9-25"></a><span class="w">  </span><span class="nt">egress</span><span class="p">:</span>
+<a href="#__codelineno-9-26" id="__codelineno-9-26" name="__codelineno-9-26"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span>
+<a href="#__codelineno-9-27" id="__codelineno-9-27" name="__codelineno-9-27"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span>
+<a href="#__codelineno-9-28" id="__codelineno-9-28" name="__codelineno-9-28"></a><span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a href="#__codelineno-9-29" id="__codelineno-9-29" name="__codelineno-9-29"></a><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sso</span>
+<a href="#__codelineno-9-30" id="__codelineno-9-30" name="__codelineno-9-30"></a><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<a href="#__codelineno-9-31" id="__codelineno-9-31" name="__codelineno-9-31"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<a href="#__codelineno-9-32" id="__codelineno-9-32" name="__codelineno-9-32"></a><span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<a href="#__codelineno-9-33" id="__codelineno-9-33" name="__codelineno-9-33"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w">  </span><span class="c1"># Allow external database access</span>
+<a href="#__codelineno-9-34" id="__codelineno-9-34" name="__codelineno-9-34"></a><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<a href="#__codelineno-9-35" id="__codelineno-9-35" name="__codelineno-9-35"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<a href="#__codelineno-9-36" id="__codelineno-9-36" name="__codelineno-9-36"></a><span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span>
+</code></pre></div>
+<h3 id="42-apply-network-policies">4.2 Apply Network Policies<a class="headerlink" href="#42-apply-network-policies" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-10-1" id="__codelineno-10-1" name="__codelineno-10-1"></a><span class="c1"># Apply network policies</span>
+<a href="#__codelineno-10-2" id="__codelineno-10-2" name="__codelineno-10-2"></a>oc<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>production-network-policies.yaml
+<a href="#__codelineno-10-3" id="__codelineno-10-3" name="__codelineno-10-3"></a>
+<a href="#__codelineno-10-4" id="__codelineno-10-4" name="__codelineno-10-4"></a><span class="c1"># Verify policies</span>
+<a href="#__codelineno-10-5" id="__codelineno-10-5" name="__codelineno-10-5"></a>oc<span class="w"> </span>get<span class="w"> </span>networkpolicy<span class="w"> </span>-n<span class="w"> </span>aap
+<a href="#__codelineno-10-6" id="__codelineno-10-6" name="__codelineno-10-6"></a>oc<span class="w"> </span>get<span class="w"> </span>networkpolicy<span class="w"> </span>-n<span class="w"> </span>sso
+</code></pre></div>
+<h2 id="step-5-configure-monitoring-and-alerting">🎬 Step 5: Configure Monitoring and Alerting<a class="headerlink" href="#step-5-configure-monitoring-and-alerting" title="Permanent link">¶</a></h2>
+<h3 id="51-enable-servicemonitor-for-aap">5.1 Enable ServiceMonitor for AAP<a class="headerlink" href="#51-enable-servicemonitor-for-aap" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-11-1" id="__codelineno-11-1" name="__codelineno-11-1"></a><span class="c1"># aap-service-monitor.yaml</span>
+<a href="#__codelineno-11-2" id="__codelineno-11-2" name="__codelineno-11-2"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring.coreos.com/v1</span>
+<a href="#__codelineno-11-3" id="__codelineno-11-3" name="__codelineno-11-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceMonitor</span>
+<a href="#__codelineno-11-4" id="__codelineno-11-4" name="__codelineno-11-4"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-11-5" id="__codelineno-11-5" name="__codelineno-11-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap-controller-metrics</span>
+<a href="#__codelineno-11-6" id="__codelineno-11-6" name="__codelineno-11-6"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap</span>
+<a href="#__codelineno-11-7" id="__codelineno-11-7" name="__codelineno-11-7"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-11-8" id="__codelineno-11-8" name="__codelineno-11-8"></a><span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<a href="#__codelineno-11-9" id="__codelineno-11-9" name="__codelineno-11-9"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a href="#__codelineno-11-10" id="__codelineno-11-10" name="__codelineno-11-10"></a><span class="w">      </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">automation-controller</span>
+<a href="#__codelineno-11-11" id="__codelineno-11-11" name="__codelineno-11-11"></a><span class="w">  </span><span class="nt">endpoints</span><span class="p">:</span>
+<a href="#__codelineno-11-12" id="__codelineno-11-12" name="__codelineno-11-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metrics</span>
+<a href="#__codelineno-11-13" id="__codelineno-11-13" name="__codelineno-11-13"></a><span class="w">    </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+<a href="#__codelineno-11-14" id="__codelineno-11-14" name="__codelineno-11-14"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/metrics</span>
+</code></pre></div>
+<h3 id="52-create-production-alerts">5.2 Create Production Alerts<a class="headerlink" href="#52-create-production-alerts" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-12-1" id="__codelineno-12-1" name="__codelineno-12-1"></a><span class="c1"># production-alerts.yaml</span>
+<a href="#__codelineno-12-2" id="__codelineno-12-2" name="__codelineno-12-2"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring.coreos.com/v1</span>
+<a href="#__codelineno-12-3" id="__codelineno-12-3" name="__codelineno-12-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PrometheusRule</span>
+<a href="#__codelineno-12-4" id="__codelineno-12-4" name="__codelineno-12-4"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-12-5" id="__codelineno-12-5" name="__codelineno-12-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">servicenow-integration-alerts</span>
+<a href="#__codelineno-12-6" id="__codelineno-12-6" name="__codelineno-12-6"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap</span>
+<a href="#__codelineno-12-7" id="__codelineno-12-7" name="__codelineno-12-7"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-12-8" id="__codelineno-12-8" name="__codelineno-12-8"></a><span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<a href="#__codelineno-12-9" id="__codelineno-12-9" name="__codelineno-12-9"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap.rules</span>
+<a href="#__codelineno-12-10" id="__codelineno-12-10" name="__codelineno-12-10"></a><span class="w">    </span><span class="nt">rules</span><span class="p">:</span>
+<a href="#__codelineno-12-11" id="__codelineno-12-11" name="__codelineno-12-11"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AAPControllerDown</span>
+<a href="#__codelineno-12-12" id="__codelineno-12-12" name="__codelineno-12-12"></a><span class="w">      </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">up{job="automation-controller"} == 0</span>
+<a href="#__codelineno-12-13" id="__codelineno-12-13" name="__codelineno-12-13"></a><span class="w">      </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5m</span>
+<a href="#__codelineno-12-14" id="__codelineno-12-14" name="__codelineno-12-14"></a><span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<a href="#__codelineno-12-15" id="__codelineno-12-15" name="__codelineno-12-15"></a><span class="w">        </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">critical</span>
+<a href="#__codelineno-12-16" id="__codelineno-12-16" name="__codelineno-12-16"></a><span class="w">      </span><span class="nt">annotations</span><span class="p">:</span>
+<a href="#__codelineno-12-17" id="__codelineno-12-17" name="__codelineno-12-17"></a><span class="w">        </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">"AAP</span><span class="nv"> </span><span class="s">Controller</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">down"</span>
+<a href="#__codelineno-12-18" id="__codelineno-12-18" name="__codelineno-12-18"></a><span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"AAP</span><span class="nv"> </span><span class="s">Controller</span><span class="nv"> </span><span class="s">has</span><span class="nv"> </span><span class="s">been</span><span class="nv"> </span><span class="s">down</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">more</span><span class="nv"> </span><span class="s">than</span><span class="nv"> </span><span class="s">5</span><span class="nv"> </span><span class="s">minutes"</span>
+<a href="#__codelineno-12-19" id="__codelineno-12-19" name="__codelineno-12-19"></a>
+<a href="#__codelineno-12-20" id="__codelineno-12-20" name="__codelineno-12-20"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AAPHighMemoryUsage</span>
+<a href="#__codelineno-12-21" id="__codelineno-12-21" name="__codelineno-12-21"></a><span class="w">      </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">container_memory_usage_bytes{pod=~"automation-controller-.*"} / container_spec_memory_limit_bytes &gt; 0.8</span>
+<a href="#__codelineno-12-22" id="__codelineno-12-22" name="__codelineno-12-22"></a><span class="w">      </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10m</span>
+<a href="#__codelineno-12-23" id="__codelineno-12-23" name="__codelineno-12-23"></a><span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<a href="#__codelineno-12-24" id="__codelineno-12-24" name="__codelineno-12-24"></a><span class="w">        </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
+<a href="#__codelineno-12-25" id="__codelineno-12-25" name="__codelineno-12-25"></a><span class="w">      </span><span class="nt">annotations</span><span class="p">:</span>
+<a href="#__codelineno-12-26" id="__codelineno-12-26" name="__codelineno-12-26"></a><span class="w">        </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">"AAP</span><span class="nv"> </span><span class="s">Controller</span><span class="nv"> </span><span class="s">high</span><span class="nv"> </span><span class="s">memory</span><span class="nv"> </span><span class="s">usage"</span>
+<a href="#__codelineno-12-27" id="__codelineno-12-27" name="__codelineno-12-27"></a><span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"AAP</span><span class="nv"> </span><span class="s">Controller</span><span class="nv"> </span><span class="s">memory</span><span class="nv"> </span><span class="s">usage</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">above</span><span class="nv"> </span><span class="s">80%"</span>
+</code></pre></div>
+<h3 id="53-apply-monitoring-configuration">5.3 Apply Monitoring Configuration<a class="headerlink" href="#53-apply-monitoring-configuration" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-13-1" id="__codelineno-13-1" name="__codelineno-13-1"></a><span class="c1"># Apply monitoring configuration</span>
+<a href="#__codelineno-13-2" id="__codelineno-13-2" name="__codelineno-13-2"></a>oc<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>aap-service-monitor.yaml
+<a href="#__codelineno-13-3" id="__codelineno-13-3" name="__codelineno-13-3"></a>oc<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>production-alerts.yaml
+<a href="#__codelineno-13-4" id="__codelineno-13-4" name="__codelineno-13-4"></a>
+<a href="#__codelineno-13-5" id="__codelineno-13-5" name="__codelineno-13-5"></a><span class="c1"># Verify monitoring</span>
+<a href="#__codelineno-13-6" id="__codelineno-13-6" name="__codelineno-13-6"></a>oc<span class="w"> </span>get<span class="w"> </span>servicemonitor<span class="w"> </span>-n<span class="w"> </span>aap
+<a href="#__codelineno-13-7" id="__codelineno-13-7" name="__codelineno-13-7"></a>oc<span class="w"> </span>get<span class="w"> </span>prometheusrule<span class="w"> </span>-n<span class="w"> </span>aap
+</code></pre></div>
+<h2 id="step-6-performance-tuning">🎬 Step 6: Performance Tuning<a class="headerlink" href="#step-6-performance-tuning" title="Permanent link">¶</a></h2>
+<h3 id="61-tune-aap-job-execution">6.1 Tune AAP Job Execution<a class="headerlink" href="#61-tune-aap-job-execution" title="Permanent link">¶</a></h3>
+<p>Configure AAP for high-throughput job execution:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-14-1" id="__codelineno-14-1" name="__codelineno-14-1"></a><span class="c1"># Update AAP settings via API</span>
+<a href="#__codelineno-14-2" id="__codelineno-14-2" name="__codelineno-14-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>PATCH<span class="w"> </span>https://aap-controller.apps.cluster.com/api/v2/settings/jobs/<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-14-3" id="__codelineno-14-3" name="__codelineno-14-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$AAP_TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-14-4" id="__codelineno-14-4" name="__codelineno-14-4"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-14-5" id="__codelineno-14-5" name="__codelineno-14-5"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<a href="#__codelineno-14-6" id="__codelineno-14-6" name="__codelineno-14-6"></a><span class="s1">    "AWX_TASK_ENV": {</span>
+<a href="#__codelineno-14-7" id="__codelineno-14-7" name="__codelineno-14-7"></a><span class="s1">      "ANSIBLE_FORCE_COLOR": "false",</span>
+<a href="#__codelineno-14-8" id="__codelineno-14-8" name="__codelineno-14-8"></a><span class="s1">      "ANSIBLE_HOST_KEY_CHECKING": "false"</span>
+<a href="#__codelineno-14-9" id="__codelineno-14-9" name="__codelineno-14-9"></a><span class="s1">    },</span>
+<a href="#__codelineno-14-10" id="__codelineno-14-10" name="__codelineno-14-10"></a><span class="s1">    "MAX_UI_JOB_EVENTS": 4000,</span>
+<a href="#__codelineno-14-11" id="__codelineno-14-11" name="__codelineno-14-11"></a><span class="s1">    "JOB_EVENT_BUFFER_SIZE": 1000,</span>
+<a href="#__codelineno-14-12" id="__codelineno-14-12" name="__codelineno-14-12"></a><span class="s1">    "DEFAULT_JOB_TIMEOUT": 3600</span>
+<a href="#__codelineno-14-13" id="__codelineno-14-13" name="__codelineno-14-13"></a><span class="s1">  }'</span>
+</code></pre></div>
+<h3 id="62-optimize-keycloak-performance">6.2 Optimize Keycloak Performance<a class="headerlink" href="#62-optimize-keycloak-performance" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-15-1" id="__codelineno-15-1" name="__codelineno-15-1"></a><span class="c1"># Update Keycloak realm settings for performance</span>
+<a href="#__codelineno-15-2" id="__codelineno-15-2" name="__codelineno-15-2"></a><span class="c1"># Access Keycloak admin console and configure:</span>
+<a href="#__codelineno-15-3" id="__codelineno-15-3" name="__codelineno-15-3"></a><span class="c1"># - Session timeout: 30 minutes</span>
+<a href="#__codelineno-15-4" id="__codelineno-15-4" name="__codelineno-15-4"></a><span class="c1"># - Token lifespan: 5 minutes</span>
+<a href="#__codelineno-15-5" id="__codelineno-15-5" name="__codelineno-15-5"></a><span class="c1"># - Refresh token lifespan: 30 minutes</span>
+<a href="#__codelineno-15-6" id="__codelineno-15-6" name="__codelineno-15-6"></a><span class="c1"># - Connection pool size: 20</span>
+</code></pre></div>
+<h2 id="step-7-backup-and-disaster-recovery">🎬 Step 7: Backup and Disaster Recovery<a class="headerlink" href="#step-7-backup-and-disaster-recovery" title="Permanent link">¶</a></h2>
+<h3 id="71-configure-automated-backups">7.1 Configure Automated Backups<a class="headerlink" href="#71-configure-automated-backups" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-16-1" id="__codelineno-16-1" name="__codelineno-16-1"></a><span class="c1"># Create backup script for AAP</span>
+<a href="#__codelineno-16-2" id="__codelineno-16-2" name="__codelineno-16-2"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>aap-backup.sh<span class="w"> </span><span class="s">&lt;&lt; 'EOF'</span>
+<a href="#__codelineno-16-3" id="__codelineno-16-3" name="__codelineno-16-3"></a><span class="s">#!/bin/bash</span>
+<a href="#__codelineno-16-4" id="__codelineno-16-4" name="__codelineno-16-4"></a><span class="s">DATE=$(date +%Y%m%d_%H%M%S)</span>
+<a href="#__codelineno-16-5" id="__codelineno-16-5" name="__codelineno-16-5"></a><span class="s">BACKUP_DIR="/backups/aap/$DATE"</span>
+<a href="#__codelineno-16-6" id="__codelineno-16-6" name="__codelineno-16-6"></a>
+<a href="#__codelineno-16-7" id="__codelineno-16-7" name="__codelineno-16-7"></a><span class="s"># Create backup directory</span>
+<a href="#__codelineno-16-8" id="__codelineno-16-8" name="__codelineno-16-8"></a><span class="s">mkdir -p $BACKUP_DIR</span>
+<a href="#__codelineno-16-9" id="__codelineno-16-9" name="__codelineno-16-9"></a>
+<a href="#__codelineno-16-10" id="__codelineno-16-10" name="__codelineno-16-10"></a><span class="s"># Backup AAP database</span>
+<a href="#__codelineno-16-11" id="__codelineno-16-11" name="__codelineno-16-11"></a><span class="s">pg_dump -h postgres.production.com -U aap_user aap_production &gt; $BACKUP_DIR/aap_db_backup.sql</span>
+<a href="#__codelineno-16-12" id="__codelineno-16-12" name="__codelineno-16-12"></a>
+<a href="#__codelineno-16-13" id="__codelineno-16-13" name="__codelineno-16-13"></a><span class="s"># Backup AAP configuration</span>
+<a href="#__codelineno-16-14" id="__codelineno-16-14" name="__codelineno-16-14"></a><span class="s">oc get secret -n aap -o yaml &gt; $BACKUP_DIR/aap_secrets.yaml</span>
+<a href="#__codelineno-16-15" id="__codelineno-16-15" name="__codelineno-16-15"></a><span class="s">oc get configmap -n aap -o yaml &gt; $BACKUP_DIR/aap_configmaps.yaml</span>
+<a href="#__codelineno-16-16" id="__codelineno-16-16" name="__codelineno-16-16"></a>
+<a href="#__codelineno-16-17" id="__codelineno-16-17" name="__codelineno-16-17"></a><span class="s"># Backup Keycloak database</span>
+<a href="#__codelineno-16-18" id="__codelineno-16-18" name="__codelineno-16-18"></a><span class="s">pg_dump -h postgres.production.com -U keycloak_user keycloak_production &gt; $BACKUP_DIR/keycloak_db_backup.sql</span>
+<a href="#__codelineno-16-19" id="__codelineno-16-19" name="__codelineno-16-19"></a>
+<a href="#__codelineno-16-20" id="__codelineno-16-20" name="__codelineno-16-20"></a><span class="s">echo "Backup completed: $BACKUP_DIR"</span>
+<a href="#__codelineno-16-21" id="__codelineno-16-21" name="__codelineno-16-21"></a><span class="s">EOF</span>
+<a href="#__codelineno-16-22" id="__codelineno-16-22" name="__codelineno-16-22"></a>
+<a href="#__codelineno-16-23" id="__codelineno-16-23" name="__codelineno-16-23"></a>chmod<span class="w"> </span>+x<span class="w"> </span>aap-backup.sh
+</code></pre></div>
+<h3 id="72-schedule-regular-backups">7.2 Schedule Regular Backups<a class="headerlink" href="#72-schedule-regular-backups" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-17-1" id="__codelineno-17-1" name="__codelineno-17-1"></a><span class="c1"># backup-cronjob.yaml</span>
+<a href="#__codelineno-17-2" id="__codelineno-17-2" name="__codelineno-17-2"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<a href="#__codelineno-17-3" id="__codelineno-17-3" name="__codelineno-17-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CronJob</span>
+<a href="#__codelineno-17-4" id="__codelineno-17-4" name="__codelineno-17-4"></a><span class="nt">metadata</span><span class="p">:</span>
+<a href="#__codelineno-17-5" id="__codelineno-17-5" name="__codelineno-17-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap-backup</span>
+<a href="#__codelineno-17-6" id="__codelineno-17-6" name="__codelineno-17-6"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aap</span>
+<a href="#__codelineno-17-7" id="__codelineno-17-7" name="__codelineno-17-7"></a><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-17-8" id="__codelineno-17-8" name="__codelineno-17-8"></a><span class="w">  </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">"0</span><span class="nv"> </span><span class="s">2</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*"</span><span class="w">  </span><span class="c1"># Daily at 2 AM</span>
+<a href="#__codelineno-17-9" id="__codelineno-17-9" name="__codelineno-17-9"></a><span class="w">  </span><span class="nt">jobTemplate</span><span class="p">:</span>
+<a href="#__codelineno-17-10" id="__codelineno-17-10" name="__codelineno-17-10"></a><span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-17-11" id="__codelineno-17-11" name="__codelineno-17-11"></a><span class="w">      </span><span class="nt">template</span><span class="p">:</span>
+<a href="#__codelineno-17-12" id="__codelineno-17-12" name="__codelineno-17-12"></a><span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
+<a href="#__codelineno-17-13" id="__codelineno-17-13" name="__codelineno-17-13"></a><span class="w">          </span><span class="nt">containers</span><span class="p">:</span>
+<a href="#__codelineno-17-14" id="__codelineno-17-14" name="__codelineno-17-14"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup</span>
+<a href="#__codelineno-17-15" id="__codelineno-17-15" name="__codelineno-17-15"></a><span class="w">            </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres:13</span>
+<a href="#__codelineno-17-16" id="__codelineno-17-16" name="__codelineno-17-16"></a><span class="w">            </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"/bin/bash"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"/scripts/aap-backup.sh"</span><span class="p p-Indicator">]</span>
+<a href="#__codelineno-17-17" id="__codelineno-17-17" name="__codelineno-17-17"></a><span class="w">            </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<a href="#__codelineno-17-18" id="__codelineno-17-18" name="__codelineno-17-18"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-scripts</span>
+<a href="#__codelineno-17-19" id="__codelineno-17-19" name="__codelineno-17-19"></a><span class="w">              </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/scripts</span>
+<a href="#__codelineno-17-20" id="__codelineno-17-20" name="__codelineno-17-20"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-storage</span>
+<a href="#__codelineno-17-21" id="__codelineno-17-21" name="__codelineno-17-21"></a><span class="w">              </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/backups</span>
+<a href="#__codelineno-17-22" id="__codelineno-17-22" name="__codelineno-17-22"></a><span class="w">          </span><span class="nt">volumes</span><span class="p">:</span>
+<a href="#__codelineno-17-23" id="__codelineno-17-23" name="__codelineno-17-23"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-scripts</span>
+<a href="#__codelineno-17-24" id="__codelineno-17-24" name="__codelineno-17-24"></a><span class="w">            </span><span class="nt">configMap</span><span class="p">:</span>
+<a href="#__codelineno-17-25" id="__codelineno-17-25" name="__codelineno-17-25"></a><span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-scripts</span>
+<a href="#__codelineno-17-26" id="__codelineno-17-26" name="__codelineno-17-26"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-storage</span>
+<a href="#__codelineno-17-27" id="__codelineno-17-27" name="__codelineno-17-27"></a><span class="w">            </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span>
+<a href="#__codelineno-17-28" id="__codelineno-17-28" name="__codelineno-17-28"></a><span class="w">              </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-pvc</span>
+<a href="#__codelineno-17-29" id="__codelineno-17-29" name="__codelineno-17-29"></a><span class="w">          </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OnFailure</span>
+</code></pre></div>
+<h2 id="step-8-validate-production-deployment">🎬 Step 8: Validate Production Deployment<a class="headerlink" href="#step-8-validate-production-deployment" title="Permanent link">¶</a></h2>
+<h3 id="81-run-production-readiness-tests">8.1 Run Production Readiness Tests<a class="headerlink" href="#81-run-production-readiness-tests" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-18-1" id="__codelineno-18-1" name="__codelineno-18-1"></a><span class="c1"># Execute comprehensive validation</span>
+<a href="#__codelineno-18-2" id="__codelineno-18-2" name="__codelineno-18-2"></a><span class="nb">cd</span><span class="w"> </span>user-workflows/advanced/
+<a href="#__codelineno-18-3" id="__codelineno-18-3" name="__codelineno-18-3"></a>./start-simplified-workflow.sh<span class="w"> </span>production-test<span class="w"> </span>production<span class="w"> </span>full
+<a href="#__codelineno-18-4" id="__codelineno-18-4" name="__codelineno-18-4"></a>
+<a href="#__codelineno-18-5" id="__codelineno-18-5" name="__codelineno-18-5"></a><span class="c1"># Run load testing</span>
+<a href="#__codelineno-18-6" id="__codelineno-18-6" name="__codelineno-18-6"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">{</span><span class="m">1</span>..10<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a href="#__codelineno-18-7" id="__codelineno-18-7" name="__codelineno-18-7"></a><span class="w">  </span>./start-simplified-workflow.sh<span class="w"> </span><span class="s2">"load-test-</span><span class="nv">$i</span><span class="s2">"</span><span class="w"> </span>production<span class="w"> </span>create-request<span class="w"> </span><span class="p">&amp;</span>
+<a href="#__codelineno-18-8" id="__codelineno-18-8" name="__codelineno-18-8"></a><span class="k">done</span>
+<a href="#__codelineno-18-9" id="__codelineno-18-9" name="__codelineno-18-9"></a><span class="nb">wait</span>
+<a href="#__codelineno-18-10" id="__codelineno-18-10" name="__codelineno-18-10"></a>
+<a href="#__codelineno-18-11" id="__codelineno-18-11" name="__codelineno-18-11"></a><span class="c1"># Verify all projects created</span>
+<a href="#__codelineno-18-12" id="__codelineno-18-12" name="__codelineno-18-12"></a>oc<span class="w"> </span>get<span class="w"> </span>projects<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>load-test
+</code></pre></div>
+<h3 id="82-performance-validation">8.2 Performance Validation<a class="headerlink" href="#82-performance-validation" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-19-1" id="__codelineno-19-1" name="__codelineno-19-1"></a><span class="c1"># Check response times</span>
+<a href="#__codelineno-19-2" id="__codelineno-19-2" name="__codelineno-19-2"></a>curl<span class="w"> </span>-w<span class="w"> </span><span class="s2">"@curl-format.txt"</span><span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-s<span class="w"> </span>https://aap-controller.apps.cluster.com/api/v2/ping/
+<a href="#__codelineno-19-3" id="__codelineno-19-3" name="__codelineno-19-3"></a>
+<a href="#__codelineno-19-4" id="__codelineno-19-4" name="__codelineno-19-4"></a><span class="c1"># Monitor resource usage during load</span>
+<a href="#__codelineno-19-5" id="__codelineno-19-5" name="__codelineno-19-5"></a>oc<span class="w"> </span>top<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>aap
+<a href="#__codelineno-19-6" id="__codelineno-19-6" name="__codelineno-19-6"></a>oc<span class="w"> </span>top<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>sso
+<a href="#__codelineno-19-7" id="__codelineno-19-7" name="__codelineno-19-7"></a>
+<a href="#__codelineno-19-8" id="__codelineno-19-8" name="__codelineno-19-8"></a><span class="c1"># Check job execution times</span>
+<a href="#__codelineno-19-9" id="__codelineno-19-9" name="__codelineno-19-9"></a>oc<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>deployment/automation-controller<span class="w"> </span>-n<span class="w"> </span>aap<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"Job.*completed"</span>
+</code></pre></div>
+<h2 id="production-readiness-checklist">✅ Production Readiness Checklist<a class="headerlink" href="#production-readiness-checklist" title="Permanent link">¶</a></h2>
+<h3 id="infrastructure">Infrastructure<a class="headerlink" href="#infrastructure" title="Permanent link">¶</a></h3>
+<ul>
+<li>[ ] <strong>High Availability</strong>: AAP and Keycloak running with 3+ replicas</li>
+<li>[ ] <strong>External Databases</strong>: PostgreSQL configured for both AAP and Keycloak</li>
+<li>[ ] <strong>Persistent Storage</strong>: Fast SSD storage classes configured</li>
+<li>[ ] <strong>Load Balancing</strong>: Production load balancers configured</li>
+<li>[ ] <strong>Network Policies</strong>: Micro-segmentation implemented</li>
+</ul>
+<h3 id="security">Security<a class="headerlink" href="#security" title="Permanent link">¶</a></h3>
+<ul>
+<li>[ ] <strong>TLS Certificates</strong>: Valid certificates for all endpoints</li>
+<li>[ ] <strong>RBAC</strong>: Proper role-based access control configured</li>
+<li>[ ] <strong>Secrets Management</strong>: All credentials in encrypted secrets</li>
+<li>[ ] <strong>Network Security</strong>: Ingress/egress policies implemented</li>
+</ul>
+<h3 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Permanent link">¶</a></h3>
+<ul>
+<li>[ ] <strong>Metrics Collection</strong>: ServiceMonitors configured</li>
+<li>[ ] <strong>Alerting</strong>: Critical alerts configured and tested</li>
+<li>[ ] <strong>Logging</strong>: Centralized logging configured</li>
+<li>[ ] <strong>Dashboards</strong>: Grafana dashboards for operational visibility</li>
+</ul>
+<h3 id="backup-recovery">Backup &amp; Recovery<a class="headerlink" href="#backup-recovery" title="Permanent link">¶</a></h3>
+<ul>
+<li>[ ] <strong>Automated Backups</strong>: Daily backups scheduled</li>
+<li>[ ] <strong>Backup Testing</strong>: Restore procedures tested</li>
+<li>[ ] <strong>Disaster Recovery</strong>: DR plan documented and tested</li>
+</ul>
+<h3 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">¶</a></h3>
+<ul>
+<li>[ ] <strong>Load Testing</strong>: System tested under expected load</li>
+<li>[ ] <strong>Resource Sizing</strong>: Appropriate resource limits set</li>
+<li>[ ] <strong>Performance Tuning</strong>: AAP and Keycloak optimized</li>
+<li>[ ] <strong>Capacity Planning</strong>: Growth projections documented</li>
+</ul>
+<hr/>
+<p><strong>🎉 Congratulations!</strong> Your ServiceNow-OpenShift integration is now production-ready with enterprise-grade scaling, security, and reliability.</p>
+<hr/>
+<div class="md-source-file">
+<small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+<br/>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+</small>
+</div>
+</article>
+</div>
+</div>
+<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"></path></svg>
+  Back to top
+</button>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+<script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+</body>
+</html>

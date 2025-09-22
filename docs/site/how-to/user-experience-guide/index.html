@@ -1,0 +1,1452 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform" name="description"/>
+<link href="https://tosin2013.github.io/servicenow-ocp-service/how-to/user-experience-guide/" rel="canonical"/>
+<link href="../debugging-integration-issues/" rel="prev"/>
+<link href="../scale-for-production/" rel="next"/>
+<link href="../../assets/favicon.ico" rel="icon"/>
+<meta content="mkdocs-1.5.3, mkdocs-material-9.4.6" name="generator"/>
+<title>🎨 User Experience Guide - ServiceNow OpenShift Integration</title>
+<link href="../../assets/stylesheets/main.35e1ed30.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.356b1318.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#servicenow-openshift-integration-user-experience-guide">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="ServiceNow OpenShift Integration" class="md-header__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              🎨 User Experience Guide
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="red" data-md-color-media="" data-md-color-primary="red" data-md-color-scheme="slate" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+</form>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../..">
+        
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../GETTING_STARTED/">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../explanation/deployment-architecture/">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../explanation/user-workflows-analysis/">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../adrs/">
+          
+  
+  Architecture Decision Records
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../tutorials/">
+          
+  
+  Tutorials
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  How-To Guides
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../reference/">
+          
+  
+  Reference
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="ServiceNow OpenShift Integration" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="ServiceNow OpenShift Integration">
+<img alt="logo" src="../../assets/logo.png"/>
+</a>
+    ServiceNow OpenShift Integration
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    Home
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../GETTING_STARTED/">
+<span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../explanation/deployment-architecture/">
+<span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../explanation/user-workflows-analysis/">
+<span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+<span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/001-three-tier-orchestration-architecture/">
+<span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/002-decoupled-api-driven-integration/">
+<span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/003-centralized-configuration-with-connection-credential-aliases/">
+<span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/004-gitops-based-deployment-with-argocd-and-kustomize/">
+<span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/005-keycloak-deployment-on-openshift-via-operator/">
+<span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/006-servicenow-implementation-with-flow-designer-and-integrationhub/">
+<span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/007-secret-management-with-external-secrets-operator/">
+<span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/008-observability-strategy-using-openshift-built-in-monitoring/">
+<span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/009-hybrid-gitops-and-ansible-configuration/">
+<span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/010-ansible-automation-platform-integration/">
+<span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/011-custom-execution-environment-for-aap/">
+<span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/012-ansible-automation-platform-kustomize-deployment/">
+<span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/013-pdi-workaround-strategy-for-development/">
+<span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/014-business-rules-over-flow-designer/">
+<span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/015-secure-credential-management-in-user-workflows/">
+<span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../adrs/016-documentation-link-validation-strategy/">
+<span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+<span class="md-ellipsis">
+    Tutorials
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/getting-started/">
+<span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/ansible-vault-configuration/">
+<span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/execution-environment-guide/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/ansible-automation-guide/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/your-first-project/">
+<span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorials/user-workflows-guide/">
+<span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+<span class="md-ellipsis">
+    How-To Guides
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../aap-token-setup/">
+<span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../working-with-execution-environment/">
+<span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../working-with-ansible/">
+<span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../business-rule-logic/">
+<span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../end-to-end-testing/">
+<span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../debugging-integration-issues/">
+<span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#table-of-contents">
+    Table of Contents
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#user-personas-and-journey-maps">
+    User Personas and Journey Maps
+  </a>
+<nav aria-label="User Personas and Journey Maps" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#primary-user-personas">
+    Primary User Personas
+  </a>
+<nav aria-label="Primary User Personas" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-application-developer">
+    1. Application Developer
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-devops-engineer">
+    2. DevOps Engineer
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-project-manager">
+    3. Project Manager
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#complete-user-journey-map">
+    Complete User Journey Map
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#detailed-user-interface-flows">
+    Detailed User Interface Flows
+  </a>
+<nav aria-label="Detailed User Interface Flows" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#servicenow-portal-navigation-flow">
+    ServiceNow Portal Navigation Flow
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#form-validation-and-error-handling-flow">
+    Form Validation and Error Handling Flow
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#servicenow-interface-mockups">
+    ServiceNow Interface Mockups
+  </a>
+<nav aria-label="ServiceNow Interface Mockups" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#enhanced-service-catalog-item-page">
+    Enhanced Service Catalog Item Page
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#multi-step-request-form-with-progress-indicator">
+    Multi-Step Request Form with Progress Indicator
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#advanced-request-status-dashboard">
+    Advanced Request Status Dashboard
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#openshift-user-experience">
+    OpenShift User Experience
+  </a>
+<nav aria-label="OpenShift User Experience" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#enhanced-project-dashboard-with-onboarding">
+    Enhanced Project Dashboard with Onboarding
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#application-deployment-wizard">
+    Application Deployment Wizard
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mobile-and-accessibility-considerations">
+    Mobile and Accessibility Considerations
+  </a>
+<nav aria-label="Mobile and Accessibility Considerations" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mobile-responsive-servicenow-interface">
+    Mobile-Responsive ServiceNow Interface
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#accessibility-features">
+    Accessibility Features
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#user-support-and-help-systems">
+    User Support and Help Systems
+  </a>
+<nav aria-label="User Support and Help Systems" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contextual-help-system">
+    Contextual Help System
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#progressive-help-disclosure">
+    Progressive Help Disclosure
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../scale-for-production/">
+<span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backup-and-recovery/">
+<span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+<span class="md-ellipsis">
+    Reference
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/">
+<span class="md-ellipsis">
+    Overview
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/configuration-variables/">
+<span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/api-reference/">
+<span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/ansible-reference/">
+<span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/execution-environment-reference/">
+<span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/user-workflows-reference/">
+<span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-report/">
+<span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-monitoring-setup/">
+<span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/link-validation-checklist/">
+<span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../PDI_ALTERNATIVE_SOLUTIONS/">
+<span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#table-of-contents">
+    Table of Contents
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#user-personas-and-journey-maps">
+    User Personas and Journey Maps
+  </a>
+<nav aria-label="User Personas and Journey Maps" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#primary-user-personas">
+    Primary User Personas
+  </a>
+<nav aria-label="Primary User Personas" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-application-developer">
+    1. Application Developer
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-devops-engineer">
+    2. DevOps Engineer
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-project-manager">
+    3. Project Manager
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#complete-user-journey-map">
+    Complete User Journey Map
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#detailed-user-interface-flows">
+    Detailed User Interface Flows
+  </a>
+<nav aria-label="Detailed User Interface Flows" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#servicenow-portal-navigation-flow">
+    ServiceNow Portal Navigation Flow
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#form-validation-and-error-handling-flow">
+    Form Validation and Error Handling Flow
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#servicenow-interface-mockups">
+    ServiceNow Interface Mockups
+  </a>
+<nav aria-label="ServiceNow Interface Mockups" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#enhanced-service-catalog-item-page">
+    Enhanced Service Catalog Item Page
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#multi-step-request-form-with-progress-indicator">
+    Multi-Step Request Form with Progress Indicator
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#advanced-request-status-dashboard">
+    Advanced Request Status Dashboard
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#openshift-user-experience">
+    OpenShift User Experience
+  </a>
+<nav aria-label="OpenShift User Experience" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#enhanced-project-dashboard-with-onboarding">
+    Enhanced Project Dashboard with Onboarding
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#application-deployment-wizard">
+    Application Deployment Wizard
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mobile-and-accessibility-considerations">
+    Mobile and Accessibility Considerations
+  </a>
+<nav aria-label="Mobile and Accessibility Considerations" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mobile-responsive-servicenow-interface">
+    Mobile-Responsive ServiceNow Interface
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#accessibility-features">
+    Accessibility Features
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#user-support-and-help-systems">
+    User Support and Help Systems
+  </a>
+<nav aria-label="User Support and Help Systems" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contextual-help-system">
+    Contextual Help System
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#progressive-help-disclosure">
+    Progressive Help Disclosure
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="servicenow-openshift-integration-user-experience-guide">ServiceNow-OpenShift Integration: User Experience Guide<a class="headerlink" href="#servicenow-openshift-integration-user-experience-guide" title="Permanent link">¶</a></h1>
+<p>This document provides detailed user experience flows, interface mockups, and functional diagrams for the ServiceNow-OpenShift integration system.</p>
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">¶</a></h2>
+<ol>
+<li><a href="#user-personas-and-journey-maps">User Personas and Journey Maps</a></li>
+<li><a href="#detailed-user-interface-flows">Detailed User Interface Flows</a></li>
+<li><a href="#servicenow-interface-mockups">ServiceNow Interface Mockups</a></li>
+<li><a href="#openshift-user-experience">OpenShift User Experience</a></li>
+<li><a href="#mobile-and-accessibility-considerations">Mobile and Accessibility Considerations</a></li>
+<li><a href="#user-support-and-help-systems">User Support and Help Systems</a></li>
+</ol>
+<h2 id="user-personas-and-journey-maps">User Personas and Journey Maps<a class="headerlink" href="#user-personas-and-journey-maps" title="Permanent link">¶</a></h2>
+<h3 id="primary-user-personas">Primary User Personas<a class="headerlink" href="#primary-user-personas" title="Permanent link">¶</a></h3>
+<h4 id="1-application-developer">1. Application Developer<a class="headerlink" href="#1-application-developer" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong>Role</strong>: Develops and deploys applications</li>
+<li><strong>Goals</strong>: Quick project setup, easy deployment, clear resource limits</li>
+<li><strong>Pain Points</strong>: Complex approval processes, unclear resource requirements</li>
+<li><strong>Experience Level</strong>: Intermediate with containers, beginner with OpenShift</li>
+</ul>
+<h4 id="2-devops-engineer">2. DevOps Engineer<a class="headerlink" href="#2-devops-engineer" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong>Role</strong>: Manages deployment pipelines and infrastructure</li>
+<li><strong>Goals</strong>: Standardized environments, automated provisioning, monitoring</li>
+<li><strong>Pain Points</strong>: Manual setup processes, inconsistent configurations</li>
+<li><strong>Experience Level</strong>: Advanced with OpenShift and automation</li>
+</ul>
+<h4 id="3-project-manager">3. Project Manager<a class="headerlink" href="#3-project-manager" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong>Role</strong>: Oversees project delivery and resource allocation</li>
+<li><strong>Goals</strong>: Visibility into resource usage, cost control, team coordination</li>
+<li><strong>Pain Points</strong>: Lack of visibility, approval bottlenecks</li>
+<li><strong>Experience Level</strong>: Beginner with technical platforms</li>
+</ul>
+<h3 id="complete-user-journey-map">Complete User Journey Map<a class="headerlink" href="#complete-user-journey-map" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>journey
+    title Developer Project Request Journey - Detailed Experience
+    section Discovery Phase
+      Hear about OpenShift platform: 3: Developer
+      Research platform capabilities: 4: Developer
+      Discuss with team lead: 4: Developer, TeamLead
+      Check project requirements: 3: Developer
+    section Planning Phase  
+      Estimate resource needs: 3: Developer
+      Plan team access requirements: 4: Developer
+      Review compliance requirements: 2: Developer, Security
+      Get budget approval: 3: Developer, Manager
+    section Request Phase
+      Login to ServiceNow: 5: Developer
+      Navigate to service catalog: 4: Developer
+      Find OpenShift project item: 5: Developer
+      Start request form: 5: Developer
+    section Form Completion
+      Fill basic information: 4: Developer
+      Configure environment settings: 3: Developer
+      Set resource requirements: 3: Developer
+      Add team members: 4: Developer
+      Review and validate: 4: Developer
+      Submit request: 5: Developer
+    section Approval Process
+      Wait for manager approval: 2: Developer
+      Answer clarifying questions: 3: Developer, Manager
+      Wait for platform team review: 2: Developer
+      Security review if needed: 2: Developer, Security
+      Receive approval notification: 5: Developer
+    section Provisioning
+      Automated provisioning starts: 5: System
+      Monitor request status: 4: Developer
+      Receive progress updates: 4: Developer, System
+      Get access credentials: 5: Developer, System
+    section First Access
+      Click OpenShift console link: 5: Developer
+      Login with corporate credentials: 4: Developer
+      Find new project: 5: Developer
+      Explore project dashboard: 4: Developer
+      Review resource quotas: 4: Developer
+    section First Deployment
+      Deploy hello world app: 3: Developer
+      Configure CI/CD pipeline: 2: Developer
+      Set up monitoring: 3: Developer
+      Invite team members: 4: Developer
+      Test application access: 5: Developer</code></pre>
+<h2 id="detailed-user-interface-flows">Detailed User Interface Flows<a class="headerlink" href="#detailed-user-interface-flows" title="Permanent link">¶</a></h2>
+<h3 id="servicenow-portal-navigation-flow">ServiceNow Portal Navigation Flow<a class="headerlink" href="#servicenow-portal-navigation-flow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>stateDiagram-v2
+    [*] --&gt; ServiceNowHome : User logs in
+    ServiceNowHome --&gt; MainDashboard : Navigate to dashboard
+    MainDashboard --&gt; ServiceCatalog : Click "Service Catalog"
+    ServiceCatalog --&gt; ITServices : Browse to "IT Services"
+    ITServices --&gt; DevTools : Select "Development Tools"
+    DevTools --&gt; OpenShiftItem : Find "New OpenShift Project"
+
+    OpenShiftItem --&gt; ItemDetails : Click for details
+    ItemDetails --&gt; RequestForm : Click "Request Now"
+    ItemDetails --&gt; ITServices : Go back to browse
+
+    RequestForm --&gt; ProjectInfo : Fill project information
+    ProjectInfo --&gt; EnvironmentConfig : Configure environment
+    EnvironmentConfig --&gt; ResourceConfig : Set resource requirements
+    ResourceConfig --&gt; TeamAccess : Configure team access
+    TeamAccess --&gt; AdditionalOptions : Set additional options
+    AdditionalOptions --&gt; ReviewSubmit : Review and submit
+
+    ReviewSubmit --&gt; FormValidation : Validate form
+    FormValidation --&gt; ProjectInfo : [Validation fails] Fix errors
+    FormValidation --&gt; RequestSubmitted : [Validation passes] Submit
+
+    RequestSubmitted --&gt; StatusTracking : Track request status
+    StatusTracking --&gt; ApprovalPending : Wait for approvals
+    ApprovalPending --&gt; ProvisioningActive : Auto-provisioning starts
+    ProvisioningActive --&gt; AccessReady : Receive access notification
+    AccessReady --&gt; [*] : Process complete</code></pre>
+<h3 id="form-validation-and-error-handling-flow">Form Validation and Error Handling Flow<a class="headerlink" href="#form-validation-and-error-handling-flow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    UserInput[User Fills Form Field] --&gt; ClientValidation{Client-Side Validation}
+    ClientValidation --&gt;|Pass| NextField[Move to Next Field]
+    ClientValidation --&gt;|Fail| ShowError[Show Inline Error]
+    ShowError --&gt; UserCorrects[User Corrects Input]
+    UserCorrects --&gt; ClientValidation
+
+    NextField --&gt; AllFieldsComplete{All Required Fields Complete?}
+    AllFieldsComplete --&gt;|No| UserInput
+    AllFieldsComplete --&gt;|Yes| ServerValidation[Server-Side Validation]
+
+    ServerValidation --&gt; BusinessRules{Business Rules Check}
+    BusinessRules --&gt;|Pass| EnableSubmit[Enable Submit Button]
+    BusinessRules --&gt;|Fail| ShowBusinessError[Show Business Rule Error]
+
+    ShowBusinessError --&gt; UserAdjusts[User Adjusts Request]
+    UserAdjusts --&gt; ServerValidation
+
+    EnableSubmit --&gt; UserSubmits[User Clicks Submit]
+    UserSubmits --&gt; FinalValidation[Final Validation]
+    FinalValidation --&gt;|Success| RequestCreated[Request Created]
+    FinalValidation --&gt;|Error| ShowSubmissionError[Show Submission Error]
+
+    ShowSubmissionError --&gt; UserRetries[User Retries Submission]
+    UserRetries --&gt; UserSubmits
+
+    RequestCreated --&gt; ConfirmationPage[Show Confirmation Page]
+
+    style UserInput fill:#e3f2fd
+    style RequestCreated fill:#c8e6c9
+    style ShowError fill:#ffcdd2
+    style ShowBusinessError fill:#ffcdd2
+    style ShowSubmissionError fill:#ffcdd2</code></pre>
+<h2 id="servicenow-interface-mockups">ServiceNow Interface Mockups<a class="headerlink" href="#servicenow-interface-mockups" title="Permanent link">¶</a></h2>
+<h3 id="enhanced-service-catalog-item-page">Enhanced Service Catalog Item Page<a class="headerlink" href="#enhanced-service-catalog-item-page" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────┐
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>│ 🏠 ServiceNow Portal &gt; Service Catalog &gt; IT Services           │
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>├─────────────────────────────────────────────────────────────────┤
+<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a>│                                                                 │
+<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a>│ 🐳 New OpenShift Project                                ⭐ 4.8  │
+<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a>│                                                                 │
+<a href="#__codelineno-0-7" id="__codelineno-0-7" name="__codelineno-0-7"></a>│ ┌─────────────────────────────────────────────────────────────┐ │
+<a href="#__codelineno-0-8" id="__codelineno-0-8" name="__codelineno-0-8"></a>│ │ 📝 Description                                             │ │
+<a href="#__codelineno-0-9" id="__codelineno-0-9" name="__codelineno-0-9"></a>│ │ Request a new containerized application project on our     │ │
+<a href="#__codelineno-0-10" id="__codelineno-0-10" name="__codelineno-0-10"></a>│ │ enterprise OpenShift platform. This service provides      │ │
+<a href="#__codelineno-0-11" id="__codelineno-0-11" name="__codelineno-0-11"></a>│ │ automated provisioning of:                                 │ │
+<a href="#__codelineno-0-12" id="__codelineno-0-12" name="__codelineno-0-12"></a>│ │ • Dedicated project namespace with RBAC                   │ │
+<a href="#__codelineno-0-13" id="__codelineno-0-13" name="__codelineno-0-13"></a>│ │ • Resource quotas and limits                              │ │
+<a href="#__codelineno-0-14" id="__codelineno-0-14" name="__codelineno-0-14"></a>│ │ • Monitoring and logging integration                      │ │
+<a href="#__codelineno-0-15" id="__codelineno-0-15" name="__codelineno-0-15"></a>│ │ • Team-based access management                            │ │
+<a href="#__codelineno-0-16" id="__codelineno-0-16" name="__codelineno-0-16"></a>│ └─────────────────────────────────────────────────────────────┘ │
+<a href="#__codelineno-0-17" id="__codelineno-0-17" name="__codelineno-0-17"></a>│                                                                 │
+<a href="#__codelineno-0-18" id="__codelineno-0-18" name="__codelineno-0-18"></a>│ ⏱️ Typical Fulfillment Time: 2-4 hours                         │
+<a href="#__codelineno-0-19" id="__codelineno-0-19" name="__codelineno-0-19"></a>│ 💰 Cost: Charged based on resource usage                       │
+<a href="#__codelineno-0-20" id="__codelineno-0-20" name="__codelineno-0-20"></a>│ 🔒 Approval Required: Manager + Platform Team                  │
+<a href="#__codelineno-0-21" id="__codelineno-0-21" name="__codelineno-0-21"></a>│                                                                 │
+<a href="#__codelineno-0-22" id="__codelineno-0-22" name="__codelineno-0-22"></a>│ ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+<a href="#__codelineno-0-23" id="__codelineno-0-23" name="__codelineno-0-23"></a>│ │ 📋 Prerequisites │  │ 🎯 What You Get │  │ 🔧 Next Steps   │  │
+<a href="#__codelineno-0-24" id="__codelineno-0-24" name="__codelineno-0-24"></a>│ │                 │  │                 │  │                 │  │
+<a href="#__codelineno-0-25" id="__codelineno-0-25" name="__codelineno-0-25"></a>│ │ • Valid Corp ID │  │ • OpenShift     │  │ • Deploy apps   │  │
+<a href="#__codelineno-0-26" id="__codelineno-0-26" name="__codelineno-0-26"></a>│ │ • Manager       │  │   project       │  │ • Set up CI/CD  │  │
+<a href="#__codelineno-0-27" id="__codelineno-0-27" name="__codelineno-0-27"></a>│ │   approval      │  │ • Team access   │  │ • Configure     │  │
+<a href="#__codelineno-0-28" id="__codelineno-0-28" name="__codelineno-0-28"></a>│ │ • Basic resource│  │ • Resource      │  │   monitoring    │  │
+<a href="#__codelineno-0-29" id="__codelineno-0-29" name="__codelineno-0-29"></a>│ │   estimates     │  │   quotas        │  │ • Add secrets   │  │
+<a href="#__codelineno-0-30" id="__codelineno-0-30" name="__codelineno-0-30"></a>│ └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+<a href="#__codelineno-0-31" id="__codelineno-0-31" name="__codelineno-0-31"></a>│                                                                 │
+<a href="#__codelineno-0-32" id="__codelineno-0-32" name="__codelineno-0-32"></a>│ 📊 Recent Activity                                              │
+<a href="#__codelineno-0-33" id="__codelineno-0-33" name="__codelineno-0-33"></a>│ • 12 requests this month  • 95% approval rate  • 2.3h avg time │
+<a href="#__codelineno-0-34" id="__codelineno-0-34" name="__codelineno-0-34"></a>│                                                                 │
+<a href="#__codelineno-0-35" id="__codelineno-0-35" name="__codelineno-0-35"></a>│ ┌─────────────────────┐  ┌─────────────────────┐              │
+<a href="#__codelineno-0-36" id="__codelineno-0-36" name="__codelineno-0-36"></a>│ │   📖 Documentation  │  │    🚀 Request Now   │              │
+<a href="#__codelineno-0-37" id="__codelineno-0-37" name="__codelineno-0-37"></a>│ └─────────────────────┘  └─────────────────────┘              │
+<a href="#__codelineno-0-38" id="__codelineno-0-38" name="__codelineno-0-38"></a>│                                                                 │
+<a href="#__codelineno-0-39" id="__codelineno-0-39" name="__codelineno-0-39"></a>│ 💬 Reviews and Comments                                         │
+<a href="#__codelineno-0-40" id="__codelineno-0-40" name="__codelineno-0-40"></a>│ ⭐⭐⭐⭐⭐ "Great service! Project was ready in 90 minutes!"    │
+<a href="#__codelineno-0-41" id="__codelineno-0-41" name="__codelineno-0-41"></a>│ ⭐⭐⭐⭐⭐ "Easy to use form and excellent documentation"       │
+<a href="#__codelineno-0-42" id="__codelineno-0-42" name="__codelineno-0-42"></a>│ ⭐⭐⭐⭐☆ "Could use better resource estimation guidance"       │
+<a href="#__codelineno-0-43" id="__codelineno-0-43" name="__codelineno-0-43"></a>│                                                                 │
+<a href="#__codelineno-0-44" id="__codelineno-0-44" name="__codelineno-0-44"></a>└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="multi-step-request-form-with-progress-indicator">Multi-Step Request Form with Progress Indicator<a class="headerlink" href="#multi-step-request-form-with-progress-indicator" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a>┌─────────────────────────────────────────────────────────────────┐
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>│ New OpenShift Project Request                           [× Close] │
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a>├─────────────────────────────────────────────────────────────────┤
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a>│                                                                 │
+<a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a>│ Progress: ●●●○○ Step 3 of 5 - Resource Configuration            │
+<a href="#__codelineno-1-6" id="__codelineno-1-6" name="__codelineno-1-6"></a>│                                                                 │
+<a href="#__codelineno-1-7" id="__codelineno-1-7" name="__codelineno-1-7"></a>│ ┌─────────────────────────────────────────────────────────────┐ │
+<a href="#__codelineno-1-8" id="__codelineno-1-8" name="__codelineno-1-8"></a>│ │ 📈 Resource Requirements                                    │ │
+<a href="#__codelineno-1-9" id="__codelineno-1-9" name="__codelineno-1-9"></a>│ │                                                             │ │
+<a href="#__codelineno-1-10" id="__codelineno-1-10" name="__codelineno-1-10"></a>│ │ Environment Type: ◉ Development                            │ │
+<a href="#__codelineno-1-11" id="__codelineno-1-11" name="__codelineno-1-11"></a>│ │                                                             │ │
+<a href="#__codelineno-1-12" id="__codelineno-1-12" name="__codelineno-1-12"></a>│ │ ┌─────────────────┐  ┌─────────────────┐                   │ │
+<a href="#__codelineno-1-13" id="__codelineno-1-13" name="__codelineno-1-13"></a>│ │ │ 🖥️ Compute       │  │ 💾 Storage      │                   │ │
+<a href="#__codelineno-1-14" id="__codelineno-1-14" name="__codelineno-1-14"></a>│ │ │                 │  │                 │                   │ │
+<a href="#__codelineno-1-15" id="__codelineno-1-15" name="__codelineno-1-15"></a>│ │ │ CPU Cores *     │  │ Persistent      │                   │ │
+<a href="#__codelineno-1-16" id="__codelineno-1-16" name="__codelineno-1-16"></a>│ │ │ [2 ▼]          │  │ Storage (GB) *  │                   │ │
+<a href="#__codelineno-1-17" id="__codelineno-1-17" name="__codelineno-1-17"></a>│ │ │                 │  │ [20 ▼]         │                   │ │
+<a href="#__codelineno-1-18" id="__codelineno-1-18" name="__codelineno-1-18"></a>│ │ │ Memory (GB) *   │  │                 │                   │ │
+<a href="#__codelineno-1-19" id="__codelineno-1-19" name="__codelineno-1-19"></a>│ │ │ [4 ▼]          │  │ Backup Required │                   │ │
+<a href="#__codelineno-1-20" id="__codelineno-1-20" name="__codelineno-1-20"></a>│ │ │                 │  │ ☐ Yes ☑ No     │                   │ │
+<a href="#__codelineno-1-21" id="__codelineno-1-21" name="__codelineno-1-21"></a>│ │ │ Pod Limit       │  │                 │                   │ │
+<a href="#__codelineno-1-22" id="__codelineno-1-22" name="__codelineno-1-22"></a>│ │ │ [10 ▼]         │  │                 │                   │ │
+<a href="#__codelineno-1-23" id="__codelineno-1-23" name="__codelineno-1-23"></a>│ │ └─────────────────┘  └─────────────────┘                   │ │
+<a href="#__codelineno-1-24" id="__codelineno-1-24" name="__codelineno-1-24"></a>│ │                                                             │ │
+<a href="#__codelineno-1-25" id="__codelineno-1-25" name="__codelineno-1-25"></a>│ │ 💡 Resource Estimation Help                                 │ │
+<a href="#__codelineno-1-26" id="__codelineno-1-26" name="__codelineno-1-26"></a>│ │ Based on your environment type, we recommend:              │ │
+<a href="#__codelineno-1-27" id="__codelineno-1-27" name="__codelineno-1-27"></a>│ │ • Small app (1-2 services): 1 CPU, 2GB RAM, 10GB storage  │ │
+<a href="#__codelineno-1-28" id="__codelineno-1-28" name="__codelineno-1-28"></a>│ │ • Medium app (3-5 services): 2 CPU, 4GB RAM, 20GB storage │ │
+<a href="#__codelineno-1-29" id="__codelineno-1-29" name="__codelineno-1-29"></a>│ │ • Large app (6+ services): 4 CPU, 8GB RAM, 50GB storage   │ │
+<a href="#__codelineno-1-30" id="__codelineno-1-30" name="__codelineno-1-30"></a>│ │                                                             │ │
+<a href="#__codelineno-1-31" id="__codelineno-1-31" name="__codelineno-1-31"></a>│ │ 💰 Estimated Monthly Cost: $45.00                          │ │
+<a href="#__codelineno-1-32" id="__codelineno-1-32" name="__codelineno-1-32"></a>│ │ [📊 Show cost breakdown]                                   │ │
+<a href="#__codelineno-1-33" id="__codelineno-1-33" name="__codelineno-1-33"></a>│ └─────────────────────────────────────────────────────────────┘ │
+<a href="#__codelineno-1-34" id="__codelineno-1-34" name="__codelineno-1-34"></a>│                                                                 │
+<a href="#__codelineno-1-35" id="__codelineno-1-35" name="__codelineno-1-35"></a>│ ⚠️ Quota Limits                                                 │
+<a href="#__codelineno-1-36" id="__codelineno-1-36" name="__codelineno-1-36"></a>│ Your department has 12 CPU cores remaining in quota            │
+<a href="#__codelineno-1-37" id="__codelineno-1-37" name="__codelineno-1-37"></a>│                                                                 │
+<a href="#__codelineno-1-38" id="__codelineno-1-38" name="__codelineno-1-38"></a>│ ┌─────────────────────┐  ┌─────────────────────┐              │
+<a href="#__codelineno-1-39" id="__codelineno-1-39" name="__codelineno-1-39"></a>│ │    [← Previous]     │  │      [Next →]       │              │
+<a href="#__codelineno-1-40" id="__codelineno-1-40" name="__codelineno-1-40"></a>│ └─────────────────────┘  └─────────────────────┘              │
+<a href="#__codelineno-1-41" id="__codelineno-1-41" name="__codelineno-1-41"></a>│                                                                 │
+<a href="#__codelineno-1-42" id="__codelineno-1-42" name="__codelineno-1-42"></a>│ [💾 Save Draft] [❌ Cancel] [❓ Get Help]                      │
+<a href="#__codelineno-1-43" id="__codelineno-1-43" name="__codelineno-1-43"></a>└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="advanced-request-status-dashboard">Advanced Request Status Dashboard<a class="headerlink" href="#advanced-request-status-dashboard" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a>┌─────────────────────────────────────────────────────────────────┐
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a>│ My Requests Dashboard                           🔄 Auto-refresh  │
+<a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a>├─────────────────────────────────────────────────────────────────┤
+<a href="#__codelineno-2-4" id="__codelineno-2-4" name="__codelineno-2-4"></a>│                                                                 │
+<a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a>│ 📊 Overview                                                     │
+<a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a>│ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐    │
+<a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a>│ │ 🟢 Active: 2    │ │ ⏳ Pending: 1   │ │ ✅ Complete: 8  │    │
+<a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a>│ └─────────────────┘ └─────────────────┘ └─────────────────┘    │
+<a href="#__codelineno-2-9" id="__codelineno-2-9" name="__codelineno-2-9"></a>│                                                                 │
+<a href="#__codelineno-2-10" id="__codelineno-2-10" name="__codelineno-2-10"></a>│ 📋 Current Requests                                             │
+<a href="#__codelineno-2-11" id="__codelineno-2-11" name="__codelineno-2-11"></a>│                                                                 │
+<a href="#__codelineno-2-12" id="__codelineno-2-12" name="__codelineno-2-12"></a>│ ┌─────────────────────────────────────────────────────────────┐ │
+<a href="#__codelineno-2-13" id="__codelineno-2-13" name="__codelineno-2-13"></a>│ │ REQ0001234 - New OpenShift Project                🔄 Active │ │
+<a href="#__codelineno-2-14" id="__codelineno-2-14" name="__codelineno-2-14"></a>│ │ ───────────────────────────────────────────────────────────  │ │
+<a href="#__codelineno-2-15" id="__codelineno-2-15" name="__codelineno-2-15"></a>│ │ Project: my-app-dev          Submitted: Sep 9, 10:30 AM    │ │
+<a href="#__codelineno-2-16" id="__codelineno-2-16" name="__codelineno-2-16"></a>│ │                                                             │ │
+<a href="#__codelineno-2-17" id="__codelineno-2-17" name="__codelineno-2-17"></a>│ │ Progress: ✅ ✅ 🔄 ⏳ ⏳                                     │ │
+<a href="#__codelineno-2-18" id="__codelineno-2-18" name="__codelineno-2-18"></a>│ │          Sub  Mgr  Plat Sec Prov                           │ │
+<a href="#__codelineno-2-19" id="__codelineno-2-19" name="__codelineno-2-19"></a>│ │                                                             │ │
+<a href="#__codelineno-2-20" id="__codelineno-2-20" name="__codelineno-2-20"></a>│ │ Current Stage: Platform Team Review                        │ │
+<a href="#__codelineno-2-21" id="__codelineno-2-21" name="__codelineno-2-21"></a>│ │ Assigned To: DevOps Team                                   │ │
+<a href="#__codelineno-2-22" id="__codelineno-2-22" name="__codelineno-2-22"></a>│ │ ETA: Sep 9, 2:00 PM                                        │ │
+<a href="#__codelineno-2-23" id="__codelineno-2-23" name="__codelineno-2-23"></a>│ │                                                             │ │
+<a href="#__codelineno-2-24" id="__codelineno-2-24" name="__codelineno-2-24"></a>│ │ 📧 Latest Update (11:45 AM): Platform team reviewing       │ │
+<a href="#__codelineno-2-25" id="__codelineno-2-25" name="__codelineno-2-25"></a>│ │    resource requirements. May need adjustment for storage. │ │
+<a href="#__codelineno-2-26" id="__codelineno-2-26" name="__codelineno-2-26"></a>│ │                                                             │ │
+<a href="#__codelineno-2-27" id="__codelineno-2-27" name="__codelineno-2-27"></a>│ │ [📞 Contact Assignee] [📧 Request Update] [📋 View Details]│ │
+<a href="#__codelineno-2-28" id="__codelineno-2-28" name="__codelineno-2-28"></a>│ └─────────────────────────────────────────────────────────────┘ │
+<a href="#__codelineno-2-29" id="__codelineno-2-29" name="__codelineno-2-29"></a>│                                                                 │
+<a href="#__codelineno-2-30" id="__codelineno-2-30" name="__codelineno-2-30"></a>│ ┌─────────────────────────────────────────────────────────────┐ │
+<a href="#__codelineno-2-31" id="__codelineno-2-31" name="__codelineno-2-31"></a>│ │ REQ0001229 - Database Instance                ⏳ Pending   │ │
+<a href="#__codelineno-2-32" id="__codelineno-2-32" name="__codelineno-2-32"></a>│ │ ───────────────────────────────────────────────────────────  │ │
+<a href="#__codelineno-2-33" id="__codelineno-2-33" name="__codelineno-2-33"></a>│ │ Project: analytics-db        Submitted: Sep 8, 3:15 PM     │ │
+<a href="#__codelineno-2-34" id="__codelineno-2-34" name="__codelineno-2-34"></a>│ │                                                             │ │
+<a href="#__codelineno-2-35" id="__codelineno-2-35" name="__codelineno-2-35"></a>│ │ Progress: ✅ ⏳ ⏳ ⏳ ⏳                                     │ │
+<a href="#__codelineno-2-36" id="__codelineno-2-36" name="__codelineno-2-36"></a>│ │          Sub  Mgr  Plat Sec Prov                           │ │
+<a href="#__codelineno-2-37" id="__codelineno-2-37" name="__codelineno-2-37"></a>│ │                                                             │ │
+<a href="#__codelineno-2-38" id="__codelineno-2-38" name="__codelineno-2-38"></a>│ │ Current Stage: Waiting for Manager Approval               │ │
+<a href="#__codelineno-2-39" id="__codelineno-2-39" name="__codelineno-2-39"></a>│ │ Pending With: Sarah Johnson                                │ │
+<a href="#__codelineno-2-40" id="__codelineno-2-40" name="__codelineno-2-40"></a>│ │ ETA: Sep 9, 5:00 PM                                        │ │
+<a href="#__codelineno-2-41" id="__codelineno-2-41" name="__codelineno-2-41"></a>│ │                                                             │ │
+<a href="#__codelineno-2-42" id="__codelineno-2-42" name="__codelineno-2-42"></a>│ │ [🔔 Send Reminder] [✏️ Edit Request] [❌ Cancel]          │ │
+<a href="#__codelineno-2-43" id="__codelineno-2-43" name="__codelineno-2-43"></a>│ └─────────────────────────────────────────────────────────────┘ │
+<a href="#__codelineno-2-44" id="__codelineno-2-44" name="__codelineno-2-44"></a>│                                                                 │
+<a href="#__codelineno-2-45" id="__codelineno-2-45" name="__codelineno-2-45"></a>│ 🔍 Filter: [All Requests ▼] [Last 30 Days ▼] [🔍 Search]      │
+<a href="#__codelineno-2-46" id="__codelineno-2-46" name="__codelineno-2-46"></a>│                                                                 │
+<a href="#__codelineno-2-47" id="__codelineno-2-47" name="__codelineno-2-47"></a>└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h2 id="openshift-user-experience">OpenShift User Experience<a class="headerlink" href="#openshift-user-experience" title="Permanent link">¶</a></h2>
+<h3 id="enhanced-project-dashboard-with-onboarding">Enhanced Project Dashboard with Onboarding<a class="headerlink" href="#enhanced-project-dashboard-with-onboarding" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a>┌─────────────────────────────────────────────────────────────────┐
+<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a>│ 🎯 Welcome to your new OpenShift project!                      │
+<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a>├─────────────────────────────────────────────────────────────────┤
+<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a>│                                                                 │
+<a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a>│ Project: my-app-dev                     👋 First time here?    │
+<a href="#__codelineno-3-6" id="__codelineno-3-6" name="__codelineno-3-6"></a>│                                                                 │
+<a href="#__codelineno-3-7" id="__codelineno-3-7" name="__codelineno-3-7"></a>│ ┌─────────────────────────────────────────────────────────────┐ │
+<a href="#__codelineno-3-8" id="__codelineno-3-8" name="__codelineno-3-8"></a>│ │ 🚀 Quick Start Checklist                            [Hide] │ │
+<a href="#__codelineno-3-9" id="__codelineno-3-9" name="__codelineno-3-9"></a>│ │                                                             │ │
+<a href="#__codelineno-3-10" id="__codelineno-3-10" name="__codelineno-3-10"></a>│ │ ☑️  1. Explore your project dashboard                      │ │
+<a href="#__codelineno-3-11" id="__codelineno-3-11" name="__codelineno-3-11"></a>│ │ ☐  2. Deploy your first application                       │ │
+<a href="#__codelineno-3-12" id="__codelineno-3-12" name="__codelineno-3-12"></a>│ │ ☐  3. Set up image pull secrets                           │ │
+<a href="#__codelineno-3-13" id="__codelineno-3-13" name="__codelineno-3-13"></a>│ │ ☐  4. Configure CI/CD pipeline                            │ │
+<a href="#__codelineno-3-14" id="__codelineno-3-14" name="__codelineno-3-14"></a>│ │ ☐  5. Enable monitoring and alerts                        │ │
+<a href="#__codelineno-3-15" id="__codelineno-3-15" name="__codelineno-3-15"></a>│ │                                                             │ │
+<a href="#__codelineno-3-16" id="__codelineno-3-16" name="__codelineno-3-16"></a>│ │ [📖 View Complete Getting Started Guide]                   │ │
+<a href="#__codelineno-3-17" id="__codelineno-3-17" name="__codelineno-3-17"></a>│ └─────────────────────────────────────────────────────────────┘ │
+<a href="#__codelineno-3-18" id="__codelineno-3-18" name="__codelineno-3-18"></a>│                                                                 │
+<a href="#__codelineno-3-19" id="__codelineno-3-19" name="__codelineno-3-19"></a>│ ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+<a href="#__codelineno-3-20" id="__codelineno-3-20" name="__codelineno-3-20"></a>│ │ 📊 Resources    │  │ 👥 Team Access  │  │ 🔧 Quick Deploy │  │
+<a href="#__codelineno-3-21" id="__codelineno-3-21" name="__codelineno-3-21"></a>│ │                 │  │                 │  │                 │  │
+<a href="#__codelineno-3-22" id="__codelineno-3-22" name="__codelineno-3-22"></a>│ │ CPU: ▓░░░ 25%   │  │ 3 team members  │  │ [🐳 From Image] │  │
+<a href="#__codelineno-3-23" id="__codelineno-3-23" name="__codelineno-3-23"></a>│ │ 0.5 / 2.0 cores │  │ 2 developers    │  │ [📝 From YAML]  │  │
+<a href="#__codelineno-3-24" id="__codelineno-3-24" name="__codelineno-3-24"></a>│ │                 │  │ 1 admin         │  │ [🔗 From Git]   │  │
+<a href="#__codelineno-3-25" id="__codelineno-3-25" name="__codelineno-3-25"></a>│ │ RAM: ▓░░░ 12%   │  │                 │  │ [📁 Upload]     │  │
+<a href="#__codelineno-3-26" id="__codelineno-3-26" name="__codelineno-3-26"></a>│ │ 0.5 / 4.0 GB    │  │ [➕ Add Member] │  │                 │  │
+<a href="#__codelineno-3-27" id="__codelineno-3-27" name="__codelineno-3-27"></a>│ │                 │  │                 │  │ [📋 Samples]    │ │
+<a href="#__codelineno-3-28" id="__codelineno-3-28" name="__codelineno-3-28"></a>│ │ Storage: ░░░░ 0%│  │ [⚙️ Manage]     │  │                 │  │
+<a href="#__codelineno-3-29" id="__codelineno-3-29" name="__codelineno-3-29"></a>│ │ 0 / 20 GB       │  │                 │  │                 │  │
+<a href="#__codelineno-3-30" id="__codelineno-3-30" name="__codelineno-3-30"></a>│ │                 │  │                 │  │                 │  │
+<a href="#__codelineno-3-31" id="__codelineno-3-31" name="__codelineno-3-31"></a>│ │ Pods: ░░░░ 0/10 │  │                 │  │                 │  │
+<a href="#__codelineno-3-32" id="__codelineno-3-32" name="__codelineno-3-32"></a>│ └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+<a href="#__codelineno-3-33" id="__codelineno-3-33" name="__codelineno-3-33"></a>│                                                                 │
+<a href="#__codelineno-3-34" id="__codelineno-3-34" name="__codelineno-3-34"></a>│ 📈 Project Health                    🔔 Recent Notifications   │
+<a href="#__codelineno-3-35" id="__codelineno-3-35" name="__codelineno-3-35"></a>│ ┌─────────────────┐                  ┌─────────────────┐       │
+<a href="#__codelineno-3-36" id="__codelineno-3-36" name="__codelineno-3-36"></a>│ │ ✅ All systems  │                  │ 🎉 Project      │       │
+<a href="#__codelineno-3-37" id="__codelineno-3-37" name="__codelineno-3-37"></a>│ │    operational  │                  │    created      │       │
+<a href="#__codelineno-3-38" id="__codelineno-3-38" name="__codelineno-3-38"></a>│ │                 │                  │    successfully │       │
+<a href="#__codelineno-3-39" id="__codelineno-3-39" name="__codelineno-3-39"></a>│ │ 🟢 0 issues     │                  │ 2 min ago       │       │
+<a href="#__codelineno-3-40" id="__codelineno-3-40" name="__codelineno-3-40"></a>│ │ 🟡 0 warnings   │                  │                 │       │
+<a href="#__codelineno-3-41" id="__codelineno-3-41" name="__codelineno-3-41"></a>│ │ 🔴 0 critical   │                  │ 📧 Welcome      │       │
+<a href="#__codelineno-3-42" id="__codelineno-3-42" name="__codelineno-3-42"></a>│ │                 │                  │    email sent   │       │
+<a href="#__codelineno-3-43" id="__codelineno-3-43" name="__codelineno-3-43"></a>│ │ [📊 Details]    │                  │ 1 min ago       │       │
+<a href="#__codelineno-3-44" id="__codelineno-3-44" name="__codelineno-3-44"></a>│ └─────────────────┘                  └─────────────────┘       │
+<a href="#__codelineno-3-45" id="__codelineno-3-45" name="__codelineno-3-45"></a>│                                                                 │
+<a href="#__codelineno-3-46" id="__codelineno-3-46" name="__codelineno-3-46"></a>└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="application-deployment-wizard">Application Deployment Wizard<a class="headerlink" href="#application-deployment-wizard" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TD
+    A[Click Deploy Application] --&gt; B{Choose Source}
+
+    B --&gt;|Container| C[Image Config]
+    B --&gt;|Git Repo| D[Git Config]
+    B --&gt;|YAML| E[YAML Editor]
+    B --&gt;|Sample| F[Sample Selector]
+
+    C --&gt; G[Resource Config]
+    D --&gt; H[Build Config]
+    E --&gt; I[Validate YAML]
+    F --&gt; G
+
+    H --&gt; G
+    I --&gt; G
+
+    G --&gt; J[Network Config]
+    J --&gt; K[Security Config]
+    K --&gt; L[Review]
+
+    L --&gt; M{Valid?}
+    M --&gt;|No| G
+    M --&gt;|Yes| N[Start Deploy]
+
+    N --&gt; O[Monitor Progress]
+    O --&gt; P[Complete]
+    P --&gt; Q[App Running]
+
+    style A fill:#e3f2fd
+    style Q fill:#c8e6c9
+    style M fill:#fff3e0</code></pre>
+<h2 id="mobile-and-accessibility-considerations">Mobile and Accessibility Considerations<a class="headerlink" href="#mobile-and-accessibility-considerations" title="Permanent link">¶</a></h2>
+<h3 id="mobile-responsive-servicenow-interface">Mobile-Responsive ServiceNow Interface<a class="headerlink" href="#mobile-responsive-servicenow-interface" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a>┌─────────────────────────────┐
+<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a>│ ☰ ServiceNow         🔍 👤 │
+<a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a>├─────────────────────────────┤
+<a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a>│                             │
+<a href="#__codelineno-4-5" id="__codelineno-4-5" name="__codelineno-4-5"></a>│ 🏠 Home                     │
+<a href="#__codelineno-4-6" id="__codelineno-4-6" name="__codelineno-4-6"></a>│ 📋 My Requests              │
+<a href="#__codelineno-4-7" id="__codelineno-4-7" name="__codelineno-4-7"></a>│ 🛒 Service Catalog          │
+<a href="#__codelineno-4-8" id="__codelineno-4-8" name="__codelineno-4-8"></a>│ 📊 My Dashboard             │
+<a href="#__codelineno-4-9" id="__codelineno-4-9" name="__codelineno-4-9"></a>│                             │
+<a href="#__codelineno-4-10" id="__codelineno-4-10" name="__codelineno-4-10"></a>│ ┌─────────────────────────┐ │
+<a href="#__codelineno-4-11" id="__codelineno-4-11" name="__codelineno-4-11"></a>│ │ 🔥 Popular Services     │ │
+<a href="#__codelineno-4-12" id="__codelineno-4-12" name="__codelineno-4-12"></a>│ │                         │ │
+<a href="#__codelineno-4-13" id="__codelineno-4-13" name="__codelineno-4-13"></a>│ │ 🐳 OpenShift Project    │ │
+<a href="#__codelineno-4-14" id="__codelineno-4-14" name="__codelineno-4-14"></a>│ │ Request new container   │ │
+<a href="#__codelineno-4-15" id="__codelineno-4-15" name="__codelineno-4-15"></a>│ │ platform project        │ │
+<a href="#__codelineno-4-16" id="__codelineno-4-16" name="__codelineno-4-16"></a>│ │ [Request →]             │ │
+<a href="#__codelineno-4-17" id="__codelineno-4-17" name="__codelineno-4-17"></a>│ │                         │ │
+<a href="#__codelineno-4-18" id="__codelineno-4-18" name="__codelineno-4-18"></a>│ │ 🗄️ Database Instance    │ │
+<a href="#__codelineno-4-19" id="__codelineno-4-19" name="__codelineno-4-19"></a>│ │ Request new database    │ │
+<a href="#__codelineno-4-20" id="__codelineno-4-20" name="__codelineno-4-20"></a>│ │ for your project        │ │
+<a href="#__codelineno-4-21" id="__codelineno-4-21" name="__codelineno-4-21"></a>│ │ [Request →]             │ │
+<a href="#__codelineno-4-22" id="__codelineno-4-22" name="__codelineno-4-22"></a>│ └─────────────────────────┘ │
+<a href="#__codelineno-4-23" id="__codelineno-4-23" name="__codelineno-4-23"></a>│                             │
+<a href="#__codelineno-4-24" id="__codelineno-4-24" name="__codelineno-4-24"></a>│ ┌─────────────────────────┐ │
+<a href="#__codelineno-4-25" id="__codelineno-4-25" name="__codelineno-4-25"></a>│ │ 📊 My Active Requests   │ │
+<a href="#__codelineno-4-26" id="__codelineno-4-26" name="__codelineno-4-26"></a>│ │                         │ │
+<a href="#__codelineno-4-27" id="__codelineno-4-27" name="__codelineno-4-27"></a>│ │ REQ001234              │ │
+<a href="#__codelineno-4-28" id="__codelineno-4-28" name="__codelineno-4-28"></a>│ │ OpenShift Project       │ │
+<a href="#__codelineno-4-29" id="__codelineno-4-29" name="__codelineno-4-29"></a>│ │ 🔄 In Progress          │ │
+<a href="#__codelineno-4-30" id="__codelineno-4-30" name="__codelineno-4-30"></a>│ │ Platform Team Review    │ │
+<a href="#__codelineno-4-31" id="__codelineno-4-31" name="__codelineno-4-31"></a>│ │ [View →]                │ │
+<a href="#__codelineno-4-32" id="__codelineno-4-32" name="__codelineno-4-32"></a>│ └─────────────────────────┘ │
+<a href="#__codelineno-4-33" id="__codelineno-4-33" name="__codelineno-4-33"></a>│                             │
+<a href="#__codelineno-4-34" id="__codelineno-4-34" name="__codelineno-4-34"></a>└─────────────────────────────┘
+</code></pre></div>
+<h3 id="accessibility-features">Accessibility Features<a class="headerlink" href="#accessibility-features" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Screen Reader Support</strong></li>
+<li>Semantic HTML structure</li>
+<li>ARIA labels and descriptions</li>
+<li>Keyboard navigation support</li>
+<li>
+<p>High contrast mode compatibility</p>
+</li>
+<li>
+<p><strong>Visual Accessibility</strong></p>
+</li>
+<li>Color-blind friendly color schemes</li>
+<li>Scalable text and icons</li>
+<li>Clear visual hierarchy</li>
+<li>
+<p>Sufficient color contrast ratios</p>
+</li>
+<li>
+<p><strong>Motor Accessibility</strong></p>
+</li>
+<li>Large click targets (minimum 44px)</li>
+<li>Keyboard-only navigation</li>
+<li>Voice control compatibility</li>
+<li>Gesture alternatives</li>
+</ol>
+<h2 id="user-support-and-help-systems">User Support and Help Systems<a class="headerlink" href="#user-support-and-help-systems" title="Permanent link">¶</a></h2>
+<h3 id="contextual-help-system">Contextual Help System<a class="headerlink" href="#contextual-help-system" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>flowchart LR
+    UserQuestion[User Has Question] --&gt; HelpSystem{Help System}
+
+    HelpSystem --&gt; ContextualHelp[Contextual Help Tooltips]
+    HelpSystem --&gt; InlineGuidance[Inline Guidance Text]
+    HelpSystem --&gt; HelpDoc[Documentation Links]
+    HelpSystem --&gt; VideoTutorials[Video Tutorials]
+    HelpSystem --&gt; LiveChat[Live Chat Support]
+
+    ContextualHelp --&gt; QuestionAnswered{Question Answered?}
+    InlineGuidance --&gt; QuestionAnswered
+    HelpDoc --&gt; QuestionAnswered
+    VideoTutorials --&gt; QuestionAnswered
+    LiveChat --&gt; QuestionAnswered
+
+    QuestionAnswered --&gt;|Yes| TaskComplete[Continue with Task]
+    QuestionAnswered --&gt;|No| EscalateSupport[Escalate to Human Support]
+
+    EscalateSupport --&gt; TicketSystem[Create Support Ticket]
+    EscalateSupport --&gt; PhoneSupport[Call Support Hotline]
+    EscalateSupport --&gt; EmailSupport[Email Support Team]
+
+    style UserQuestion fill:#ffcdd2
+    style TaskComplete fill:#c8e6c9
+    style LiveChat fill:#e1f5fe</code></pre>
+<h3 id="progressive-help-disclosure">Progressive Help Disclosure<a class="headerlink" href="#progressive-help-disclosure" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a>┌─────────────────────────────────────────────────────────────────┐
+<a href="#__codelineno-5-2" id="__codelineno-5-2" name="__codelineno-5-2"></a>│ Project Name * [my-app-dev                              ] [?]   │
+<a href="#__codelineno-5-3" id="__codelineno-5-3" name="__codelineno-5-3"></a>├─────────────────────────────────────────────────────────────────┤
+<a href="#__codelineno-5-4" id="__codelineno-5-4" name="__codelineno-5-4"></a>│ ℹ️ Help: Project Name                                           │
+<a href="#__codelineno-5-5" id="__codelineno-5-5" name="__codelineno-5-5"></a>│                                                                 │
+<a href="#__codelineno-5-6" id="__codelineno-5-6" name="__codelineno-5-6"></a>│ Choose a unique name for your project. This will be used as:   │
+<a href="#__codelineno-5-7" id="__codelineno-5-7" name="__codelineno-5-7"></a>│ • The OpenShift namespace identifier                           │
+<a href="#__codelineno-5-8" id="__codelineno-5-8" name="__codelineno-5-8"></a>│ • The URL subdomain for your applications                      │
+<a href="#__codelineno-5-9" id="__codelineno-5-9" name="__codelineno-5-9"></a>│ • The default prefix for created resources                     │
+<a href="#__codelineno-5-10" id="__codelineno-5-10" name="__codelineno-5-10"></a>│                                                                 │
+<a href="#__codelineno-5-11" id="__codelineno-5-11" name="__codelineno-5-11"></a>│ 📋 Naming Requirements:                                         │
+<a href="#__codelineno-5-12" id="__codelineno-5-12" name="__codelineno-5-12"></a>│ • 3-20 characters long                                         │
+<a href="#__codelineno-5-13" id="__codelineno-5-13" name="__codelineno-5-13"></a>│ • Lowercase letters, numbers, and hyphens only                │
+<a href="#__codelineno-5-14" id="__codelineno-5-14" name="__codelineno-5-14"></a>│ • Must start and end with a letter or number                  │
+<a href="#__codelineno-5-15" id="__codelineno-5-15" name="__codelineno-5-15"></a>│ • Must be unique across the organization                       │
+<a href="#__codelineno-5-16" id="__codelineno-5-16" name="__codelineno-5-16"></a>│                                                                 │
+<a href="#__codelineno-5-17" id="__codelineno-5-17" name="__codelineno-5-17"></a>│ ✅ Good examples: my-app-dev, user-portal, api-gateway         │
+<a href="#__codelineno-5-18" id="__codelineno-5-18" name="__codelineno-5-18"></a>│ ❌ Bad examples: My-App, api_gateway, -test-, myapp-           │
+<a href="#__codelineno-5-19" id="__codelineno-5-19" name="__codelineno-5-19"></a>│                                                                 │
+<a href="#__codelineno-5-20" id="__codelineno-5-20" name="__codelineno-5-20"></a>│ 🔍 [Check name availability]                                   │
+<a href="#__codelineno-5-21" id="__codelineno-5-21" name="__codelineno-5-21"></a>│                                                                 │
+<a href="#__codelineno-5-22" id="__codelineno-5-22" name="__codelineno-5-22"></a>│ [📖 View complete naming guide] [❌ Close help]                │
+<a href="#__codelineno-5-23" id="__codelineno-5-23" name="__codelineno-5-23"></a>└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<p>This comprehensive user experience guide provides:</p>
+<ol>
+<li><strong>Detailed user personas</strong> and complete journey mapping</li>
+<li><strong>Interactive interface mockups</strong> showing real user interfaces</li>
+<li><strong>Step-by-step workflow diagrams</strong> with decision points and error handling</li>
+<li><strong>Mobile and accessibility considerations</strong> for inclusive design</li>
+<li><strong>Progressive help systems</strong> that scale from simple tooltips to full documentation</li>
+<li><strong>Error handling and support escalation</strong> pathways</li>
+</ol>
+<p>The documentation ensures users understand exactly what to expect when interacting with the ServiceNow-OpenShift integration system, from initial discovery through successful project deployment and ongoing management.</p>
+<hr/>
+<div class="md-source-file">
+<small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+<br/>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+</small>
+</div>
+</article>
+</div>
+</div>
+<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"></path></svg>
+  Back to top
+</button>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+<script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+</body>
+</html>

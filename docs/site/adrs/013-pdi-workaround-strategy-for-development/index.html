@@ -1,0 +1,2306 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/servicenow-ocp-service/adrs/013-pdi-workaround-strategy-for-development/">
+      
+      
+        <link rel="prev" href="../012-ansible-automation-platform-kustomize-deployment/">
+      
+      
+        <link rel="next" href="../014-business-rules-over-flow-designer/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+    
+    
+      
+        <title>ADR-013 PDI Workaround Strategy - ServiceNow OpenShift Integration</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adr-013-pdi-workaround-strategy-for-development-environment" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="ServiceNow OpenShift Integration" class="md-header__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ADR-013 PDI Workaround Strategy
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../GETTING_STARTED/" class="md-tabs__link">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../explanation/deployment-architecture/" class="md-tabs__link">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../explanation/user-workflows-analysis/" class="md-tabs__link">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  Architecture Decision Records
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
+          
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../how-to/" class="md-tabs__link">
+          
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/" class="md-tabs__link">
+          
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="ServiceNow OpenShift Integration" class="md-nav__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    ServiceNow OpenShift Integration
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GETTING_STARTED/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/deployment-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/user-workflows-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../001-three-tier-orchestration-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../002-decoupled-api-driven-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../003-centralized-configuration-with-connection-credential-aliases/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../004-gitops-based-deployment-with-argocd-and-kustomize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../005-keycloak-deployment-on-openshift-via-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../006-servicenow-implementation-with-flow-designer-and-integrationhub/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../007-secret-management-with-external-secrets-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../008-observability-strategy-using-openshift-built-in-monitoring/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../009-hybrid-gitops-and-ansible-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../010-ansible-automation-platform-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../011-custom-execution-environment-for-aap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../012-ansible-automation-platform-kustomize-deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    Context
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem-statement" class="md-nav__link">
+    Problem Statement
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    Decision
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primary-approach-business-rules-for-production" class="md-nav__link">
+    Primary Approach: Business Rules for Production
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-workaround-simplified-workflow-script" class="md-nav__link">
+    Development Workaround: Simplified Workflow Script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-strategy" class="md-nav__link">
+    Validation Strategy
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-details" class="md-nav__link">
+    Implementation Details
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-environment-components" class="md-nav__link">
+    Development Environment Components
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-readiness-indicators" class="md-nav__link">
+    Production Readiness Indicators
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rationale" class="md-nav__link">
+    Rationale
+  </a>
+  
+    <nav class="md-nav" aria-label="Rationale">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-this-approach" class="md-nav__link">
+    Why This Approach
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#research-based-pdi-limitations" class="md-nav__link">
+    Research-Based PDI Limitations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    Consequences
+  </a>
+  
+    <nav class="md-nav" aria-label="Consequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#positive-consequences" class="md-nav__link">
+    Positive Consequences
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#negative-consequences" class="md-nav__link">
+    Negative Consequences
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#risk-mitigation" class="md-nav__link">
+    Risk Mitigation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-status" class="md-nav__link">
+    Implementation Status
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Status">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#completed" class="md-nav__link">
+    ✅ Completed
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ongoing" class="md-nav__link">
+    🔄 Ongoing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future-work" class="md-nav__link">
+    📋 Future Work
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-adrs" class="md-nav__link">
+    Related ADRs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#external-references" class="md-nav__link">
+    External References
+  </a>
+  
+    <nav class="md-nav" aria-label="External References">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-development-environment" class="md-nav__link">
+    ServiceNow Development Environment
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#business-rules-and-outbound-integration" class="md-nav__link">
+    Business Rules and Outbound Integration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-and-testing-patterns" class="md-nav__link">
+    Development and Testing Patterns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ansible-and-aap-integration" class="md-nav__link">
+    Ansible and AAP Integration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../014-business-rules-over-flow-designer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../015-secure-credential-management-in-user-workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../016-documentation-link-validation-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/ansible-vault-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/execution-environment-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/ansible-automation-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/your-first-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/user-workflows-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/aap-token-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/working-with-execution-environment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/working-with-ansible/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/business-rule-logic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/end-to-end-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/debugging-integration-issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/user-experience-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/scale-for-production/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/backup-and-recovery/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configuration-variables/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ansible-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/execution-environment-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/user-workflows-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/link-validation-report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/link-monitoring-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/link-validation-checklist/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PDI_ALTERNATIVE_SOLUTIONS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    Context
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem-statement" class="md-nav__link">
+    Problem Statement
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    Decision
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primary-approach-business-rules-for-production" class="md-nav__link">
+    Primary Approach: Business Rules for Production
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-workaround-simplified-workflow-script" class="md-nav__link">
+    Development Workaround: Simplified Workflow Script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-strategy" class="md-nav__link">
+    Validation Strategy
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-details" class="md-nav__link">
+    Implementation Details
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-environment-components" class="md-nav__link">
+    Development Environment Components
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-readiness-indicators" class="md-nav__link">
+    Production Readiness Indicators
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rationale" class="md-nav__link">
+    Rationale
+  </a>
+  
+    <nav class="md-nav" aria-label="Rationale">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-this-approach" class="md-nav__link">
+    Why This Approach
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#research-based-pdi-limitations" class="md-nav__link">
+    Research-Based PDI Limitations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    Consequences
+  </a>
+  
+    <nav class="md-nav" aria-label="Consequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#positive-consequences" class="md-nav__link">
+    Positive Consequences
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#negative-consequences" class="md-nav__link">
+    Negative Consequences
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#risk-mitigation" class="md-nav__link">
+    Risk Mitigation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-status" class="md-nav__link">
+    Implementation Status
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Status">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#completed" class="md-nav__link">
+    ✅ Completed
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ongoing" class="md-nav__link">
+    🔄 Ongoing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future-work" class="md-nav__link">
+    📋 Future Work
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-adrs" class="md-nav__link">
+    Related ADRs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#external-references" class="md-nav__link">
+    External References
+  </a>
+  
+    <nav class="md-nav" aria-label="External References">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-development-environment" class="md-nav__link">
+    ServiceNow Development Environment
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#business-rules-and-outbound-integration" class="md-nav__link">
+    Business Rules and Outbound Integration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-and-testing-patterns" class="md-nav__link">
+    Development and Testing Patterns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ansible-and-aap-integration" class="md-nav__link">
+    Ansible and AAP Integration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="adr-013-pdi-workaround-strategy-for-development-environment">ADR-013: PDI Workaround Strategy for Development Environment<a class="headerlink" href="#adr-013-pdi-workaround-strategy-for-development-environment" title="Permanent link">&para;</a></h1>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2025-09-19<br />
+<strong>Supersedes:</strong> None<br />
+<strong>Superseded by:</strong> None  </p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>The ServiceNow-OpenShift integration project requires a development environment for testing and validation. The project uses a ServiceNow Personal Developer Instance (PDI) at <code>dev295398.service-now.com</code> for development work. However, there are <strong>research-based indications</strong> that PDI environments may have limitations regarding outbound REST API calls and external system integrations that could prevent Business Rules from automatically triggering AAP job templates.</p>
+<p><strong>Important Note</strong>: These limitations are based on research and community knowledge rather than direct testing in a production ServiceNow instance. The project team does not currently have access to a production ServiceNow environment to validate the full Business Rules automation.</p>
+<h2 id="problem-statement">Problem Statement<a class="headerlink" href="#problem-statement" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>PDI Limitations (Research-Based)</strong>: ServiceNow PDI environments may restrict outbound REST API calls to external systems for security and resource management reasons</li>
+<li><strong>Development Validation Need</strong>: The project requires a way to validate the complete ServiceNow → AAP → OpenShift → Keycloak integration workflow</li>
+<li><strong>Business Rules Testing</strong>: The Business Rules logic needs validation before potential production deployment</li>
+<li><strong>Educational Value</strong>: Developers need a way to understand and test the integration workflow</li>
+</ol>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
+<p>Implement a <strong>hybrid development approach</strong> that accommodates potential PDI limitations while maintaining production readiness:</p>
+<h3 id="primary-approach-business-rules-for-production">Primary Approach: Business Rules for Production<a class="headerlink" href="#primary-approach-business-rules-for-production" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Maintain Business Rules implementation</strong> as the production-ready solution</li>
+<li><strong>Document Business Rules thoroughly</strong> for enterprise ServiceNow deployment</li>
+<li><strong>Keep Business Rules logic in version control</strong> (test_business_rule_logic.js)</li>
+</ul>
+<h3 id="development-workaround-simplified-workflow-script">Development Workaround: Simplified Workflow Script<a class="headerlink" href="#development-workaround-simplified-workflow-script" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Use <code>user-workflows/advanced/start-simplified-workflow.sh</code></strong> as the development validation tool</li>
+<li><strong>Simulate Business Rules logic locally</strong> to test API calls and integration flow</li>
+<li><strong>Provide manual trigger mechanism</strong> that works within PDI constraints</li>
+<li><strong>Maintain educational value</strong> for understanding the complete workflow</li>
+</ul>
+<h3 id="validation-strategy">Validation Strategy<a class="headerlink" href="#validation-strategy" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Local Business Rules Testing</strong>: Use <code>test_business_rule_logic.js</code> to validate API call logic</li>
+<li><strong>End-to-End Workflow Testing</strong>: Use <code>ansible/idempotent_end_to_end_test.yml</code> for complete validation</li>
+<li><strong>OpenShift Verification</strong>: Use <code>oc get projects</code> to confirm project creation</li>
+<li><strong>ServiceNow Integration</strong>: Use simplified workflow to test ServiceNow catalog integration</li>
+</ul>
+<h2 id="implementation-details">Implementation Details<a class="headerlink" href="#implementation-details" title="Permanent link">&para;</a></h2>
+<h3 id="development-environment-components">Development Environment Components<a class="headerlink" href="#development-environment-components" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Working Components (Validated)</strong>:</li>
+<li>✅ ServiceNow catalog request creation</li>
+<li>✅ AAP job template execution (manual trigger)</li>
+<li>✅ OpenShift project creation</li>
+<li>✅ Keycloak user management</li>
+<li>
+<p>✅ End-to-end workflow validation</p>
+</li>
+<li>
+<p><strong>PDI Workaround Script</strong>: <code>user-workflows/advanced/start-simplified-workflow.sh</code>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Demonstrates complete workflow</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>./start-simplified-workflow.sh<span class="w"> </span><span class="o">[</span>project-name<span class="o">]</span><span class="w"> </span><span class="o">[</span>environment<span class="o">]</span><span class="w"> </span><span class="o">[</span>mode<span class="o">]</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Modes:</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># - check-first: Check ServiceNow requests, then AAP jobs, then projects</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># - create-request: Create new ServiceNow request</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># - verify-only: Only verify OpenShift project exists</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># - full: Complete workflow with request creation and validation</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Business Rules Logic Testing</strong>: <code>test_business_rule_logic.js</code>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// Tests AAP REST API call logic locally</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1">// Validates payload structure and authentication</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">// Simulates ServiceNow Business Rule execution</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="production-readiness-indicators">Production Readiness Indicators<a class="headerlink" href="#production-readiness-indicators" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>95% Test Confidence Score</strong>: Comprehensive testing validates all components</li>
+<li><strong>Business Rules Documentation</strong>: Complete implementation guide available</li>
+<li><strong>API Integration Validated</strong>: AAP job template calls working</li>
+<li><strong>OpenShift Integration Confirmed</strong>: Project creation and management working</li>
+</ul>
+<h2 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h2>
+<h3 id="why-this-approach">Why This Approach<a class="headerlink" href="#why-this-approach" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Accommodates PDI Constraints</strong>: Works within potential PDI limitations without compromising production design</li>
+<li><strong>Maintains Production Focus</strong>: Business Rules remain the target production solution</li>
+<li><strong>Enables Complete Testing</strong>: All integration components can be validated</li>
+<li><strong>Educational Value</strong>: Developers can understand the complete workflow</li>
+<li><strong>Version Controlled</strong>: All logic remains in Git for proper change management</li>
+</ol>
+<h3 id="research-based-pdi-limitations">Research-Based PDI Limitations<a class="headerlink" href="#research-based-pdi-limitations" title="Permanent link">&para;</a></h3>
+<p>While not directly tested, research suggests PDI environments may have:
+- <strong>Outbound REST API restrictions</strong> for security reasons
+- <strong>External system integration limitations</strong> to prevent abuse
+- <strong>Resource management constraints</strong> that affect background processing</p>
+<p><strong>References for Further Research</strong>:
+- <a href="https://community.servicenow.com/community?id=community_search&amp;q=PDI%20limitations">ServiceNow Community PDI Discussions</a> - Community discussions on PDI limitations
+- <a href="https://developer.servicenow.com/dev.do#!/learn/learning-plans/vancouver/new_to_servicenow/app_store_learnv2_buildmyfirstapp_vancouver_personal_developer_instances">ServiceNow Developer Program</a> - PDI documentation and limitations
+- <a href="https://docs.servicenow.com/bundle/vancouver-platform-administration/page/administer/managing-instances/concept/c_InstanceTypes.html">ServiceNow Instance Types</a> - Developer vs production instance differences
+- <a href="https://community.servicenow.com/community?id=community_question&amp;sys_id=9d4b4e1bdb98dbc01dcaf3231f9619f1">ServiceNow Outbound REST Limitations</a> - Community reports of outbound integration restrictions</p>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
+<h3 id="positive-consequences">Positive Consequences<a class="headerlink" href="#positive-consequences" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Complete Development Validation</strong>: All integration components can be tested</li>
+<li><strong>Production-Ready Design</strong>: Business Rules approach remains intact for enterprise deployment</li>
+<li><strong>Educational Workflow</strong>: Clear understanding of integration flow for developers</li>
+<li><strong>Flexible Testing</strong>: Multiple testing modes for different scenarios</li>
+<li><strong>Version Controlled Logic</strong>: All automation logic properly managed in Git</li>
+</ul>
+<h3 id="negative-consequences">Negative Consequences<a class="headerlink" href="#negative-consequences" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Manual Execution Required</strong>: PDI environment requires manual workflow execution</li>
+<li><strong>Development/Production Divergence</strong>: Slight difference between dev and production workflows</li>
+<li><strong>Assumption-Based</strong>: PDI limitations are research-based, not directly validated</li>
+<li><strong>Additional Complexity</strong>: Maintains both Business Rules and workaround script</li>
+</ul>
+<h3 id="risk-mitigation">Risk Mitigation<a class="headerlink" href="#risk-mitigation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Business Rules Testing</strong>: Local testing validates production logic</li>
+<li><strong>Comprehensive Documentation</strong>: Clear migration path to production</li>
+<li><strong>Modular Design</strong>: Easy to switch to full automation in production environment</li>
+<li><strong>Validation Framework</strong>: Extensive testing ensures production readiness</li>
+</ul>
+<h2 id="implementation-status">Implementation Status<a class="headerlink" href="#implementation-status" title="Permanent link">&para;</a></h2>
+<h3 id="completed">✅ Completed<a class="headerlink" href="#completed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Working simplified workflow script</li>
+<li>Business Rules logic validation</li>
+<li>End-to-end testing framework</li>
+<li>OpenShift integration validation</li>
+<li>ServiceNow catalog integration</li>
+</ul>
+<h3 id="ongoing">🔄 Ongoing<a class="headerlink" href="#ongoing" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Documentation of Business Rules for production deployment</li>
+<li>Community-driven documentation creation</li>
+<li>Production deployment planning</li>
+</ul>
+<h3 id="future-work">📋 Future Work<a class="headerlink" href="#future-work" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Production ServiceNow Testing</strong>: Validate Business Rules in enterprise instance</li>
+<li><strong>PDI Limitation Validation</strong>: Direct testing of PDI outbound REST capabilities</li>
+<li><strong>Production Deployment Guide</strong>: Complete enterprise deployment documentation</li>
+</ul>
+<h2 id="related-adrs">Related ADRs<a class="headerlink" href="#related-adrs" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>ADR-001</strong>: Three-Tier Orchestration Architecture</li>
+<li><strong>ADR-010</strong>: Ansible Automation Platform Integration</li>
+<li><strong>ADR-014</strong>: Business Rules Over Flow Designer Implementation (planned)</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>user-workflows/advanced/start-simplified-workflow.sh</code> - Working development workflow</li>
+<li><code>test_business_rule_logic.js</code> - Business Rules logic validation</li>
+<li><code>ansible/idempotent_end_to_end_test.yml</code> - End-to-end testing</li>
+<li><code>research.md</code> - Flow Designer vs Business Rules analysis</li>
+<li><code>SERVICENOW_SETUP_GUIDE.md</code> - ServiceNow configuration documentation</li>
+<li><code>END_TO_END_TEST_EXECUTION_SUMMARY.md</code> - Test validation results</li>
+</ul>
+<h2 id="external-references">External References<a class="headerlink" href="#external-references" title="Permanent link">&para;</a></h2>
+<h3 id="servicenow-development-environment">ServiceNow Development Environment<a class="headerlink" href="#servicenow-development-environment" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="https://developer.servicenow.com/dev.do#!/learn/learning-plans/vancouver/new_to_servicenow/app_store_learnv2_buildmyfirstapp_vancouver_personal_developer_instances">ServiceNow Personal Developer Instance</a> - PDI setup and limitations</li>
+<li><a href="https://developer.servicenow.com/">ServiceNow Developer Program</a> - Developer resources and documentation</li>
+<li><a href="https://docs.servicenow.com/bundle/vancouver-platform-administration/page/administer/managing-instances/concept/c_InstanceTypes.html">ServiceNow Instance Types</a> - Instance type comparison</li>
+<li><a href="https://community.servicenow.com/">ServiceNow Community Forums</a> - Community discussions and support</li>
+</ul>
+<h3 id="business-rules-and-outbound-integration">Business Rules and Outbound Integration<a class="headerlink" href="#business-rules-and-outbound-integration" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="https://docs.servicenow.com/bundle/vancouver-platform-administration/page/administer/business-rules/concept/c_BusinessRules.html">ServiceNow Business Rules</a> - Business Rules documentation</li>
+<li><a href="https://docs.servicenow.com/bundle/vancouver-application-development/page/integrate/outbound-rest/concept/c_OutboundREST.html">ServiceNow Outbound REST</a> - Outbound REST integration</li>
+<li><a href="https://docs.servicenow.com/bundle/vancouver-application-development/page/integrate/outbound-rest/concept/c_RESTMessage.html">ServiceNow REST Message</a> - REST message configuration</li>
+<li><a href="https://docs.servicenow.com/bundle/vancouver-application-development/page/script/server-scripting/concept/c_ServerSideScripting.html">ServiceNow JavaScript API</a> - Server-side scripting</li>
+</ul>
+<h3 id="development-and-testing-patterns">Development and Testing Patterns<a class="headerlink" href="#development-and-testing-patterns" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="https://martinfowler.com/bliki/TestDrivenDevelopment.html">Test-Driven Development</a> - TDD methodology</li>
+<li><a href="https://12factor.net/dev-prod-parity">Local Development Best Practices</a> - Development/production parity</li>
+<li><a href="https://martinfowler.com/articles/practical-test-pyramid.html">API Testing Strategies</a> - Testing pyramid and API testing</li>
+<li><a href="https://martinfowler.com/articles/continuousIntegration.html">Continuous Integration Patterns</a> - CI/CD best practices</li>
+</ul>
+<h3 id="ansible-and-aap-integration">Ansible and AAP Integration<a class="headerlink" href="#ansible-and-aap-integration" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="https://docs.ansible.com/automation-controller/latest/html/userguide/job_templates.html">Ansible Job Templates</a> - AAP job template configuration</li>
+<li><a href="https://docs.ansible.com/automation-controller/latest/html/controllerapi/index.html">Ansible REST API</a> - AAP API documentation</li>
+<li><a href="https://docs.ansible.com/ansible/latest/dev_guide/testing.html">Ansible Testing</a> - Ansible testing strategies</li>
+</ul>
+<hr />
+<p><strong>Note</strong>: This ADR documents the current development approach based on research-indicated PDI limitations. Future validation in a production ServiceNow environment may allow for simplification of this approach.</p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+        <br>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+    
+  </body>
+</html>

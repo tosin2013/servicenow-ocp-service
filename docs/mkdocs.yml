@@ -88,6 +88,7 @@ nav:
     - ADR-015 Secure Credential Management: adrs/015-secure-credential-management-in-user-workflows.md
     - ADR-016 Documentation Link Validation Strategy: adrs/016-documentation-link-validation-strategy.md
   - Tutorials:
+    - Overview: tutorials/index.md
     - 🚀 Getting Started: tutorials/getting-started.md
     - 🔐 Ansible Vault Configuration: tutorials/ansible-vault-configuration.md
     - 🐳 Execution Environment Guide: tutorials/execution-environment-guide.md
@@ -95,6 +96,7 @@ nav:
     - 🎯 Your First Project: tutorials/your-first-project.md
     - 🔄 User Workflows Guide: tutorials/user-workflows-guide.md
   - How-To Guides:
+    - Overview: how-to/index.md
     - 🔧 AAP Token Setup: how-to/aap-token-setup.md
     - 🐳 Working with Execution Environment: how-to/working-with-execution-environment.md
     - ⚙️ Working with Ansible: how-to/working-with-ansible.md
@@ -105,6 +107,7 @@ nav:
     - 🚀 Scale for Production: how-to/scale-for-production.md
     - 🛡️ Backup and Recovery: how-to/backup-and-recovery.md
   - Reference:
+    - Overview: reference/index.md
     - 📋 Configuration Variables: reference/configuration-variables.md
     - 🔌 API Reference: reference/api-reference.md
     - ⚙️ Ansible Reference: reference/ansible-reference.md

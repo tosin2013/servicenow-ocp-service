@@ -1,0 +1,21 @@
+{
+    "timestamp": "2025-09-21T22:04:39+00:00",
+    "configuration": {
+        "content_directory": "/home/ec2-user/servicenow-ocp-service/docs/content",
+        "check_external_links": true,
+        "check_internal_links": true,
+        "check_anchor_links": true,
+        "timeout_ms": 10000,
+        "max_concurrent_checks": 3,
+        "output_format": "detailed"
+    },
+    "summary": {
+        "note": "This is a placeholder report. Actual validation requires MCP documcp server.",
+        "instructions": "Use MCP tools to perform actual link validation."
+    },
+    "recommendations": [
+        "Integrate with MCP documcp server for actual validation",
+        "Run validation in CI/CD pipeline",
+        "Set up regular monitoring for link health"
+    ]
+}

@@ -1,0 +1,2196 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/servicenow-ocp-service/reference/link-monitoring-setup/">
+      
+      
+        <link rel="prev" href="../link-validation-report/">
+      
+      
+        <link rel="next" href="../link-validation-checklist/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+    
+    
+      
+        <title>🔍 Link Monitoring Setup - ServiceNow OpenShift Integration</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#link-monitoring-and-alerting-setup" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="ServiceNow OpenShift Integration" class="md-header__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              🔍 Link Monitoring Setup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../GETTING_STARTED/" class="md-tabs__link">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../explanation/deployment-architecture/" class="md-tabs__link">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../explanation/user-workflows-analysis/" class="md-tabs__link">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adrs/" class="md-tabs__link">
+          
+  
+  Architecture Decision Records
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
+          
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../how-to/" class="md-tabs__link">
+          
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="ServiceNow OpenShift Integration" class="md-nav__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    ServiceNow OpenShift Integration
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GETTING_STARTED/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/deployment-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/user-workflows-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/001-three-tier-orchestration-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/002-decoupled-api-driven-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/003-centralized-configuration-with-connection-credential-aliases/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/004-gitops-based-deployment-with-argocd-and-kustomize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/005-keycloak-deployment-on-openshift-via-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/006-servicenow-implementation-with-flow-designer-and-integrationhub/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/007-secret-management-with-external-secrets-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/008-observability-strategy-using-openshift-built-in-monitoring/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/009-hybrid-gitops-and-ansible-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/010-ansible-automation-platform-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/011-custom-execution-environment-for-aap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/012-ansible-automation-platform-kustomize-deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/013-pdi-workaround-strategy-for-development/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/014-business-rules-over-flow-designer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/015-secure-credential-management-in-user-workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/016-documentation-link-validation-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/ansible-vault-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/execution-environment-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/ansible-automation-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/your-first-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/user-workflows-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/aap-token-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/working-with-execution-environment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/working-with-ansible/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/business-rule-logic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/end-to-end-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/debugging-integration-issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/user-experience-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/scale-for-production/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/backup-and-recovery/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration-variables/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ansible-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../execution-environment-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-workflows-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../link-validation-report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-strategy" class="md-nav__link">
+    Monitoring Strategy
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-monitoring-schedule" class="md-nav__link">
+    🔄 Automated Monitoring Schedule
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-metrics" class="md-nav__link">
+    📊 Monitoring Metrics
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alert-configuration" class="md-nav__link">
+    Alert Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Alert Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#immediate-alerts" class="md-nav__link">
+    🚨 Immediate Alerts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notification-channels" class="md-nav__link">
+    📧 Notification Channels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-dashboard" class="md-nav__link">
+    Monitoring Dashboard
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-health-dashboard" class="md-nav__link">
+    📈 Link Health Dashboard
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics-collection" class="md-nav__link">
+    📊 Metrics Collection
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#response-procedures" class="md-nav__link">
+    Response Procedures
+  </a>
+  
+    <nav class="md-nav" aria-label="Response Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#critical-link-failures" class="md-nav__link">
+    🚨 Critical Link Failures
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systematic-link-maintenance" class="md-nav__link">
+    🔧 Systematic Link Maintenance
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-tools-integration" class="md-nav__link">
+    Monitoring Tools Integration
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring Tools Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-monitoring-services" class="md-nav__link">
+    🔧 External Monitoring Services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analytics-integration" class="md-nav__link">
+    📊 Analytics Integration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance-schedule" class="md-nav__link">
+    Maintenance Schedule
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintenance Schedule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regular-maintenance-tasks" class="md-nav__link">
+    📅 Regular Maintenance Tasks
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#success-metrics" class="md-nav__link">
+    🎯 Success Metrics
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../link-validation-checklist/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PDI_ALTERNATIVE_SOLUTIONS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-strategy" class="md-nav__link">
+    Monitoring Strategy
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-monitoring-schedule" class="md-nav__link">
+    🔄 Automated Monitoring Schedule
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-metrics" class="md-nav__link">
+    📊 Monitoring Metrics
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alert-configuration" class="md-nav__link">
+    Alert Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Alert Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#immediate-alerts" class="md-nav__link">
+    🚨 Immediate Alerts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notification-channels" class="md-nav__link">
+    📧 Notification Channels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-dashboard" class="md-nav__link">
+    Monitoring Dashboard
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-health-dashboard" class="md-nav__link">
+    📈 Link Health Dashboard
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics-collection" class="md-nav__link">
+    📊 Metrics Collection
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#response-procedures" class="md-nav__link">
+    Response Procedures
+  </a>
+  
+    <nav class="md-nav" aria-label="Response Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#critical-link-failures" class="md-nav__link">
+    🚨 Critical Link Failures
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systematic-link-maintenance" class="md-nav__link">
+    🔧 Systematic Link Maintenance
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-tools-integration" class="md-nav__link">
+    Monitoring Tools Integration
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring Tools Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-monitoring-services" class="md-nav__link">
+    🔧 External Monitoring Services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analytics-integration" class="md-nav__link">
+    📊 Analytics Integration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance-schedule" class="md-nav__link">
+    Maintenance Schedule
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintenance Schedule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regular-maintenance-tasks" class="md-nav__link">
+    📅 Regular Maintenance Tasks
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#success-metrics" class="md-nav__link">
+    🎯 Success Metrics
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="link-monitoring-and-alerting-setup">Link Monitoring and Alerting Setup<a class="headerlink" href="#link-monitoring-and-alerting-setup" title="Permanent link">&para;</a></h1>
+<p><strong>Purpose</strong>: Configure ongoing monitoring and alerting for documentation link health<br />
+<strong>Related</strong>: <a href="../../adrs/016-documentation-link-validation-strategy/">ADR-016: Documentation Link Validation Strategy</a></p>
+<h2 id="monitoring-strategy">Monitoring Strategy<a class="headerlink" href="#monitoring-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="automated-monitoring-schedule">🔄 Automated Monitoring Schedule<a class="headerlink" href="#automated-monitoring-schedule" title="Permanent link">&para;</a></h3>
+<p><strong>GitHub Actions Workflow</strong> (<code>.github/workflows/documentation-validation.yml</code>):
+- <strong>Weekly</strong>: Full link validation every Sunday at 2 AM UTC
+- <strong>On Changes</strong>: Validation triggered by documentation file changes
+- <strong>Manual</strong>: On-demand validation with configurable options</p>
+<p><strong>Monitoring Frequency</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">schedule</span><span class="p">:</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="c1"># Weekly comprehensive check</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0</span><span class="nv"> </span><span class="s">2</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">0&#39;</span><span class="w">  </span><span class="c1"># Sundays at 2 AM UTC</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="c1"># Optional: Daily quick external check</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="c1"># - cron: &#39;0 6 * * *&#39;  # Daily at 6 AM UTC</span>
+</code></pre></div></p>
+<h3 id="monitoring-metrics">📊 Monitoring Metrics<a class="headerlink" href="#monitoring-metrics" title="Permanent link">&para;</a></h3>
+<p><strong>Link Health Metrics</strong>:
+- Total links monitored
+- Broken link count and percentage
+- Warning link count (timeouts, slow responses)
+- Response time trends for critical links
+- Link failure patterns by domain</p>
+<p><strong>Documentation Health Metrics</strong>:
+- Files with broken links
+- Most problematic domains
+- Link validation success rate over time
+- Time to fix broken links</p>
+<h2 id="alert-configuration">Alert Configuration<a class="headerlink" href="#alert-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="immediate-alerts">🚨 Immediate Alerts<a class="headerlink" href="#immediate-alerts" title="Permanent link">&para;</a></h3>
+<p><strong>Critical Broken Links</strong> (Auto-created GitHub Issues):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Triggered when scheduled validation fails</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create issue for broken links</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github.event_name == &#39;schedule&#39; &amp;&amp; failure()</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/github-script@v7</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">      </span><span class="no">github.rest.issues.create({</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="no">title: &quot;🔗 Broken Links Detected - ${date}&quot;,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="no">labels: [&#39;documentation&#39;, &#39;maintenance&#39;, &#39;broken-links&#39;],</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="no">body: &quot;Automated link validation detected broken links...&quot;</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">      </span><span class="no">});</span>
+</code></pre></div></p>
+<p><strong>Alert Conditions</strong>:
+- Any broken links in critical ADR files
+- More than 5% of total links broken
+- ServiceNow documentation mass failures
+- Internal link failures (immediate fix required)</p>
+<h3 id="notification-channels">📧 Notification Channels<a class="headerlink" href="#notification-channels" title="Permanent link">&para;</a></h3>
+<p><strong>GitHub Issues</strong> (Primary):
+- Automatic issue creation for broken links
+- Labels: <code>documentation</code>, <code>maintenance</code>, <code>broken-links</code>
+- Assigned to documentation maintainers
+- Includes direct links to validation reports</p>
+<p><strong>Pull Request Comments</strong> (Secondary):
+- Validation results posted to PRs
+- Prevents merging with broken links
+- Links to detailed reports and fix guidance</p>
+<p><strong>Optional Integrations</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Slack notification (if configured)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Notify Slack</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failure()</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8398a7/action-slack@v3</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failure</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">text</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Documentation</span><span class="nv"> </span><span class="s">link</span><span class="nv"> </span><span class="s">validation</span><span class="nv"> </span><span class="s">failed&quot;</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">webhook_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.SLACK_WEBHOOK }}</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># Email notification (if configured)  </span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Send email alert</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failure()</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dawidd6/action-send-mail@v3</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="nt">server_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">smtp.gmail.com</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="nt">subject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Documentation</span><span class="nv"> </span><span class="s">Link</span><span class="nv"> </span><span class="s">Validation</span><span class="nv"> </span><span class="s">Failed&quot;</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="nt">body</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Broken</span><span class="nv"> </span><span class="s">links</span><span class="nv"> </span><span class="s">detected</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">documentation&quot;</span>
+</code></pre></div></p>
+<h2 id="monitoring-dashboard">Monitoring Dashboard<a class="headerlink" href="#monitoring-dashboard" title="Permanent link">&para;</a></h2>
+<h3 id="link-health-dashboard">📈 Link Health Dashboard<a class="headerlink" href="#link-health-dashboard" title="Permanent link">&para;</a></h3>
+<p><strong>GitHub Repository Insights</strong>:
+- Issues labeled <code>broken-links</code> for current problems
+- Workflow run history for validation trends
+- Artifact downloads for detailed reports</p>
+<p><strong>Custom Dashboard Options</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Generate link health report</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>./docs/scripts/generate-link-health-report.sh
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Output: docs/reports/link-health-dashboard.html</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># Includes:</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># - Link validation trends over time</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># - Most problematic domains</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="c1"># - Response time analysis</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># - Fix time metrics</span>
+</code></pre></div></p>
+<h3 id="metrics-collection">📊 Metrics Collection<a class="headerlink" href="#metrics-collection" title="Permanent link">&para;</a></h3>
+<p><strong>Validation Report Structure</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-09-21T18:25:00Z&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;summary&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">&quot;totalLinks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">206</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nt">&quot;validLinks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">164</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">&quot;brokenLinks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">&quot;warningLinks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">18</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">&quot;validationTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">63918</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">  </span><span class="nt">&quot;trends&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="nt">&quot;brokenLinkTrend&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;increasing&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="nt">&quot;responseTimeTrend&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;stable&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="nt">&quot;fixRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;85%&quot;</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">  </span><span class="nt">&quot;alerts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;critical&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">      </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ServiceNow docs timeout rate &gt; 50%&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">      </span><span class="nt">&quot;recommendation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Switch to community links&quot;</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="p">}</span>
+</code></pre></div></p>
+<h2 id="response-procedures">Response Procedures<a class="headerlink" href="#response-procedures" title="Permanent link">&para;</a></h2>
+<h3 id="critical-link-failures">🚨 Critical Link Failures<a class="headerlink" href="#critical-link-failures" title="Permanent link">&para;</a></h3>
+<p><strong>Immediate Response (&lt; 2 hours)</strong>:
+1. <strong>Assess Impact</strong>: Determine if broken links affect critical user workflows
+2. <strong>Quick Fix</strong>: Replace with working alternatives if available
+3. <strong>Document</strong>: Update GitHub issue with temporary fix status
+4. <strong>Communicate</strong>: Notify team if widespread documentation impact</p>
+<p><strong>Example Quick Fix</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Replace broken ServiceNow link with community alternative</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s|docs.servicenow.com/bundle/vancouver-platform-administration/page/administer/business-rules/concept/c_BusinessRules.html|community.servicenow.com/community?id=community_search&amp;q=business+rules|g&#39;</span><span class="w"> </span>docs/content/adrs/013-pdi-workaround-strategy-for-development.md
+</code></pre></div></p>
+<h3 id="systematic-link-maintenance">🔧 Systematic Link Maintenance<a class="headerlink" href="#systematic-link-maintenance" title="Permanent link">&para;</a></h3>
+<p><strong>Weekly Maintenance Process</strong>:
+1. <strong>Review Reports</strong>: Analyze weekly validation results
+2. <strong>Prioritize Fixes</strong>: Focus on critical ADRs and user-facing guides
+3. <strong>Update Links</strong>: Replace broken links with current alternatives
+4. <strong>Verify Fixes</strong>: Run validation to confirm repairs
+5. <strong>Document Changes</strong>: Update changelog and close related issues</p>
+<p><strong>Monthly Link Audit</strong>:
+1. <strong>Trend Analysis</strong>: Review link health trends over past month
+2. <strong>Domain Assessment</strong>: Identify problematic domains for replacement
+3. <strong>Strategy Updates</strong>: Adjust link selection strategy based on patterns
+4. <strong>Tool Updates</strong>: Update validation tools and configurations</p>
+<h2 id="monitoring-tools-integration">Monitoring Tools Integration<a class="headerlink" href="#monitoring-tools-integration" title="Permanent link">&para;</a></h2>
+<h3 id="external-monitoring-services">🔧 External Monitoring Services<a class="headerlink" href="#external-monitoring-services" title="Permanent link">&para;</a></h3>
+<p><strong>Optional: UptimeRobot Integration</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Monitor critical external links independently</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># Set up monitors for:</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># - https://docs.servicenow.com (primary ServiceNow docs)</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># - https://docs.openshift.com (primary OpenShift docs)  </span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="c1"># - https://www.keycloak.org (primary Keycloak docs)</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># - https://docs.ansible.com (primary Ansible docs)</span>
+</code></pre></div></p>
+<p><strong>Optional: Pingdom Integration</strong>:
+- Monitor response times for frequently referenced domains
+- Alert on significant response time degradation
+- Track availability trends for critical documentation sources</p>
+<h3 id="analytics-integration">📊 Analytics Integration<a class="headerlink" href="#analytics-integration" title="Permanent link">&para;</a></h3>
+<p><strong>Google Analytics (if documentation site deployed)</strong>:
+- Track 404 errors from documentation links
+- Monitor user behavior when encountering broken links
+- Identify most-accessed external references</p>
+<p><strong>Custom Analytics</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Generate link usage analytics</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>./docs/scripts/analyze-link-usage.sh
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># Output: Most referenced domains, link click patterns, etc.</span>
+</code></pre></div></p>
+<h2 id="maintenance-schedule">Maintenance Schedule<a class="headerlink" href="#maintenance-schedule" title="Permanent link">&para;</a></h2>
+<h3 id="regular-maintenance-tasks">📅 Regular Maintenance Tasks<a class="headerlink" href="#regular-maintenance-tasks" title="Permanent link">&para;</a></h3>
+<p><strong>Daily</strong> (Automated):
+- Monitor GitHub Actions workflow results
+- Check for new broken link issues</p>
+<p><strong>Weekly</strong> (Automated + Manual Review):
+- Comprehensive link validation run
+- Review and triage any new issues
+- Quick fixes for critical broken links</p>
+<p><strong>Monthly</strong> (Manual):
+- Comprehensive link audit and cleanup
+- Update link selection strategy
+- Review monitoring effectiveness
+- Update validation tools and configurations</p>
+<p><strong>Quarterly</strong> (Manual):
+- Full documentation link review
+- Update ADR-016 based on lessons learned
+- Assess and improve monitoring strategy
+- Team training on link validation processes</p>
+<h3 id="success-metrics">🎯 Success Metrics<a class="headerlink" href="#success-metrics" title="Permanent link">&para;</a></h3>
+<p><strong>Target Metrics</strong>:
+- &lt; 2% broken links at any time
+- &lt; 24 hours average time to fix critical broken links
+- &gt; 95% link validation success rate
+- Zero broken links in critical ADR files</p>
+<p><strong>Monitoring KPIs</strong>:
+- Link validation success rate trend
+- Mean time to repair (MTTR) for broken links
+- User-reported broken link incidents (should be zero)
+- Documentation quality score based on link health</p>
+<hr />
+<p><strong>Remember</strong>: Proactive monitoring prevents user frustration and maintains professional documentation standards. The goal is to catch and fix link issues before users encounter them.</p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+        <br>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+    
+  </body>
+</html>

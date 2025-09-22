@@ -1,0 +1,2654 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/servicenow-ocp-service/reference/ansible-reference/">
+      
+      
+        <link rel="prev" href="../api-reference/">
+      
+      
+        <link rel="next" href="../execution-environment-reference/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+    
+    
+      
+        <title>Ansible Reference - ServiceNow OpenShift Integration</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ansible-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="ServiceNow OpenShift Integration" class="md-header__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Ansible Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../GETTING_STARTED/" class="md-tabs__link">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../explanation/deployment-architecture/" class="md-tabs__link">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../explanation/user-workflows-analysis/" class="md-tabs__link">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adrs/" class="md-tabs__link">
+          
+  
+  Architecture Decision Records
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
+          
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../how-to/" class="md-tabs__link">
+          
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="ServiceNow OpenShift Integration" class="md-nav__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    ServiceNow OpenShift Integration
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GETTING_STARTED/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/deployment-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/user-workflows-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/001-three-tier-orchestration-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/002-decoupled-api-driven-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/003-centralized-configuration-with-connection-credential-aliases/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/004-gitops-based-deployment-with-argocd-and-kustomize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/005-keycloak-deployment-on-openshift-via-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/006-servicenow-implementation-with-flow-designer-and-integrationhub/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/007-secret-management-with-external-secrets-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/008-observability-strategy-using-openshift-built-in-monitoring/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/009-hybrid-gitops-and-ansible-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/010-ansible-automation-platform-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/011-custom-execution-environment-for-aap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/012-ansible-automation-platform-kustomize-deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/013-pdi-workaround-strategy-for-development/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/014-business-rules-over-flow-designer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/015-secure-credential-management-in-user-workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/016-documentation-link-validation-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/ansible-vault-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/execution-environment-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/ansible-automation-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/your-first-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/user-workflows-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/aap-token-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/working-with-execution-environment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/working-with-ansible/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/business-rule-logic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/end-to-end-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/debugging-integration-issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/user-experience-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/scale-for-production/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/backup-and-recovery/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration-variables/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#project-overview" class="md-nav__link">
+    📋 Project Overview
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Project Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-integration" class="md-nav__link">
+    Architecture Integration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#directory-structure" class="md-nav__link">
+    📁 Directory Structure
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-playbooks-reference" class="md-nav__link">
+    🚀 Core Playbooks Reference
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Core Playbooks Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-playbookyml-main-configuration" class="md-nav__link">
+    1. playbook.yml - Main Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-preflight_checksyml-connectivity-validation" class="md-nav__link">
+    2. preflight_checks.yml - Connectivity Validation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configure_aapyml-aap-configuration" class="md-nav__link">
+    3. configure_aap.yml - AAP Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-oauth_integration_playbookyml-oauth-setup" class="md-nav__link">
+    4. oauth_integration_playbook.yml - OAuth Setup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-openshift_oidc_playbookyml-openshift-oidc" class="md-nav__link">
+    5. openshift_oidc_playbook.yml - OpenShift OIDC
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-roles-reference" class="md-nav__link">
+    🔧 Custom Roles Reference
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Custom Roles Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-rhsso_servicenow_config" class="md-nav__link">
+    1. rhsso_servicenow_config
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-openshift_oidc_integration" class="md-nav__link">
+    2. openshift_oidc_integration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-aap_configuration" class="md-nav__link">
+    3. aap_configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-servicenow_flow_designer-legacy" class="md-nav__link">
+    4. servicenow_flow_designer (Legacy)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-keycloak_user_management" class="md-nav__link">
+    5. keycloak_user_management
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variable-reference" class="md-nav__link">
+    📊 Variable Reference
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Variable Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vault-variables-group_varsallvaultyml" class="md-nav__link">
+    Vault Variables (group_vars/all/vault.yml)
+  </a>
+  
+    <nav class="md-nav" aria-label="Vault Variables (group_vars/all/vault.yml)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-configuration" class="md-nav__link">
+    ServiceNow Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keycloak-configuration" class="md-nav__link">
+    Keycloak Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-configuration" class="md-nav__link">
+    OpenShift Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aap-configuration" class="md-nav__link">
+    AAP Configuration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-variables-varsproductionyml" class="md-nav__link">
+    Production Variables (vars/production.yml)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-playbooks-reference" class="md-nav__link">
+    🧪 Testing Playbooks Reference
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 Testing Playbooks Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-testing" class="md-nav__link">
+    End-to-End Testing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-testing" class="md-nav__link">
+    Component Testing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-patterns" class="md-nav__link">
+    🔄 Execution Patterns
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Execution Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-execution" class="md-nav__link">
+    Standard Execution
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-execution-options" class="md-nav__link">
+    Advanced Execution Options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-and-optimization" class="md-nav__link">
+    📈 Performance and Optimization
+  </a>
+  
+    <nav class="md-nav" aria-label="📈 Performance and Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#execution-times-approximate" class="md-nav__link">
+    Execution Times (Approximate)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization-tips" class="md-nav__link">
+    Optimization Tips
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-points" class="md-nav__link">
+    🔗 Integration Points
+  </a>
+  
+    <nav class="md-nav" aria-label="🔗 Integration Points">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aap-job-templates" class="md-nav__link">
+    AAP Job Templates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-business-rules" class="md-nav__link">
+    ServiceNow Business Rules
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-integration" class="md-nav__link">
+    OpenShift Integration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../execution-environment-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-workflows-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../link-validation-report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../link-monitoring-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../link-validation-checklist/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PDI_ALTERNATIVE_SOLUTIONS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#project-overview" class="md-nav__link">
+    📋 Project Overview
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Project Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-integration" class="md-nav__link">
+    Architecture Integration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#directory-structure" class="md-nav__link">
+    📁 Directory Structure
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-playbooks-reference" class="md-nav__link">
+    🚀 Core Playbooks Reference
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Core Playbooks Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-playbookyml-main-configuration" class="md-nav__link">
+    1. playbook.yml - Main Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-preflight_checksyml-connectivity-validation" class="md-nav__link">
+    2. preflight_checks.yml - Connectivity Validation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configure_aapyml-aap-configuration" class="md-nav__link">
+    3. configure_aap.yml - AAP Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-oauth_integration_playbookyml-oauth-setup" class="md-nav__link">
+    4. oauth_integration_playbook.yml - OAuth Setup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-openshift_oidc_playbookyml-openshift-oidc" class="md-nav__link">
+    5. openshift_oidc_playbook.yml - OpenShift OIDC
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-roles-reference" class="md-nav__link">
+    🔧 Custom Roles Reference
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Custom Roles Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-rhsso_servicenow_config" class="md-nav__link">
+    1. rhsso_servicenow_config
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-openshift_oidc_integration" class="md-nav__link">
+    2. openshift_oidc_integration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-aap_configuration" class="md-nav__link">
+    3. aap_configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-servicenow_flow_designer-legacy" class="md-nav__link">
+    4. servicenow_flow_designer (Legacy)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-keycloak_user_management" class="md-nav__link">
+    5. keycloak_user_management
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variable-reference" class="md-nav__link">
+    📊 Variable Reference
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Variable Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vault-variables-group_varsallvaultyml" class="md-nav__link">
+    Vault Variables (group_vars/all/vault.yml)
+  </a>
+  
+    <nav class="md-nav" aria-label="Vault Variables (group_vars/all/vault.yml)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-configuration" class="md-nav__link">
+    ServiceNow Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keycloak-configuration" class="md-nav__link">
+    Keycloak Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-configuration" class="md-nav__link">
+    OpenShift Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aap-configuration" class="md-nav__link">
+    AAP Configuration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-variables-varsproductionyml" class="md-nav__link">
+    Production Variables (vars/production.yml)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-playbooks-reference" class="md-nav__link">
+    🧪 Testing Playbooks Reference
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 Testing Playbooks Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-testing" class="md-nav__link">
+    End-to-End Testing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-testing" class="md-nav__link">
+    Component Testing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-patterns" class="md-nav__link">
+    🔄 Execution Patterns
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Execution Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-execution" class="md-nav__link">
+    Standard Execution
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-execution-options" class="md-nav__link">
+    Advanced Execution Options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-and-optimization" class="md-nav__link">
+    📈 Performance and Optimization
+  </a>
+  
+    <nav class="md-nav" aria-label="📈 Performance and Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#execution-times-approximate" class="md-nav__link">
+    Execution Times (Approximate)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization-tips" class="md-nav__link">
+    Optimization Tips
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-points" class="md-nav__link">
+    🔗 Integration Points
+  </a>
+  
+    <nav class="md-nav" aria-label="🔗 Integration Points">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aap-job-templates" class="md-nav__link">
+    AAP Job Templates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-business-rules" class="md-nav__link">
+    ServiceNow Business Rules
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-integration" class="md-nav__link">
+    OpenShift Integration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="ansible-reference">Ansible Reference<a class="headerlink" href="#ansible-reference" title="Permanent link">&para;</a></h1>
+<p><strong>Complete technical reference for all Ansible playbooks, roles, and automation in the ServiceNow-OpenShift integration</strong></p>
+<h2 id="project-overview">📋 Project Overview<a class="headerlink" href="#project-overview" title="Permanent link">&para;</a></h2>
+<p>The ServiceNow-OpenShift integration uses <strong>30+ Ansible playbooks</strong> and <strong>5 custom roles</strong> to automate the complete configuration of the four-tier architecture.</p>
+<h3 id="architecture-integration">Architecture Integration<a class="headerlink" href="#architecture-integration" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Phase 1</strong>: GitOps deploys infrastructure (AAP, Keycloak, External Secrets)</li>
+<li><strong>Phase 2</strong>: Ansible configures applications (realms, clients, job templates)</li>
+</ul>
+<h2 id="directory-structure">📁 Directory Structure<a class="headerlink" href="#directory-structure" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ansible/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├──<span class="w"> </span>Core<span class="w"> </span>Configuration<span class="w"> </span>Playbooks
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│<span class="w">   </span>├──<span class="w"> </span>playbook.yml<span class="w">                    </span><span class="c1"># Main Keycloak configuration</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│<span class="w">   </span>├──<span class="w"> </span>preflight_checks.yml<span class="w">           </span><span class="c1"># Connectivity validation</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│<span class="w">   </span>├──<span class="w"> </span>configure_aap.yml<span class="w">              </span><span class="c1"># AAP job template setup</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│<span class="w">   </span>├──<span class="w"> </span>oauth_integration_playbook.yml<span class="w"> </span><span class="c1"># OAuth configuration</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│<span class="w">   </span>└──<span class="w"> </span>openshift_oidc_playbook.yml<span class="w">    </span><span class="c1"># OpenShift OIDC setup</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>├──<span class="w"> </span>ServiceNow<span class="w"> </span>Integration<span class="w"> </span>Playbooks
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│<span class="w">   </span>├──<span class="w"> </span>servicenow_business_rules.yml<span class="w">  </span><span class="c1"># Business Rules setup</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│<span class="w">   </span>├──<span class="w"> </span>servicenow_catalog_setup.yml<span class="w">   </span><span class="c1"># Catalog configuration</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│<span class="w">   </span>├──<span class="w"> </span>servicenow_project_creation.yml<span class="w"> </span><span class="c1"># Project automation</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│<span class="w">   </span>└──<span class="w"> </span>servicenow_*.yml<span class="w">               </span><span class="c1"># Additional ServiceNow tasks</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>├──<span class="w"> </span>Testing<span class="w"> </span>and<span class="w"> </span>Validation<span class="w"> </span>Playbooks
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│<span class="w">   </span>├──<span class="w"> </span>end_to_end_test.yml<span class="w">           </span><span class="c1"># Complete integration test</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│<span class="w">   </span>├──<span class="w"> </span>idempotent_end_to_end_test.yml<span class="w"> </span><span class="c1"># Repeatable testing</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│<span class="w">   </span>├──<span class="w"> </span>simple_e2e_test.yml<span class="w">           </span><span class="c1"># Basic validation</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│<span class="w">   </span>└──<span class="w"> </span>test_*.yml<span class="w">                     </span><span class="c1"># Specific component tests</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>├──<span class="w"> </span>Utility<span class="w"> </span>and<span class="w"> </span>Maintenance<span class="w"> </span>Playbooks
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│<span class="w">   </span>├──<span class="w"> </span>cleanup_*.yml<span class="w">                  </span><span class="c1"># Environment cleanup</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│<span class="w">   </span>├──<span class="w"> </span>diagnose_*.yml<span class="w">                 </span><span class="c1"># Troubleshooting</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│<span class="w">   </span>└──<span class="w"> </span>query_*.yml<span class="w">                    </span><span class="c1"># Information gathering</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>└──<span class="w"> </span>Configuration<span class="w"> </span>and<span class="w"> </span>Variables
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span>├──<span class="w"> </span>group_vars/all/vault.yml<span class="w">       </span><span class="c1"># Encrypted credentials</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span>├──<span class="w"> </span>vars/production.yml<span class="w">            </span><span class="c1"># Production variables</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span>└──<span class="w"> </span>templates/<span class="w">                     </span><span class="c1"># Jinja2 templates</span>
+</code></pre></div>
+<h2 id="core-playbooks-reference">🚀 Core Playbooks Reference<a class="headerlink" href="#core-playbooks-reference" title="Permanent link">&para;</a></h2>
+<h3 id="1-playbookyml-main-configuration">1. <strong>playbook.yml</strong> - Main Configuration<a class="headerlink" href="#1-playbookyml-main-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Configure base Keycloak realms and ServiceNow OAuth integration</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Execution</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="l l-Scalar l-Scalar-Plain">./run_playbook.sh ../ansible/playbook.yml \</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">-e @../ansible/group_vars/all/vault.yml \</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">--vault-password-file ../.vault_pass -m stdout</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="l l-Scalar l-Scalar-Plain"># Key Variables</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="l l-Scalar l-Scalar-Plain">keycloak_admin_password</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_keycloak_password</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nt">servicenow_instance_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_servicenow_url</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="nt">servicenow_oauth_client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;servicenow_oauth_client&quot;</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1"># Roles Used</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rhsso_servicenow_config</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="c1"># Expected Outcomes</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceNow realm created in Keycloak</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OAuth client configured</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceNow OAuth profile set up</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Connection aliases created</span>
+</code></pre></div>
+<h3 id="2-preflight_checksyml-connectivity-validation">2. <strong>preflight_checks.yml</strong> - Connectivity Validation<a class="headerlink" href="#2-preflight_checksyml-connectivity-validation" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Validate connectivity to all systems before configuration</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Execution</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="l l-Scalar l-Scalar-Plain">./run_playbook.sh ../ansible/preflight_checks.yml \</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">-e @../ansible/group_vars/all/vault.yml \</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">--vault-password-file ../.vault_pass -m stdout</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="l l-Scalar l-Scalar-Plain"># Checks Performed</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="l l-Scalar l-Scalar-Plain">- ServiceNow API connectivity</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="l l-Scalar l-Scalar-Plain">- Keycloak admin API access</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="l l-Scalar l-Scalar-Plain">- OpenShift cluster connectivity</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="l l-Scalar l-Scalar-Plain">- AAP controller access</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="l l-Scalar l-Scalar-Plain">- Credential validation</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="l l-Scalar l-Scalar-Plain"># Success Criteria</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="l l-Scalar l-Scalar-Plain">- All API endpoints return 200 status</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="l l-Scalar l-Scalar-Plain">- Authentication succeeds for all services</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="l l-Scalar l-Scalar-Plain">- Required permissions validated</span>
+</code></pre></div>
+<h3 id="3-configure_aapyml-aap-configuration">3. <strong>configure_aap.yml</strong> - AAP Configuration<a class="headerlink" href="#3-configure_aapyml-aap-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Set up AAP job templates, projects, and credentials</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Execution</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="l l-Scalar l-Scalar-Plain">./run_playbook.sh ../ansible/configure_aap.yml \</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">-e @../ansible/group_vars/all/vault.yml \</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">--vault-password-file ../.vault_pass -m stdout</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="l l-Scalar l-Scalar-Plain"># Key Variables</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="l l-Scalar l-Scalar-Plain">aap_controller_url</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_aap_controller_url</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nt">aap_token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_aap_token</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="nt">git_repository_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://github.com/tosin2013/servicenow-ocp-service.git&quot;</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="c1"># Resources Created</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">AAP Project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ServiceNow-OpenShift</span><span class="nv"> </span><span class="s">Integration&quot;</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Job Template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;OpenShift</span><span class="nv"> </span><span class="s">Project</span><span class="nv"> </span><span class="s">Creation&quot;</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Credentials</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceNow, OpenShift, Keycloak</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Inventory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
+</code></pre></div>
+<h3 id="4-oauth_integration_playbookyml-oauth-setup">4. <strong>oauth_integration_playbook.yml</strong> - OAuth Setup<a class="headerlink" href="#4-oauth_integration_playbookyml-oauth-setup" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Configure OAuth integration between ServiceNow and Keycloak</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Execution</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="l l-Scalar l-Scalar-Plain">./run_playbook.sh ../ansible/oauth_integration_playbook.yml \</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">-e @../ansible/group_vars/all/vault.yml \</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">--vault-password-file ../.vault_pass -m stdout</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="l l-Scalar l-Scalar-Plain"># Configuration Steps</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="l l-Scalar l-Scalar-Plain">1. Create OAuth application registry in ServiceNow</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="l l-Scalar l-Scalar-Plain">2. Configure OAuth profiles</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="l l-Scalar l-Scalar-Plain">3. Set up connection aliases</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="l l-Scalar l-Scalar-Plain">4. Test OAuth flow</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="l l-Scalar l-Scalar-Plain">5. Validate token exchange</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="l l-Scalar l-Scalar-Plain"># Key Endpoints</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="l l-Scalar l-Scalar-Plain">- ServiceNow</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/oauth_app_registry.do</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Keycloak</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/realms/servicenow/protocol/openid-connect/token</span>
+</code></pre></div>
+<h3 id="5-openshift_oidc_playbookyml-openshift-oidc">5. <strong>openshift_oidc_playbook.yml</strong> - OpenShift OIDC<a class="headerlink" href="#5-openshift_oidc_playbookyml-openshift-oidc" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Configure OpenShift to use Keycloak for authentication</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Execution</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="l l-Scalar l-Scalar-Plain">./run_playbook.sh ../ansible/openshift_oidc_playbook.yml \</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">-e @../ansible/group_vars/all/vault.yml \</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">--vault-password-file ../.vault_pass -m stdout</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="l l-Scalar l-Scalar-Plain"># Configuration Applied</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="l l-Scalar l-Scalar-Plain">- OpenShift OAuth resource updated</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="l l-Scalar l-Scalar-Plain">- Keycloak identity provider added</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="l l-Scalar l-Scalar-Plain">- Group synchronization configured</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="l l-Scalar l-Scalar-Plain">- RBAC mappings created</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="l l-Scalar l-Scalar-Plain"># Key Variables</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="l l-Scalar l-Scalar-Plain">keycloak_openshift_client_id</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;openshift&quot;</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="nt">keycloak_openshift_client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_keycloak_openshift_secret</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="nt">openshift_oauth_issuer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_keycloak_url</span><span class="nv"> </span><span class="s">}}/realms/openshift&quot;</span>
+</code></pre></div>
+<h2 id="custom-roles-reference">🔧 Custom Roles Reference<a class="headerlink" href="#custom-roles-reference" title="Permanent link">&para;</a></h2>
+<h3 id="1-rhsso_servicenow_config">1. <strong>rhsso_servicenow_config</strong><a class="headerlink" href="#1-rhsso_servicenow_config" title="Permanent link">&para;</a></h3>
+<p><strong>Location</strong>: <code>ansible/roles/rhsso_servicenow_config/</code></p>
+<p><strong>Purpose</strong>: Complete Keycloak-ServiceNow OAuth integration</p>
+<p><strong>Key Tasks</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Main tasks (tasks/main.yml)</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create ServiceNow realm</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure realm settings</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create OAuth client</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up client scopes</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure ServiceNow OAuth profile</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create connection aliases</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test OAuth connectivity</span>
+</code></pre></div></p>
+<p><strong>Variables</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Required variables</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nt">keycloak_admin_password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_keycloak_password</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nt">servicenow_instance_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_servicenow_url</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nt">servicenow_username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_servicenow_username</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="nt">servicenow_password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_servicenow_password</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># Optional variables (with defaults)</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="nt">keycloak_realm_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;servicenow&quot;</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="nt">oauth_client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;servicenow_oauth_client&quot;</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="nt">oauth_client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">vault_servicenow_oauth_secret</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</code></pre></div></p>
+<p><strong>Files Generated</strong>:
+- <code>/tmp/servicenow_oauth_config_summary.md</code>
+- <code>/tmp/servicenow_oauth_test_results.md</code></p>
+<h3 id="2-openshift_oidc_integration">2. <strong>openshift_oidc_integration</strong><a class="headerlink" href="#2-openshift_oidc_integration" title="Permanent link">&para;</a></h3>
+<p><strong>Location</strong>: <code>ansible/roles/openshift_oidc_integration/</code></p>
+<p><strong>Purpose</strong>: Configure OpenShift OIDC with Keycloak</p>
+<p><strong>Key Tasks</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure OpenShift OAuth resource</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create Keycloak identity provider</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up group mappings</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure RBAC policies</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test OIDC authentication flow</span>
+</code></pre></div></p>
+<h3 id="3-aap_configuration">3. <strong>aap_configuration</strong><a class="headerlink" href="#3-aap_configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Location</strong>: <code>ansible/roles/aap_configuration/</code></p>
+<p><strong>Purpose</strong>: Configure AAP job templates and projects</p>
+<p><strong>Key Tasks</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create AAP organization</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Git-based projects</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure job templates</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create credential types</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up inventories</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure notifications</span>
+</code></pre></div></p>
+<h3 id="4-servicenow_flow_designer-legacy">4. <strong>servicenow_flow_designer</strong> (Legacy)<a class="headerlink" href="#4-servicenow_flow_designer-legacy" title="Permanent link">&para;</a></h3>
+<p><strong>Location</strong>: <code>ansible/roles/servicenow_flow_designer/</code></p>
+<p><strong>Status</strong>: Deprecated in favor of Business Rules (ADR-014)</p>
+<p><strong>Purpose</strong>: Configure ServiceNow Flow Designer workflows</p>
+<h3 id="5-keycloak_user_management">5. <strong>keycloak_user_management</strong><a class="headerlink" href="#5-keycloak_user_management" title="Permanent link">&para;</a></h3>
+<p><strong>Location</strong>: <code>ansible/roles/keycloak_user_management/</code></p>
+<p><strong>Purpose</strong>: Manage Keycloak users and groups</p>
+<p><strong>Key Tasks</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create user groups</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Assign group roles</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure user attributes</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up group mappings</span>
+</code></pre></div></p>
+<h2 id="variable-reference">📊 Variable Reference<a class="headerlink" href="#variable-reference" title="Permanent link">&para;</a></h2>
+<h3 id="vault-variables-group_varsallvaultyml">Vault Variables (<code>group_vars/all/vault.yml</code>)<a class="headerlink" href="#vault-variables-group_varsallvaultyml" title="Permanent link">&para;</a></h3>
+<h4 id="servicenow-configuration">ServiceNow Configuration<a class="headerlink" href="#servicenow-configuration" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">vault_servicenow_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://dev123456.service-now.com&quot;</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nt">vault_servicenow_username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nt">vault_servicenow_password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;encrypted_password&quot;</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="nt">vault_servicenow_oauth_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;encrypted_oauth_secret&quot;</span>
+</code></pre></div>
+<h4 id="keycloak-configuration">Keycloak Configuration<a class="headerlink" href="#keycloak-configuration" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">vault_keycloak_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://keycloak-sso.apps.cluster.example.com&quot;</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nt">vault_keycloak_password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;encrypted_admin_password&quot;</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="nt">vault_keycloak_openshift_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;encrypted_client_secret&quot;</span>
+</code></pre></div>
+<h4 id="openshift-configuration">OpenShift Configuration<a class="headerlink" href="#openshift-configuration" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nt">vault_openshift_api_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.cluster.example.com:6443&quot;</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nt">vault_openshift_token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;encrypted_service_account_token&quot;</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nt">vault_openshift_console_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://console-openshift-console.apps.cluster.example.com&quot;</span>
+</code></pre></div>
+<h4 id="aap-configuration">AAP Configuration<a class="headerlink" href="#aap-configuration" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nt">vault_aap_controller_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://ansible-controller-aap.apps.cluster.example.com&quot;</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nt">vault_aap_username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nt">vault_aap_password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;encrypted_admin_password&quot;</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nt">vault_aap_token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;encrypted_api_token&quot;</span>
+</code></pre></div>
+<h3 id="production-variables-varsproductionyml">Production Variables (<code>vars/production.yml</code>)<a class="headerlink" href="#production-variables-varsproductionyml" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Environment-specific settings</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nt">deployment_environment</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;production&quot;</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="nt">enable_ssl_verification</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="nt">oauth_token_lifetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="nt">keycloak_session_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1"># Resource limits</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="nt">max_concurrent_jobs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="nt">job_timeout_seconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span>
+</code></pre></div>
+<h2 id="testing-playbooks-reference">🧪 Testing Playbooks Reference<a class="headerlink" href="#testing-playbooks-reference" title="Permanent link">&para;</a></h2>
+<h3 id="end-to-end-testing">End-to-End Testing<a class="headerlink" href="#end-to-end-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Complete integration test</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nt">end_to_end_test.yml</span><span class="p">:</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tests ServiceNow → AAP → OpenShift flow</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Creates test project</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Validates RBAC</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cleans up resources</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="c1"># Idempotent testing</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="nt">idempotent_end_to_end_test.yml</span><span class="p">:</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Repeatable test execution</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Updates existing test data</span>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Avoids duplicate resource creation</span>
+</code></pre></div>
+<h3 id="component-testing">Component Testing<a class="headerlink" href="#component-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># API connectivity tests</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="nt">test_servicenow_connection.yml</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceNow API validation</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="nt">test_servicenow_oauth.yml</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OAuth flow testing</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="nt">test_oidc_flow_playbook.yml</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OpenShift OIDC testing</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="nt">test_rbac_playbook.yml</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RBAC validation</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="c1"># Service-specific tests</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="nt">test_servicenow_catalog.yml</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Catalog item testing</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="nt">validate_business_rules.yml</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Business Rules validation</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="nt">validate_flow_designer.yml</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Flow Designer testing (legacy)</span>
+</code></pre></div>
+<h2 id="execution-patterns">🔄 Execution Patterns<a class="headerlink" href="#execution-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="standard-execution">Standard Execution<a class="headerlink" href="#standard-execution" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># Using wrapper script (recommended)</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>./run_playbook.sh<span class="w"> </span>../ansible/PLAYBOOK.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span>-e<span class="w"> </span>@../ansible/group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass<span class="w"> </span>-m<span class="w"> </span>stdout
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="c1"># Direct execution</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="nb">cd</span><span class="w"> </span>ansible/
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>ansible-playbook<span class="w"> </span>PLAYBOOK.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">  </span>-e<span class="w"> </span>@group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass
+</code></pre></div>
+<h3 id="advanced-execution-options">Advanced Execution Options<a class="headerlink" href="#advanced-execution-options" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Check mode (dry run)</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>ansible-playbook<span class="w"> </span>PLAYBOOK.yml<span class="w"> </span>--check<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span>-e<span class="w"> </span>@group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="c1"># Verbose output</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>ansible-playbook<span class="w"> </span>PLAYBOOK.yml<span class="w"> </span>-vvv<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">  </span>-e<span class="w"> </span>@group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="c1"># Tag-based execution</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>ansible-playbook<span class="w"> </span>PLAYBOOK.yml<span class="w"> </span>--tags<span class="w"> </span><span class="s2">&quot;keycloak_setup&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">  </span>-e<span class="w"> </span>@group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="c1"># Step-by-step execution</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a>ansible-playbook<span class="w"> </span>PLAYBOOK.yml<span class="w"> </span>--step<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">  </span>-e<span class="w"> </span>@group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>../.vault_pass
+</code></pre></div>
+<h2 id="performance-and-optimization">📈 Performance and Optimization<a class="headerlink" href="#performance-and-optimization" title="Permanent link">&para;</a></h2>
+<h3 id="execution-times-approximate">Execution Times (Approximate)<a class="headerlink" href="#execution-times-approximate" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Playbook</th>
+<th>Duration</th>
+<th>Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>preflight_checks.yml</code></td>
+<td>2-3 minutes</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><code>playbook.yml</code></td>
+<td>5-8 minutes</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><code>configure_aap.yml</code></td>
+<td>3-5 minutes</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><code>oauth_integration_playbook.yml</code></td>
+<td>4-6 minutes</td>
+<td>High</td>
+</tr>
+<tr>
+<td><code>openshift_oidc_playbook.yml</code></td>
+<td>2-4 minutes</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><code>end_to_end_test.yml</code></td>
+<td>8-12 minutes</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="optimization-tips">Optimization Tips<a class="headerlink" href="#optimization-tips" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Use check mode</strong> for validation</li>
+<li><strong>Tag tasks</strong> for selective execution</li>
+<li><strong>Cache API responses</strong> where possible</li>
+<li><strong>Run in parallel</strong> when safe</li>
+<li><strong>Use execution environment</strong> for consistency</li>
+</ul>
+<h2 id="integration-points">🔗 Integration Points<a class="headerlink" href="#integration-points" title="Permanent link">&para;</a></h2>
+<h3 id="aap-job-templates">AAP Job Templates<a class="headerlink" href="#aap-job-templates" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Local Playbook</th>
+<th>AAP Job Template</th>
+<th>ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>playbook.yml</code></td>
+<td>"Configure Base Keycloak"</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>servicenow_project_creation.yml</code></td>
+<td>"OpenShift Project Creation"</td>
+<td>9</td>
+</tr>
+<tr>
+<td><code>oauth_integration_playbook.yml</code></td>
+<td>"ServiceNow OAuth Setup"</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<h3 id="servicenow-business-rules">ServiceNow Business Rules<a class="headerlink" href="#servicenow-business-rules" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Trigger</strong>: Catalog request state change to "In Process"</li>
+<li><strong>Action</strong>: Call AAP job template via REST API</li>
+<li><strong>Payload</strong>: Project name, environment, requester details</li>
+</ul>
+<h3 id="openshift-integration">OpenShift Integration<a class="headerlink" href="#openshift-integration" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Service Account</strong>: <code>servicenow-automation</code></li>
+<li><strong>Permissions</strong>: Project creation, RBAC management</li>
+<li><strong>Namespace Pattern</strong>: <code>servicenow-{project-name}-{environment}</code></li>
+</ul>
+<hr />
+<p><em>This reference provides complete technical details for all Ansible automation in the ServiceNow-OpenShift integration</em></p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+        <br>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,3134 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A production-ready ServiceNow to OpenShift integration system that automates user provisioning and project creation through Ansible Automation Platform">
+      
+      
+      
+        <link rel="canonical" href="https://tosin2013.github.io/servicenow-ocp-service/reference/configuration-variables/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../api-reference/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+    
+    
+      
+        <title>📋 Configuration Variables - ServiceNow OpenShift Integration</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration-variables-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="ServiceNow OpenShift Integration" class="md-header__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ServiceNow OpenShift Integration
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              📋 Configuration Variables
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../GETTING_STARTED/" class="md-tabs__link">
+        
+  
+    
+  
+  📋 Implementation Guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../explanation/deployment-architecture/" class="md-tabs__link">
+        
+  
+    
+  
+  🏗️ Deployment Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../explanation/user-workflows-analysis/" class="md-tabs__link">
+        
+  
+    
+  
+  📊 User Workflows Analysis
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adrs/" class="md-tabs__link">
+          
+  
+  Architecture Decision Records
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
+          
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../how-to/" class="md-tabs__link">
+          
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="ServiceNow OpenShift Integration" class="md-nav__button md-logo" aria-label="ServiceNow OpenShift Integration" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    ServiceNow OpenShift Integration
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GETTING_STARTED/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Implementation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/deployment-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🏗️ Deployment Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/user-workflows-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📊 User Workflows Analysis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Architecture Decision Records
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture Decision Records
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/001-three-tier-orchestration-architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-001 Three-Tier Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/002-decoupled-api-driven-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-002 API-Driven Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/003-centralized-configuration-with-connection-credential-aliases/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-003 Centralized Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/004-gitops-based-deployment-with-argocd-and-kustomize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-004 GitOps Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/005-keycloak-deployment-on-openshift-via-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-005 Keycloak Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/006-servicenow-implementation-with-flow-designer-and-integrationhub/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-006 ServiceNow Implementation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/007-secret-management-with-external-secrets-operator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-007 Secret Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/008-observability-strategy-using-openshift-built-in-monitoring/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-008 Observability Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/009-hybrid-gitops-and-ansible-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-009 Hybrid GitOps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/010-ansible-automation-platform-integration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-010 AAP Integration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/011-custom-execution-environment-for-aap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-011 Custom Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/012-ansible-automation-platform-kustomize-deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-012 AAP Kustomize Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/013-pdi-workaround-strategy-for-development/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-013 PDI Workaround Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/014-business-rules-over-flow-designer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-014 Business Rules Over Flow Designer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/015-secure-credential-management-in-user-workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-015 Secure Credential Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/016-documentation-link-validation-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADR-016 Documentation Link Validation Strategy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/ansible-vault-configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔐 Ansible Vault Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/execution-environment-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/ansible-automation-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Automation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/your-first-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎯 Your First Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/user-workflows-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔄 User Workflows Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/aap-token-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 AAP Token Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/working-with-execution-environment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Working with Execution Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/working-with-ansible/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Working with Ansible
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/business-rule-logic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📋 Business Rule Logic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/end-to-end-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🧪 End-to-End Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/debugging-integration-issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Debugging Integration Issues
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/user-experience-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🎨 User Experience Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/scale-for-production/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🚀 Scale for Production
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/backup-and-recovery/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🛡️ Backup and Recovery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    📋 Configuration Variables
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    🎯 Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vault-variables-encrypted" class="md-nav__link">
+    🔐 Vault Variables (Encrypted)
+  </a>
+  
+    <nav class="md-nav" aria-label="🔐 Vault Variables (Encrypted)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-authentication" class="md-nav__link">
+    ServiceNow Authentication
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keycloakrh-sso-authentication" class="md-nav__link">
+    Keycloak/RH-SSO Authentication
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-authentication" class="md-nav__link">
+    OpenShift Authentication
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ansible-automation-platform" class="md-nav__link">
+    Ansible Automation Platform
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    🌐 Environment Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="🌐 Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-configuration" class="md-nav__link">
+    ServiceNow Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keycloakrh-sso-configuration" class="md-nav__link">
+    Keycloak/RH-SSO Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-configuration" class="md-nav__link">
+    OpenShift Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ansible-automation-platform_1" class="md-nav__link">
+    Ansible Automation Platform
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-configuration-variables" class="md-nav__link">
+    ⚙️ Feature Configuration Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Feature Configuration Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#oauth-integration" class="md-nav__link">
+    OAuth Integration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oidc-configuration" class="md-nav__link">
+    OIDC Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-designer-configuration" class="md-nav__link">
+    Flow Designer Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#business-rules-configuration" class="md-nav__link">
+    Business Rules Configuration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resource-configuration-variables" class="md-nav__link">
+    📊 Resource Configuration Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Resource Configuration Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#openshift-resource-quotas" class="md-nav__link">
+    OpenShift Resource Quotas
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbac-configuration" class="md-nav__link">
+    RBAC Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#group-mappings" class="md-nav__link">
+    Group Mappings
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-environment-variables" class="md-nav__link">
+    🔧 Execution Environment Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Execution Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ansible-navigator-configuration" class="md-nav__link">
+    Ansible Navigator Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables-passed-to-ee" class="md-nav__link">
+    Environment Variables Passed to EE
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-and-development-variables" class="md-nav__link">
+    🧪 Testing and Development Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 Testing and Development Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-configuration" class="md-nav__link">
+    Test Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-toggles" class="md-nav__link">
+    Feature Toggles
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notification-configuration" class="md-nav__link">
+    📧 Notification Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="📧 Notification Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#email-settings" class="md-nav__link">
+    Email Settings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alert-severity-mapping" class="md-nav__link">
+    Alert Severity Mapping
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#servicenow-table-configuration" class="md-nav__link">
+    🗂️ ServiceNow Table Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="🗂️ ServiceNow Table Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#table-names" class="md-nav__link">
+    Table Names
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variable-compatibility-mappings" class="md-nav__link">
+    🔄 Variable Compatibility Mappings
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Variable Compatibility Mappings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#alternative-variable-names" class="md-nav__link">
+    Alternative Variable Names
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    📝 Usage Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-variable-file" class="md-nav__link">
+    Basic Variable File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vault-file-template" class="md-nav__link">
+    Vault File Template
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playbook-usage" class="md-nav__link">
+    Playbook Usage
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔌 API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ansible-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ⚙️ Ansible Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../execution-environment-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🐳 Execution Environment Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-workflows-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔧 User Workflows Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../link-validation-report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔗 Link Validation Report
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../link-monitoring-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🔍 Link Monitoring Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../link-validation-checklist/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ✅ Link Validation Checklist
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PDI_ALTERNATIVE_SOLUTIONS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PDI Alternative Solutions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    🎯 Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vault-variables-encrypted" class="md-nav__link">
+    🔐 Vault Variables (Encrypted)
+  </a>
+  
+    <nav class="md-nav" aria-label="🔐 Vault Variables (Encrypted)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-authentication" class="md-nav__link">
+    ServiceNow Authentication
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keycloakrh-sso-authentication" class="md-nav__link">
+    Keycloak/RH-SSO Authentication
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-authentication" class="md-nav__link">
+    OpenShift Authentication
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ansible-automation-platform" class="md-nav__link">
+    Ansible Automation Platform
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    🌐 Environment Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="🌐 Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#servicenow-configuration" class="md-nav__link">
+    ServiceNow Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keycloakrh-sso-configuration" class="md-nav__link">
+    Keycloak/RH-SSO Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-configuration" class="md-nav__link">
+    OpenShift Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ansible-automation-platform_1" class="md-nav__link">
+    Ansible Automation Platform
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-configuration-variables" class="md-nav__link">
+    ⚙️ Feature Configuration Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Feature Configuration Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#oauth-integration" class="md-nav__link">
+    OAuth Integration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oidc-configuration" class="md-nav__link">
+    OIDC Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-designer-configuration" class="md-nav__link">
+    Flow Designer Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#business-rules-configuration" class="md-nav__link">
+    Business Rules Configuration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resource-configuration-variables" class="md-nav__link">
+    📊 Resource Configuration Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Resource Configuration Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#openshift-resource-quotas" class="md-nav__link">
+    OpenShift Resource Quotas
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbac-configuration" class="md-nav__link">
+    RBAC Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#group-mappings" class="md-nav__link">
+    Group Mappings
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-environment-variables" class="md-nav__link">
+    🔧 Execution Environment Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Execution Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ansible-navigator-configuration" class="md-nav__link">
+    Ansible Navigator Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables-passed-to-ee" class="md-nav__link">
+    Environment Variables Passed to EE
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-and-development-variables" class="md-nav__link">
+    🧪 Testing and Development Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 Testing and Development Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-configuration" class="md-nav__link">
+    Test Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-toggles" class="md-nav__link">
+    Feature Toggles
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notification-configuration" class="md-nav__link">
+    📧 Notification Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="📧 Notification Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#email-settings" class="md-nav__link">
+    Email Settings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alert-severity-mapping" class="md-nav__link">
+    Alert Severity Mapping
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#servicenow-table-configuration" class="md-nav__link">
+    🗂️ ServiceNow Table Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="🗂️ ServiceNow Table Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#table-names" class="md-nav__link">
+    Table Names
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variable-compatibility-mappings" class="md-nav__link">
+    🔄 Variable Compatibility Mappings
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Variable Compatibility Mappings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#alternative-variable-names" class="md-nav__link">
+    Alternative Variable Names
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    📝 Usage Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-variable-file" class="md-nav__link">
+    Basic Variable File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vault-file-template" class="md-nav__link">
+    Vault File Template
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playbook-usage" class="md-nav__link">
+    Playbook Usage
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="configuration-variables-reference">📋 Configuration Variables Reference<a class="headerlink" href="#configuration-variables-reference" title="Permanent link">&para;</a></h1>
+<p><strong>Complete reference for all Ansible variables and configuration parameters used in the ServiceNow-OpenShift integration</strong></p>
+<h2 id="overview">🎯 Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>This reference documents all configurable variables organized by component and usage context. Variables are categorized as:</p>
+<ul>
+<li><strong>🔐 Vault Variables</strong>: Encrypted sensitive data (passwords, tokens, secrets)</li>
+<li><strong>🌐 Environment Variables</strong>: Environment-specific configuration</li>
+<li><strong>⚙️ Feature Variables</strong>: Feature toggles and behavioral settings</li>
+<li><strong>📊 Resource Variables</strong>: Resource limits, quotas, and sizing</li>
+</ul>
+<h2 id="vault-variables-encrypted">🔐 Vault Variables (Encrypted)<a class="headerlink" href="#vault-variables-encrypted" title="Permanent link">&para;</a></h2>
+<h3 id="servicenow-authentication">ServiceNow Authentication<a class="headerlink" href="#servicenow-authentication" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vault_servicenow_password</code></td>
+<td>string</td>
+<td>ServiceNow admin password</td>
+<td><code>"SecurePassword123!"</code></td>
+</tr>
+<tr>
+<td><code>vault_servicenow_admin_password</code></td>
+<td>string</td>
+<td>Alternative ServiceNow admin password</td>
+<td><code>"SecurePassword123!"</code></td>
+</tr>
+<tr>
+<td><code>vault_servicenow_client_secret</code></td>
+<td>string</td>
+<td>OAuth client secret for ServiceNow</td>
+<td><code>"servicenow-secret-2025"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="keycloakrh-sso-authentication">Keycloak/RH-SSO Authentication<a class="headerlink" href="#keycloakrh-sso-authentication" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vault_keycloak_password</code></td>
+<td>string</td>
+<td>Keycloak admin password</td>
+<td><code>"KeycloakAdmin123!"</code></td>
+</tr>
+<tr>
+<td><code>vault_rhsso_admin_password</code></td>
+<td>string</td>
+<td>RH-SSO admin password</td>
+<td><code>"KeycloakAdmin123!"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="openshift-authentication">OpenShift Authentication<a class="headerlink" href="#openshift-authentication" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vault_openshift_token</code></td>
+<td>string</td>
+<td>OpenShift cluster admin token</td>
+<td><code>"sha256~AbCdEf..."</code></td>
+</tr>
+<tr>
+<td><code>vault_openshift_client_secret</code></td>
+<td>string</td>
+<td>OAuth client secret for OpenShift</td>
+<td><code>"openshift-secret-2025"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="ansible-automation-platform">Ansible Automation Platform<a class="headerlink" href="#ansible-automation-platform" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vault_aap_password</code></td>
+<td>string</td>
+<td>AAP admin password</td>
+<td><code>"AAPAdmin123!"</code></td>
+</tr>
+<tr>
+<td><code>vault_aap_admin_password</code></td>
+<td>string</td>
+<td>Alternative AAP admin password</td>
+<td><code>"AAPAdmin123!"</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="environment-variables">🌐 Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
+<h3 id="servicenow-configuration">ServiceNow Configuration<a class="headerlink" href="#servicenow-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servicenow_url</code></td>
+<td>string</td>
+<td>✅</td>
+<td>ServiceNow instance URL</td>
+<td><code>"https://dev295398.service-now.com"</code></td>
+</tr>
+<tr>
+<td><code>servicenow_username</code></td>
+<td>string</td>
+<td>✅</td>
+<td>ServiceNow admin username</td>
+<td><code>"admin"</code></td>
+</tr>
+<tr>
+<td><code>servicenow_instance_url</code></td>
+<td>string</td>
+<td>❌</td>
+<td>Alternative instance URL</td>
+<td><code>"{{ servicenow_url }}"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="keycloakrh-sso-configuration">Keycloak/RH-SSO Configuration<a class="headerlink" href="#keycloakrh-sso-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rhsso_url</code></td>
+<td>string</td>
+<td>✅</td>
+<td>Keycloak instance URL</td>
+<td><code>"https://keycloak-sso.apps.cluster.com"</code></td>
+</tr>
+<tr>
+<td><code>rhsso_external_url</code></td>
+<td>string</td>
+<td>❌</td>
+<td>External Keycloak URL</td>
+<td><code>"{{ rhsso_url }}"</code></td>
+</tr>
+<tr>
+<td><code>rhsso_admin_username</code></td>
+<td>string</td>
+<td>✅</td>
+<td>Keycloak admin username</td>
+<td><code>"admin"</code></td>
+</tr>
+<tr>
+<td><code>servicenow_realm_name</code></td>
+<td>string</td>
+<td>✅</td>
+<td>Keycloak realm name</td>
+<td><code>"servicenow"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="openshift-configuration">OpenShift Configuration<a class="headerlink" href="#openshift-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>openshift_api_url</code></td>
+<td>string</td>
+<td>✅</td>
+<td>OpenShift API server URL</td>
+<td><code>"https://api.cluster.com:6443"</code></td>
+</tr>
+<tr>
+<td><code>openshift_apps_domain</code></td>
+<td>string</td>
+<td>✅</td>
+<td>OpenShift apps domain</td>
+<td><code>"apps.cluster.com"</code></td>
+</tr>
+<tr>
+<td><code>openshift_cluster_domain</code></td>
+<td>string</td>
+<td>❌</td>
+<td>Alternative cluster domain</td>
+<td><code>"{{ openshift_apps_domain }}"</code></td>
+</tr>
+<tr>
+<td><code>ocp_console_url</code></td>
+<td>string</td>
+<td>❌</td>
+<td>OpenShift console URL</td>
+<td>Auto-generated</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ansible-automation-platform_1">Ansible Automation Platform<a class="headerlink" href="#ansible-automation-platform_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aap_url</code></td>
+<td>string</td>
+<td>✅</td>
+<td>AAP controller URL</td>
+<td><code>"https://aap-controller.apps.cluster.com"</code></td>
+</tr>
+<tr>
+<td><code>aap_username</code></td>
+<td>string</td>
+<td>✅</td>
+<td>AAP admin username</td>
+<td><code>"admin"</code></td>
+</tr>
+<tr>
+<td><code>controller_host</code></td>
+<td>string</td>
+<td>❌</td>
+<td>Alternative AAP host</td>
+<td><code>"{{ aap_url }}"</code></td>
+</tr>
+<tr>
+<td><code>controller_username</code></td>
+<td>string</td>
+<td>❌</td>
+<td>Alternative AAP username</td>
+<td><code>"{{ aap_username }}"</code></td>
+</tr>
+<tr>
+<td><code>controller_validate_certs</code></td>
+<td>boolean</td>
+<td>❌</td>
+<td>Validate SSL certificates</td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="feature-configuration-variables">⚙️ Feature Configuration Variables<a class="headerlink" href="#feature-configuration-variables" title="Permanent link">&para;</a></h2>
+<h3 id="oauth-integration">OAuth Integration<a class="headerlink" href="#oauth-integration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>oauth_redirect_url</code></td>
+<td>string</td>
+<td>ServiceNow OAuth redirect URL</td>
+<td><code>"https://instance.service-now.com/oauth_redirect.do"</code></td>
+</tr>
+<tr>
+<td><code>oauth_app_name</code></td>
+<td>string</td>
+<td>OAuth application name</td>
+<td><code>"Keycloak SSO Integration"</code></td>
+</tr>
+<tr>
+<td><code>servicenow_client_id</code></td>
+<td>string</td>
+<td>ServiceNow OAuth client ID</td>
+<td><code>"servicenow-client"</code></td>
+</tr>
+<tr>
+<td><code>openshift_client_id</code></td>
+<td>string</td>
+<td>OpenShift OAuth client ID</td>
+<td><code>"openshift"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="oidc-configuration">OIDC Configuration<a class="headerlink" href="#oidc-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>oidc_name</code></td>
+<td>string</td>
+<td>OIDC identity provider name</td>
+<td><code>"keycloak-oidc"</code></td>
+</tr>
+<tr>
+<td><code>oidc_display</code></td>
+<td>string</td>
+<td>OIDC display name</td>
+<td><code>"Keycloak SSO"</code></td>
+</tr>
+<tr>
+<td><code>oidc_scopes</code></td>
+<td>list</td>
+<td>OIDC scopes to request</td>
+<td><code>["openid", "profile", "email", "groups"]</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="flow-designer-configuration">Flow Designer Configuration<a class="headerlink" href="#flow-designer-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>user_provisioning_flow_name</code></td>
+<td>string</td>
+<td>User provisioning flow name</td>
+<td><code>"Keycloak User Provisioning"</code></td>
+</tr>
+<tr>
+<td><code>project_management_flow_name</code></td>
+<td>string</td>
+<td>Project management flow name</td>
+<td><code>"OpenShift Project Management"</code></td>
+</tr>
+<tr>
+<td><code>enable_user_provisioning</code></td>
+<td>boolean</td>
+<td>Enable user provisioning flow</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>enable_project_management</code></td>
+<td>boolean</td>
+<td>Enable project management flow</td>
+<td><code>true</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="business-rules-configuration">Business Rules Configuration<a class="headerlink" href="#business-rules-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>business_rule_trigger_state</code></td>
+<td>string</td>
+<td>ServiceNow state that triggers automation</td>
+<td><code>"3"</code> (Work in Progress)</td>
+</tr>
+<tr>
+<td><code>automation_fulfillment_level</code></td>
+<td>string</td>
+<td>ServiceNow fulfillment automation level</td>
+<td><code>"Fully automated"</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="resource-configuration-variables">📊 Resource Configuration Variables<a class="headerlink" href="#resource-configuration-variables" title="Permanent link">&para;</a></h2>
+<h3 id="openshift-resource-quotas">OpenShift Resource Quotas<a class="headerlink" href="#openshift-resource-quotas" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default_resource_quotas.requests_cpu</code></td>
+<td>string</td>
+<td>Default CPU requests</td>
+<td><code>"4"</code></td>
+</tr>
+<tr>
+<td><code>default_resource_quotas.requests_memory</code></td>
+<td>string</td>
+<td>Default memory requests</td>
+<td><code>"8Gi"</code></td>
+</tr>
+<tr>
+<td><code>default_resource_quotas.limits_cpu</code></td>
+<td>string</td>
+<td>Default CPU limits</td>
+<td><code>"8"</code></td>
+</tr>
+<tr>
+<td><code>default_resource_quotas.limits_memory</code></td>
+<td>string</td>
+<td>Default memory limits</td>
+<td><code>"16Gi"</code></td>
+</tr>
+<tr>
+<td><code>default_resource_quotas.pods</code></td>
+<td>string</td>
+<td>Maximum pods per project</td>
+<td><code>"10"</code></td>
+</tr>
+<tr>
+<td><code>default_resource_quotas.persistent_volume_claims</code></td>
+<td>string</td>
+<td>Maximum PVCs per project</td>
+<td><code>"5"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="rbac-configuration">RBAC Configuration<a class="headerlink" href="#rbac-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default_openshift_roles</code></td>
+<td>list</td>
+<td>Available OpenShift roles</td>
+<td><code>["view", "edit", "admin"]</code></td>
+</tr>
+<tr>
+<td><code>default_cluster_role</code></td>
+<td>string</td>
+<td>Default cluster role for OIDC users</td>
+<td><code>"view"</code></td>
+</tr>
+<tr>
+<td><code>create_cluster_role_bindings</code></td>
+<td>boolean</td>
+<td>Create cluster role bindings</td>
+<td><code>true</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="group-mappings">Group Mappings<a class="headerlink" href="#group-mappings" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>admin_groups</code></td>
+<td>list</td>
+<td>Groups with admin privileges</td>
+<td><code>["cluster-admins", "openshift-admins"]</code></td>
+</tr>
+<tr>
+<td><code>group_mappings.cluster_admins</code></td>
+<td>list</td>
+<td>Keycloak groups for cluster admins</td>
+<td><code>["/cluster-admins", "/openshift-admins"]</code></td>
+</tr>
+<tr>
+<td><code>group_mappings.developers</code></td>
+<td>list</td>
+<td>Keycloak groups for developers</td>
+<td><code>["/developers", "/dev-team"]</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="execution-environment-variables">🔧 Execution Environment Variables<a class="headerlink" href="#execution-environment-variables" title="Permanent link">&para;</a></h2>
+<h3 id="ansible-navigator-configuration">Ansible Navigator Configuration<a class="headerlink" href="#ansible-navigator-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>execution_environment.image</code></td>
+<td>string</td>
+<td>EE container image</td>
+<td><code>"quay.io/takinosh/servicenow-ocp-ee:latest"</code></td>
+</tr>
+<tr>
+<td><code>execution_environment.pull_policy</code></td>
+<td>string</td>
+<td>Container pull policy</td>
+<td><code>"never"</code></td>
+</tr>
+<tr>
+<td><code>execution_environment.container_engine</code></td>
+<td>string</td>
+<td>Container engine to use</td>
+<td><code>"auto"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="environment-variables-passed-to-ee">Environment Variables Passed to EE<a class="headerlink" href="#environment-variables-passed-to-ee" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ANSIBLE_ADMIN_USER</code></td>
+<td>string</td>
+<td>Ansible admin username</td>
+<td>Passed through to EE</td>
+</tr>
+<tr>
+<td><code>ANSIBLE_ADMIN_PASSWORD</code></td>
+<td>string</td>
+<td>Ansible admin password</td>
+<td>Passed through to EE</td>
+</tr>
+<tr>
+<td><code>ANSIBLE_HUB_TOKEN</code></td>
+<td>string</td>
+<td>Red Hat Automation Hub token</td>
+<td>Used for collection downloads</td>
+</tr>
+</tbody>
+</table>
+<h2 id="testing-and-development-variables">🧪 Testing and Development Variables<a class="headerlink" href="#testing-and-development-variables" title="Permanent link">&para;</a></h2>
+<h3 id="test-configuration">Test Configuration<a class="headerlink" href="#test-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create_test_user</code></td>
+<td>boolean</td>
+<td>Create test user in Keycloak</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>test_user_username</code></td>
+<td>string</td>
+<td>Test user username</td>
+<td><code>"oidc-test-user"</code></td>
+</tr>
+<tr>
+<td><code>test_user_password</code></td>
+<td>string</td>
+<td>Test user password</td>
+<td><code>"TestPassword123!"</code></td>
+</tr>
+<tr>
+<td><code>test_user_email</code></td>
+<td>string</td>
+<td>Test user email</td>
+<td><code>"oidc-test@example.com"</code></td>
+</tr>
+<tr>
+<td><code>test_user_groups</code></td>
+<td>list</td>
+<td>Test user groups</td>
+<td><code>["/developers"]</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="feature-toggles">Feature Toggles<a class="headerlink" href="#feature-toggles" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_keycloak_client_config</code></td>
+<td>boolean</td>
+<td>Configure Keycloak clients</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>enable_openshift_oauth_config</code></td>
+<td>boolean</td>
+<td>Configure OpenShift OAuth</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>enable_rbac_group_mappings</code></td>
+<td>boolean</td>
+<td>Enable RBAC group mappings</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>enable_oidc_flow_testing</code></td>
+<td>boolean</td>
+<td>Enable OIDC flow testing</td>
+<td><code>true</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="notification-configuration">📧 Notification Configuration<a class="headerlink" href="#notification-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="email-settings">Email Settings<a class="headerlink" href="#email-settings" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>notification_emails.openshift_ops</code></td>
+<td>string</td>
+<td>OpenShift operations email</td>
+<td><code>"openshift-ops@company.com"</code></td>
+</tr>
+<tr>
+<td><code>notification_emails.admin</code></td>
+<td>string</td>
+<td>Admin notification email</td>
+<td><code>"admin@company.com"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="alert-severity-mapping">Alert Severity Mapping<a class="headerlink" href="#alert-severity-mapping" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>alert_severity_mapping.critical.priority</code></td>
+<td>string</td>
+<td>Critical alert priority</td>
+<td><code>"1"</code></td>
+</tr>
+<tr>
+<td><code>alert_severity_mapping.warning.priority</code></td>
+<td>string</td>
+<td>Warning alert priority</td>
+<td><code>"3"</code></td>
+</tr>
+<tr>
+<td><code>alert_severity_mapping.info.priority</code></td>
+<td>string</td>
+<td>Info alert priority</td>
+<td><code>"4"</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="servicenow-table-configuration">🗂️ ServiceNow Table Configuration<a class="headerlink" href="#servicenow-table-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="table-names">Table Names<a class="headerlink" href="#table-names" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>user_request_table</code></td>
+<td>string</td>
+<td>User request table</td>
+<td><code>"sc_request"</code></td>
+</tr>
+<tr>
+<td><code>project_request_table</code></td>
+<td>string</td>
+<td>Project request table</td>
+<td><code>"sc_req_item"</code></td>
+</tr>
+<tr>
+<td><code>incident_table</code></td>
+<td>string</td>
+<td>Incident table</td>
+<td><code>"incident"</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="variable-compatibility-mappings">🔄 Variable Compatibility Mappings<a class="headerlink" href="#variable-compatibility-mappings" title="Permanent link">&para;</a></h2>
+<h3 id="alternative-variable-names">Alternative Variable Names<a class="headerlink" href="#alternative-variable-names" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Primary Variable</th>
+<th>Alternative Names</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rhsso_url</code></td>
+<td><code>rhsso_external_url</code></td>
+<td>Keycloak URL compatibility</td>
+</tr>
+<tr>
+<td><code>servicenow_url</code></td>
+<td><code>servicenow_instance_url</code></td>
+<td>ServiceNow URL compatibility</td>
+</tr>
+<tr>
+<td><code>openshift_apps_domain</code></td>
+<td><code>openshift_cluster_domain</code></td>
+<td>OpenShift domain compatibility</td>
+</tr>
+<tr>
+<td><code>vault_keycloak_password</code></td>
+<td><code>rhsso_admin_password</code></td>
+<td>Password compatibility</td>
+</tr>
+</tbody>
+</table>
+<h2 id="usage-examples">📝 Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
+<h3 id="basic-variable-file">Basic Variable File<a class="headerlink" href="#basic-variable-file" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nn">---</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># vars/production.yml</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">servicenow_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://prod.service-now.com&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nt">rhsso_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://keycloak.company.com&quot;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">openshift_api_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.prod-cluster.com:6443&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nt">openshift_apps_domain</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;apps.prod-cluster.com&quot;</span>
+</code></pre></div>
+<h3 id="vault-file-template">Vault File Template<a class="headerlink" href="#vault-file-template" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nn">---</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># group_vars/all/vault.yml (encrypted)</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">vault_servicenow_password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SecurePassword123!&quot;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nt">vault_keycloak_password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;KeycloakAdmin123!&quot;</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">vault_openshift_token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sha256~AbCdEf...&quot;</span>
+</code></pre></div>
+<h3 id="playbook-usage">Playbook Usage<a class="headerlink" href="#playbook-usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Using variables</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>ansible-playbook<span class="w"> </span>playbook.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>-e<span class="w"> </span>@vars/production.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>-e<span class="w"> </span>@group_vars/all/vault.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>--vault-password-file<span class="w"> </span>.vault_pass
+</code></pre></div>
+<hr />
+<p><strong>📚 Related Documentation:</strong>
+- <a href="../../GETTING_STARTED/">Getting Started Guide</a> - Setup instructions
+- <a href="../KEYCLOAK_INTEGRATION_GUIDE.md">Keycloak Integration Guide</a> - Identity configuration
+- <a href="../explanation/security-architecture.md">Security Guide</a> - Security best practices</p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+        <br>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 22, 2025</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+    
+  </body>
+</html>

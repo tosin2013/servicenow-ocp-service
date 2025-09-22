@@ -1,0 +1,41 @@
+# Container ignore file for MkDocs documentation build
+# Excludes unnecessary files from the container build context
+
+# Build outputs
+site/
+_site/
+*.pyc
+__pycache__/
+
+# Version control
+.git/
+.gitignore
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Node modules (if any)
+node_modules/
+
+# Python virtual environments
+venv/
+env/
+.env
+
+# Backup files
+*.bak
+*.backup
+*~

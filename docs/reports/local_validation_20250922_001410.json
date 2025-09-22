@@ -1,0 +1,17 @@
+{
+    "timestamp": "2025-09-22T00:14:10+00:00",
+    "validation_type": "local_development",
+    "configuration": {
+        "content_directory": "/home/ec2-user/servicenow-ocp-service/docs/content",
+        "check_external_links": true,
+        "check_internal_links": true,
+        "timeout_ms": 10000
+    },
+    "message": "Link validation completed for local development",
+    "note": "For full validation with broken link detection, use GitHub Actions workflow or run with MCP documcp server",
+    "recommendations": [
+        "Check for missing files referenced in documentation",
+        "Verify external links manually during development",
+        "Use 'cd docs && python -m http.server 8080' to test locally served content"
+    ]
+}
