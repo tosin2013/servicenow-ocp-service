@@ -6,7 +6,7 @@ metadata:
   labels:
     servicenow-request: "{{ servicenow_request_number }}"
     environment: "{{ project_environment | default('development') }}"
-    team: "{{ team | replace(',', '-') | replace(' ', '') }}"
+    team: "{{ (team_members | join('-') if team_members is defined and team_members is iterable and team_members is not string else (team | replace(',', '-') | replace(' ', '') if team is defined else 'default')) }}"
     managed-by: "servicenow-aap"
     project-type: "{{ project_type | default('standard') }}"
   annotations:
