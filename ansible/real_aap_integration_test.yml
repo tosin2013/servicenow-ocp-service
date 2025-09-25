@@ -19,6 +19,13 @@
     real_project_name: "servicenow-real-{{ ansible_date_time.epoch }}"
     real_display_name: "ServiceNow Real Integration Test"
 
+  pre_tasks:
+    # Convert team_members from JSON string to list if needed
+    - name: Parse team_members if provided as JSON string
+      set_fact:
+        team_members: "{{ team_members | from_json if team_members is string and team_members.startswith('[') else team_members }}"
+      when: team_members is defined
+
   tasks:
     - name: Display Real AAP Integration Test Information
       debug:

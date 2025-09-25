@@ -25,6 +25,11 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SERVICENOW_URL="https://dev295398.service-now.com"
 AAP_URL="https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
 
+
+# User provisioning configuration
+REQUESTOR="alice"
+TEAM_MEMBERS='["bob","carol"]'
+
 # Standard command format from GETTING_STARTED.md
 ANSIBLE_CMD_BASE="./run_playbook.sh"
 ANSIBLE_VAULT_ARGS="-e @ansible/group_vars/all/vault.yml --vault-password-file .vault_pass -m stdout"
@@ -228,18 +233,19 @@ check_servicenow_requests() {
     fi
 }
 
+
 # Step 1: Create ServiceNow Request
 create_servicenow_request() {
     local project_name="$1"
     local environment="${2:-development}"
-    
+
     print_step "1" "Creating ServiceNow Request"
     print_info "Project: $project_name"
     print_info "Environment: $environment"
-    
+
     # Use existing ServiceNow request creation playbook
-    local extra_vars="test_project_name=$project_name test_environment=$environment"
-    
+    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members=$TEAM_MEMBERS"
+
     if run_playbook "create_servicenow_request_direct.yml" "ServiceNow Request Creation" "$extra_vars"; then
         print_success "ServiceNow request created for project: $project_name"
         print_info "Check ServiceNow: $SERVICENOW_URL/nav_to.do?uri=sc_request_list.do"
@@ -259,7 +265,8 @@ check_aap_job() {
     print_info "Following GETTING_STARTED.md workflow for AAP integration"
 
     # Use existing AAP integration test (from GETTING_STARTED.md section 10.3)
-    if run_playbook "real_aap_integration_test.yml" "AAP Job Verification"; then
+    local extra_vars="requestor=$REQUESTOR team_members=$TEAM_MEMBERS"
+    if run_playbook "real_aap_integration_test.yml" "AAP Job Verification" "$extra_vars"; then
         print_success "✅ AAP job verification completed"
         print_info "🔗 Check AAP Dashboard: $AAP_URL/#/jobs"
 
@@ -367,7 +374,7 @@ verify_openshift_project() {
             else
                 print_info "Project exists but contains no resources yet"
             fi
-        else
+        else 
             print_warning "Could not list resources in project: $resource_output"
         fi
 
@@ -410,7 +417,7 @@ run_e2e_validation() {
     print_info "Testing complete ServiceNow → AAP → OpenShift → Keycloak workflow"
 
     # Use existing end-to-end test (from GETTING_STARTED.md)
-    local extra_vars="test_project_name=$project_name test_environment=$environment"
+    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members=$TEAM_MEMBERS"
 
     if run_playbook "end_to_end_test.yml" "End-to-End Integration Test" "$extra_vars"; then
         print_success "✅ End-to-end integration test completed successfully"

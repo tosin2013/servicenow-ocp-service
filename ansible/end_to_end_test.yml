@@ -21,14 +21,22 @@
     sn_host: "{{ servicenow_instance_url }}"
     sn_username: "{{ servicenow_admin_user }}"
     sn_password: "{{ vault_servicenow_admin_password }}"
-    # Test project details
-    test_project_name: "e2e-test-{{ ansible_date_time.epoch }}"
+    # Test project details - use passed variables or defaults
+    test_project_name: "{{ test_project_name | default('e2e-test-' + ansible_date_time.epoch) }}"
     test_display_name: "End-to-End Test Project"
-    test_environment: "development"
-    test_requestor_first: "TestUser"
+    test_environment: "{{ test_environment | default('development') }}"
+    test_requestor_first: "{{ requestor | default('TestUser') }}"
     test_requestor_last: "E2E"
-    test_team_members: "developer1,developer2,tester1"
+    test_team_members: "{{ team_members | join(',') if team_members is defined and team_members is iterable and team_members is not string else (team_members | default('developer1,developer2,tester1')) }}"
     test_justification: "End-to-end integration test to validate complete ServiceNow to OpenShift workflow including AAP job template execution and resource creation."
+
+  pre_tasks:
+    # Convert team_members from JSON string to list if needed
+    - name: Parse team_members if provided as JSON string
+      set_fact:
+        team_members: "{{ team_members | from_json if team_members is string and team_members.startswith('[') else team_members }}"
+        test_team_members: "{{ (team_members | from_json if team_members is string and team_members.startswith('[') else team_members) | join(',') if team_members is defined else 'developer1,developer2,tester1' }}"
+      when: team_members is defined
 
     # AAP Configuration
     aap_controller_url: "https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
