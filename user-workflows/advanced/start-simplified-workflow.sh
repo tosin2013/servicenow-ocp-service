@@ -244,7 +244,9 @@ create_servicenow_request() {
     print_info "Environment: $environment"
 
     # Use existing ServiceNow request creation playbook
-    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members=$TEAM_MEMBERS"
+    # Use jq to properly format team_members as JSON array
+    local team_members_json=$(echo "$TEAM_MEMBERS" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
+    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members=$(echo "$team_members_json" | jq -c .)"
 
     if run_playbook "create_servicenow_request_direct.yml" "ServiceNow Request Creation" "$extra_vars"; then
         print_success "ServiceNow request created for project: $project_name"
@@ -265,7 +267,17 @@ check_aap_job() {
     print_info "Following GETTING_STARTED.md workflow for AAP integration"
 
     # Use existing AAP integration test (from GETTING_STARTED.md section 10.3)
-    local extra_vars="requestor=$REQUESTOR team_members=$TEAM_MEMBERS"
+    # Use jq to properly format the variables as JSON
+    local team_members_json=$(echo "$TEAM_MEMBERS" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
+    local extra_vars_json=$(jq -n \
+        --arg requestor "$REQUESTOR" \
+        --argjson team_members "$team_members_json" \
+        '{requestor: $requestor, team_members: $team_members}')
+
+    print_info "Variables being passed: $extra_vars_json"
+
+    # Convert back to Ansible extra-vars format
+    local extra_vars="requestor=$REQUESTOR team_members=$(echo "$team_members_json" | jq -c .)"
     if run_playbook "real_aap_integration_test.yml" "AAP Job Verification" "$extra_vars"; then
         print_success "✅ AAP job verification completed"
         print_info "🔗 Check AAP Dashboard: $AAP_URL/#/jobs"
@@ -417,7 +429,9 @@ run_e2e_validation() {
     print_info "Testing complete ServiceNow → AAP → OpenShift → Keycloak workflow"
 
     # Use existing end-to-end test (from GETTING_STARTED.md)
-    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members=$TEAM_MEMBERS"
+    # Use jq to properly format team_members as JSON array
+    local team_members_json=$(echo "$TEAM_MEMBERS" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
+    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members=$(echo "$team_members_json" | jq -c .)"
 
     if run_playbook "end_to_end_test.yml" "End-to-End Integration Test" "$extra_vars"; then
         print_success "✅ End-to-end integration test completed successfully"
