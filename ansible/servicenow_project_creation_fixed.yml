@@ -1,0 +1,181 @@
+---
+# ansible/servicenow_project_creation_fixed.yml
+# Fixed version with robust OpenShift token handling
+
+- name: Create OpenShift Project from ServiceNow Request (Fixed)
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    # These variables would be passed in from the AAP Job Template,
+    # which in turn gets them from the ServiceNow Flow Designer call.
+    project_name: "example-project"
+    display_name: "Example Project"
+    description: "An example project created from a ServiceNow request."
+    requestor: "example-user"
+    servicenow_request_number: "REQ0000001"
+    environment: "development"
+    team: "example-team"
+
+  pre_tasks:
+    - name: Ensure Keycloak users exist for requestor and team
+      import_role:
+        name: keycloak_user_management
+      vars:
+        requestor: "{{ requestor }}"
+        team_members: "{{ team_members | default([]) }}"
+        servicenow_realm: "{{ servicenow_realm | default('servicenow') }}"
+        keycloak_url: "{{ keycloak_url | default(rhsso_url) }}"
+        keycloak_admin_username: "{{ keycloak_admin_username | default('admin') }}"
+        keycloak_admin_password: "{{ keycloak_admin_password | default(vault_keycloak_password) }}"
+        temp_password: "{{ temp_password | default('TempPass123!') }}"
+        default_email_domain: "{{ default_email_domain | default('example.com') }}"
+
+  tasks:
+    - name: Handle environment variable conflict (Ansible reserved name)
+      set_fact:
+        project_environment: "{{ project_env | default(env_type) | default('development') }}"
+      when: project_environment is not defined
+
+    - name: "🔍 DEBUG: Check all possible token sources"
+      debug:
+        msg:
+          - "Environment variable OPENSHIFT_API_TOKEN: {{ 'SET' if lookup('env', 'OPENSHIFT_API_TOKEN') != '' else 'NOT SET' }}"
+          - "Vault variable vault_openshift_token: {{ 'SET' if vault_openshift_token is defined and vault_openshift_token != '' else 'NOT SET' }}"
+          - "AAP credential openshift_token: {{ 'SET' if openshift_token is defined and openshift_token != '' else 'NOT SET' }}"
+
+    - name: Set OpenShift API authentication facts (Enhanced)
+      set_fact:
+        openshift_auth:
+          # Priority order: AAP credential -> Environment variable -> Vault variable
+          api_key: "{{ openshift_token | default(lookup('env', 'OPENSHIFT_API_TOKEN'), true) | default(vault_openshift_token, true) }}"
+      no_log: true
+
+    - name: "🔍 DEBUG: Display resolved token info"
+      debug:
+        msg:
+          - "Token resolved: {{ 'Yes' if openshift_auth.api_key is defined and openshift_auth.api_key != '' else 'No' }}"
+          - "Token length: {{ openshift_auth.api_key | length if openshift_auth.api_key is defined and openshift_auth.api_key != '' else 'N/A' }}"
+          - "Token type: {{ 'SHA256' if openshift_auth.api_key is defined and openshift_auth.api_key.startswith('sha256~') else 'JWT' if openshift_auth.api_key is defined and '.' in openshift_auth.api_key else 'Unknown' }}"
+
+    - name: "❌ FAIL: OpenShift API token is not available from any source"
+      fail:
+        msg: |
+          OpenShift API token is not available from any source.
+          
+          Checked sources (in priority order):
+          1. AAP Credential 'openshift_token': {{ 'SET' if openshift_token is defined and openshift_token != '' else 'NOT SET' }}
+          2. Environment variable 'OPENSHIFT_API_TOKEN': {{ 'SET' if lookup('env', 'OPENSHIFT_API_TOKEN') != '' else 'NOT SET' }}
+          3. Vault variable 'vault_openshift_token': {{ 'SET' if vault_openshift_token is defined and vault_openshift_token != '' else 'NOT SET' }}
+          
+          Solutions for AAP:
+          1. Configure "OpenShift API Token" credential in AAP with your cluster token
+          2. Add the credential to the Job Template
+          3. Ensure the credential is named 'openshift_token' in the playbook
+          
+          Solutions for local execution:
+          1. Set environment variable: export OPENSHIFT_API_TOKEN="your-token-here"
+          2. Add vault_openshift_token to ansible/group_vars/all/vault.yml
+          3. Ensure oc login is working: oc login <cluster-url> --token=<token>
+      when: openshift_auth.api_key is not defined or openshift_auth.api_key == ""
+
+    - name: "✅ SUCCESS: OpenShift API token resolved successfully"
+      debug:
+        msg:
+          - "✅ OpenShift API token successfully resolved"
+          - "Ready to create OpenShift project: {{ project_name }}"
+          - "Using OpenShift API: https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+
+    - name: "🧪 TEST: Verify OpenShift API connectivity"
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Namespace
+        name: default
+        host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+        api_key: "{{ openshift_auth.api_key }}"
+        validate_certs: false
+      register: connectivity_test
+
+    - name: "✅ SUCCESS: OpenShift API connectivity verified"
+      debug:
+        msg:
+          - "✅ Successfully connected to OpenShift API"
+          - "Default namespace found: {{ connectivity_test.resources[0].metadata.name }}"
+          - "Cluster ready for project creation"
+
+    - name: Create OpenShift Project (Namespace)
+      kubernetes.core.k8s:
+        state: present
+        host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+        api_key: "{{ openshift_auth.api_key }}"
+        validate_certs: false
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ project_name }}"
+            labels:
+              servicenow-request: "{{ servicenow_request_number }}"
+              environment: "{{ project_environment }}"
+              team: "{{ team | replace(',', '-') | replace(' ', '') }}"
+              managed-by: "servicenow-aap"
+            annotations:
+              openshift.io/display-name: "{{ display_name }}"
+              openshift.io/description: "{{ description }}"
+              openshift.io/requestor: "{{ requestor }}"
+      register: namespace_creation
+
+    - name: "✅ SUCCESS: OpenShift project created"
+      debug:
+        msg:
+          - "✅ OpenShift project created successfully"
+          - "Project name: {{ project_name }}"
+          - "Display name: {{ display_name }}"
+          - "Requestor: {{ requestor }}"
+          - "ServiceNow request: {{ servicenow_request_number }}"
+
+    - name: Apply RBAC Permissions for all users
+      kubernetes.core.k8s:
+        state: present
+        host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+        api_key: "{{ openshift_auth.api_key }}"
+        validate_certs: false
+        definition:
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: RoleBinding
+          metadata:
+            name: "{{ item }}-admin"
+            namespace: "{{ project_name }}"
+          subjects:
+          - kind: User
+            name: "{{ item }}"
+            apiGroup: rbac.authorization.k8s.io
+          roleRef:
+            kind: ClusterRole
+            name: admin
+            apiGroup: rbac.authorization.k8s.io
+      loop: "{{ [requestor] + (team_members | default([])) }}"
+      loop_control:
+        label: "{{ item }}"
+
+    - name: "✅ SUCCESS: RBAC permissions applied"
+      debug:
+        msg:
+          - "✅ Admin permissions granted to {{ requestor }}"
+          - "User {{ requestor }} can now manage the {{ project_name }} project"
+
+    - name: "🎉 FINAL SUCCESS: ServiceNow OpenShift project creation completed"
+      debug:
+        msg:
+          - "🎉 ServiceNow OpenShift integration completed successfully!"
+          - "Project: {{ project_name }} ({{ display_name }})"
+          - "Requestor: {{ requestor }} (admin access granted)"
+          - "ServiceNow Request: {{ servicenow_request_number }}"
+          - "Environment: {{ project_environment }}"
+          - "Team: {{ team }}"
+          - ""
+          - "Next steps:"
+          - "1. Notify requestor that project is ready"
+          - "2. Update ServiceNow request status"
+          - "3. Send project access details"

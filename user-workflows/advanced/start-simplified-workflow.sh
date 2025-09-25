@@ -54,6 +54,120 @@ print_warning() {
     echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
+print_debug() {
+    echo -e "${CYAN}🔍 DEBUG: $1${NC}"
+}
+
+# Enhanced OpenShift token debugging function
+debug_openshift_token() {
+    print_header "🔍 OpenShift Token Debugging"
+
+    print_debug "Checking OpenShift CLI configuration and authentication..."
+
+    # Check if oc command exists
+    if ! command -v oc >/dev/null 2>&1; then
+        print_error "OpenShift CLI (oc) not found in PATH"
+        return 1
+    fi
+    print_success "OpenShift CLI found: $(which oc)"
+
+    # Check oc version
+    print_debug "OpenShift CLI version:"
+    oc version --client 2>/dev/null | sed 's/^/  /' || print_warning "Could not get oc version"
+
+    # Check current context
+    print_debug "Current OpenShift context:"
+    if oc config current-context 2>/dev/null; then
+        print_success "Current context found"
+    else
+        print_warning "No current context set"
+    fi
+
+    # Check if logged in
+    print_debug "Checking authentication status..."
+    if oc whoami >/dev/null 2>&1; then
+        local current_user=$(oc whoami 2>/dev/null)
+        print_success "Authenticated as: $current_user"
+
+        # Get server info
+        print_debug "OpenShift server information:"
+        local server_url=$(oc whoami --show-server 2>/dev/null)
+        print_info "Server: $server_url"
+
+        # Check token expiration if possible
+        print_debug "Token information:"
+        local token_info=$(oc whoami --show-token 2>/dev/null)
+        if [ -n "$token_info" ]; then
+            print_info "Token length: ${#token_info} characters"
+            print_info "Token prefix: ${token_info:0:20}..."
+
+            # Try to decode token expiration (if it's a JWT)
+            if command -v jq >/dev/null 2>&1 && [[ "$token_info" == *"."*"."* ]]; then
+                print_debug "Attempting to decode JWT token..."
+                local payload=$(echo "$token_info" | cut -d'.' -f2)
+                # Add padding if needed
+                local padded_payload="$payload$(printf '%*s' $(((4 - ${#payload} % 4) % 4)) '')"
+                if decoded=$(echo "$padded_payload" | base64 -d 2>/dev/null | jq . 2>/dev/null); then
+                    local exp=$(echo "$decoded" | jq -r '.exp // empty' 2>/dev/null)
+                    if [ -n "$exp" ] && [ "$exp" != "null" ]; then
+                        local exp_date=$(date -d "@$exp" 2>/dev/null || echo "Invalid date")
+                        print_info "Token expires: $exp_date"
+
+                        # Check if token is expired
+                        local current_time=$(date +%s)
+                        if [ "$exp" -lt "$current_time" ]; then
+                            print_error "TOKEN IS EXPIRED!"
+                            return 1
+                        else
+                            local time_left=$((exp - current_time))
+                            print_success "Token valid for $((time_left / 3600)) hours $((time_left % 3600 / 60)) minutes"
+                        fi
+                    fi
+                fi
+            fi
+        else
+            print_warning "Could not retrieve token information"
+        fi
+
+        # Test basic API access
+        print_debug "Testing API access..."
+        if oc get projects --no-headers >/dev/null 2>&1; then
+            local project_count=$(oc get projects --no-headers 2>/dev/null | wc -l)
+            print_success "API access working - found $project_count projects"
+        else
+            print_error "API access failed - token may be invalid or expired"
+            return 1
+        fi
+
+    else
+        print_error "Not authenticated to OpenShift cluster"
+        print_info "Authentication methods to try:"
+        print_info "1. oc login <server-url> --token=<your-token>"
+        print_info "2. oc login <server-url> -u <username> -p <password>"
+        print_info "3. Check if existing token has expired"
+        return 1
+    fi
+
+    # Check cluster connectivity
+    print_debug "Testing cluster connectivity..."
+    if timeout 10 oc cluster-info >/dev/null 2>&1; then
+        print_success "Cluster connectivity verified"
+    else
+        print_warning "Cluster connectivity test failed (may be normal)"
+    fi
+
+    # Show current project
+    print_debug "Current project context:"
+    local current_project=$(oc project -q 2>/dev/null)
+    if [ -n "$current_project" ]; then
+        print_info "Current project: $current_project"
+    else
+        print_info "No current project set"
+    fi
+
+    return 0
+}
+
 # Function to run playbooks using the existing infrastructure (following GETTING_STARTED.md format)
 run_playbook() {
     local playbook="$1"
@@ -176,41 +290,105 @@ verify_openshift_project() {
     print_step "3" "Verifying OpenShift Project Creation"
     print_info "Using 'oc get projects' to check for project: $project_name"
 
-    # First, show all projects to give context
-    echo -e "\n${CYAN}All OpenShift Projects:${NC}"
-    if oc get projects --no-headers | head -10; then
-        echo "  ... (showing first 10 projects)"
-    else
-        print_error "Failed to get OpenShift projects - check oc login status"
+    # Run OpenShift token debugging first
+    print_debug "Running OpenShift authentication diagnostics..."
+    if ! debug_openshift_token; then
+        print_error "OpenShift authentication issues detected"
+        print_info "Please resolve authentication issues before continuing"
         return 1
     fi
 
-    # Check for specific project
-    if oc get project "$project_name" >/dev/null 2>&1; then
+    # First, show all projects to give context
+    echo -e "\n${CYAN}All OpenShift Projects (verbose):${NC}"
+    print_debug "Running: oc get projects --no-headers"
+
+    local projects_output
+    local projects_exit_code
+    projects_output=$(oc get projects --no-headers 2>&1)
+    projects_exit_code=$?
+
+    print_debug "Projects command exit code: $projects_exit_code"
+
+    if [ $projects_exit_code -eq 0 ]; then
+        echo "$projects_output" | head -10
+        local project_count=$(echo "$projects_output" | wc -l)
+        print_info "Showing first 10 of $project_count total projects"
+    else
+        print_error "Failed to get OpenShift projects - authentication or connectivity issue"
+        print_debug "Error output: $projects_output"
+        print_info "Try running: oc login <your-cluster-url> --token=<your-token>"
+        return 1
+    fi
+
+    # Check for specific project with verbose debugging
+    echo -e "\n${CYAN}Checking for specific project: $project_name${NC}"
+    print_debug "Running: oc get project \"$project_name\""
+
+    local project_check_output
+    local project_check_exit_code
+
+    project_check_output=$(oc get project "$project_name" 2>&1)
+    project_check_exit_code=$?
+
+    print_debug "Command exit code: $project_check_exit_code"
+    print_debug "Command output: $project_check_output"
+
+    if [ $project_check_exit_code -eq 0 ]; then
         print_success "✅ OpenShift project found: $project_name"
 
-        # Get project details
+        # Get project details with verbose output
         echo -e "\n${CYAN}Project Details:${NC}"
+        print_debug "Running: oc get project \"$project_name\" -o wide"
         oc get project "$project_name" -o wide | sed 's/^/  /'
 
-        # Check for resources in the project
+        # Check for resources in the project with verbose debugging
         echo -e "\n${CYAN}Resources in project:${NC}"
-        local resource_count=$(oc get all -n "$project_name" --no-headers 2>/dev/null | wc -l)
-        print_info "Found $resource_count resources in project $project_name"
+        print_debug "Running: oc get all -n \"$project_name\" --no-headers"
 
-        # Show some resources if they exist
-        if [ "$resource_count" -gt 0 ]; then
-            echo -e "\n${CYAN}Sample resources:${NC}"
-            oc get all -n "$project_name" | head -5 | sed 's/^/  /'
+        local resource_output
+        local resource_exit_code
+        resource_output=$(oc get all -n "$project_name" --no-headers 2>&1)
+        resource_exit_code=$?
+
+        print_debug "Resource check exit code: $resource_exit_code"
+
+        if [ $resource_exit_code -eq 0 ]; then
+            local resource_count=$(echo "$resource_output" | wc -l)
+            if [ -z "$resource_output" ]; then
+                resource_count=0
+            fi
+            print_info "Found $resource_count resources in project $project_name"
+
+            # Show some resources if they exist
+            if [ "$resource_count" -gt 0 ]; then
+                echo -e "\n${CYAN}Sample resources:${NC}"
+                print_debug "Running: oc get all -n \"$project_name\""
+                oc get all -n "$project_name" | head -5 | sed 's/^/  /'
+            else
+                print_info "Project exists but contains no resources yet"
+            fi
+        else
+            print_warning "Could not list resources in project: $resource_output"
         fi
 
         return 0
     else
         print_error "❌ OpenShift project not found: $project_name"
+        print_debug "Error details: $project_check_output"
+
+        # Check if it's an authentication issue
+        if echo "$project_check_output" | grep -qi "unauthorized\|forbidden\|authentication\|login"; then
+            print_error "Authentication issue detected!"
+            print_info "Your OpenShift token may have expired or be invalid"
+            print_info "Try: oc login <your-cluster-url> --token=<your-token>"
+            return 1
+        fi
+
         print_info "Searching for projects with similar names..."
 
-        # Look for similar project names
-        local similar_projects=$(oc get projects --no-headers | grep -i "$(echo "$project_name" | cut -d'-' -f1)" | head -5)
+        # Look for similar project names with verbose output
+        print_debug "Running: oc get projects --no-headers | grep -i \"$(echo "$project_name" | cut -d'-' -f1)\""
+        local similar_projects=$(oc get projects --no-headers 2>/dev/null | grep -i "$(echo "$project_name" | cut -d'-' -f1)" | head -5)
         if [ -n "$similar_projects" ]; then
             echo -e "\n${CYAN}Similar projects found:${NC}"
             echo "$similar_projects" | sed 's/^/  /'
@@ -291,10 +469,26 @@ main() {
     
     if ! command -v oc >/dev/null 2>&1; then
         print_error "oc command not found - OpenShift CLI required"
+        print_info "Install OpenShift CLI from: https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html"
         exit 1
     fi
-    
+
     print_success "Prerequisites verified"
+
+    # Run initial OpenShift token check if verbose mode or if we're going to use oc commands
+    if [[ "$mode" == *"verify"* ]] || [[ "$mode" == "check-first" ]] || [[ "$mode" == "full" ]]; then
+        print_info "Running initial OpenShift authentication check..."
+        if ! debug_openshift_token; then
+            print_warning "OpenShift authentication issues detected"
+            print_info "You may need to login: oc login <cluster-url> --token=<token>"
+            echo -e "${YELLOW}Continue anyway? (y/N):${NC}"
+            read -r continue_choice
+            if [[ ! "$continue_choice" =~ ^[Yy]$ ]]; then
+                print_info "Exiting. Please resolve authentication issues first."
+                exit 1
+            fi
+        fi
+    fi
     echo ""
     echo -e "${YELLOW}Press Enter to start workflow...${NC}"
     read -r
@@ -415,10 +609,23 @@ show_usage() {
     echo "  $0 existing-project development verify-only    # Just verify project exists"
     echo "  $0 new-project development full               # Full workflow"
     echo ""
+    echo "🔍 Debugging Features:"
+    echo "  • Verbose OpenShift token authentication debugging"
+    echo "  • Detailed API call logging with exit codes"
+    echo "  • Token expiration checking (for JWT tokens)"
+    echo "  • Comprehensive connectivity testing"
+    echo "  • Authentication error detection and guidance"
+    echo ""
     echo "Based on GETTING_STARTED.md workflow:"
     echo "  1. Check ServiceNow for recent requests"
     echo "  2. Verify AAP job creation and execution"
     echo "  3. Check OpenShift project creation using 'oc get projects'"
+    echo ""
+    echo "🚨 Troubleshooting OpenShift Token Issues:"
+    echo "  • Check if logged in: oc whoami"
+    echo "  • Login with token: oc login <cluster-url> --token=<your-token>"
+    echo "  • Check token expiration: This script will detect expired JWT tokens"
+    echo "  • Verify cluster connectivity: oc cluster-info"
     echo ""
 }
 
