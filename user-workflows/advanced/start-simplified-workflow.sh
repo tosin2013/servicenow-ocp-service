@@ -244,9 +244,9 @@ create_servicenow_request() {
     print_info "Environment: $environment"
 
     # Use existing ServiceNow request creation playbook
-    # TEAM_MEMBERS is already a JSON array, validate and use directly
-    local team_members_json=$(echo "$TEAM_MEMBERS" | jq -c .)
-    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members=$team_members_json"
+    # Use Ansible's JSON parsing by passing as a proper JSON string
+    local team_members_escaped=$(echo "$TEAM_MEMBERS" | jq -c . | sed 's/"/\\"/g')
+    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members_json='$TEAM_MEMBERS'"
 
     if run_playbook "create_servicenow_request_direct.yml" "ServiceNow Request Creation" "$extra_vars"; then
         print_success "ServiceNow request created for project: $project_name"
@@ -267,8 +267,7 @@ check_aap_job() {
     print_info "Following GETTING_STARTED.md workflow for AAP integration"
 
     # Use existing AAP integration test (from GETTING_STARTED.md section 10.3)
-    # TEAM_MEMBERS is already a JSON array, validate and use directly
-    local team_members_json=$(echo "$TEAM_MEMBERS" | jq -c .)
+    # Pass team_members as JSON string for proper parsing
     local extra_vars_json=$(jq -n \
         --arg requestor "$REQUESTOR" \
         --argjson team_members "$TEAM_MEMBERS" \
@@ -276,8 +275,8 @@ check_aap_job() {
 
     print_info "Variables being passed: $extra_vars_json"
 
-    # Pass variables to Ansible
-    local extra_vars="requestor=$REQUESTOR team_members=$team_members_json"
+    # Pass variables to Ansible with JSON string
+    local extra_vars="requestor=$REQUESTOR team_members_json='$TEAM_MEMBERS'"
     if run_playbook "real_aap_integration_test.yml" "AAP Job Verification" "$extra_vars"; then
         print_success "✅ AAP job verification completed"
         print_info "🔗 Check AAP Dashboard: $AAP_URL/#/jobs"
@@ -429,9 +428,8 @@ run_e2e_validation() {
     print_info "Testing complete ServiceNow → AAP → OpenShift → Keycloak workflow"
 
     # Use existing end-to-end test (from GETTING_STARTED.md)
-    # TEAM_MEMBERS is already a JSON array, validate and use directly
-    local team_members_json=$(echo "$TEAM_MEMBERS" | jq -c .)
-    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members=$team_members_json"
+    # Pass team_members as JSON string for proper parsing
+    local extra_vars="test_project_name=$project_name test_environment=$environment requestor=$REQUESTOR team_members_json='$TEAM_MEMBERS'"
 
     if run_playbook "end_to_end_test.yml" "End-to-End Integration Test" "$extra_vars"; then
         print_success "✅ End-to-end integration test completed successfully"

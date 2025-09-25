@@ -29,8 +29,14 @@
           Received variables:
           - requestor: {{ requestor | default('undefined') }}
           - team_members: {{ team_members | default('undefined') }} (type: {{ team_members | type_debug if team_members is defined else 'undefined' }})
+          - team_members_json: {{ team_members_json | default('undefined') }} (type: {{ team_members_json | type_debug if team_members_json is defined else 'undefined' }})
           - team: {{ team | default('undefined') }} (type: {{ team | type_debug if team is defined else 'undefined' }})
           - project_name: {{ project_name | default('undefined') }}
+
+    - name: Parse team_members from JSON if provided
+      set_fact:
+        team_members: "{{ team_members_json | from_json }}"
+      when: team_members_json is defined
 
     - name: Ensure team_members is a proper list for user creation
       set_fact:
