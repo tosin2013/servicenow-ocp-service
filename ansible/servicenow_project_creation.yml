@@ -23,6 +23,11 @@
         project_environment: "{{ project_env | default(env_type) | default('development') }}"
       when: project_environment is not defined
 
+    - name: Convert team string to team_members list for user creation
+      set_fact:
+        team_members: "{{ team.split(',') | map('trim') | list if team is defined and team != 'default' else [] }}"
+      when: team_members is not defined and team is defined
+
     - name: Set OpenShift API authentication facts
       set_fact:
         openshift_auth:
@@ -73,4 +78,15 @@
     - name: Create Keycloak users in ServiceNow realm
       include_role:
         name: keycloak_user_management
+      vars:
+        requestor: "{{ requestor }}"
+        team_members: "{{ team_members | default([]) }}"
+        servicenow_realm: "{{ servicenow_realm | default('servicenow') }}"
+        keycloak_url: "{{ keycloak_url | default(rhsso_url) }}"
+        keycloak_admin_username: "{{ keycloak_admin_username | default('admin') }}"
+        keycloak_admin_password: "{{ keycloak_admin_password | default(vault_keycloak_password) }}"
+        temp_password: "{{ temp_password | default('TempPass123!') }}"
+        default_email_domain: "{{ default_email_domain | default('example.com') }}"
+        project_name: "{{ project_name }}"
+        servicenow_request_number: "{{ servicenow_request_number }}"
       when: manage_keycloak_users | default(false)

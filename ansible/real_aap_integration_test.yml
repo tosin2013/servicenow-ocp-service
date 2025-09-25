@@ -200,9 +200,9 @@
           u_project_name: "{{ real_project_name }}"
           u_display_name: "{{ real_display_name }}"
           u_environment: "development"
-          u_requestor_first_name: "ServiceNow"
-          u_requestor_last_name: "Admin"
-          u_team_members: "admin,developer,tester"
+          u_requestor_first_name: "{{ requestor_first_name | default(requestor | default('ServiceNow') | title) }}"
+          u_requestor_last_name: "{{ requestor_last_name | default('User') }}"
+          u_team_members: "{{ team_members | join(',') if team_members is defined else 'admin,developer,tester' }}"
           u_business_justification: "Real AAP integration test to validate complete ServiceNow to OpenShift workflow with actual resource creation"
       register: real_request
 
@@ -229,10 +229,10 @@
           extra_vars:
             project_name: "{{ real_project_name }}"
             display_name: "{{ real_display_name }}"
-            requestor: "servicenow.admin"
+            requestor: "{{ requestor | default('servicenow.admin') }}"
             servicenow_request_number: "{{ real_request.record.number }}"
             environment: "development"
-            team: "admin,developer,tester"
+            team: "{{ team_members | join(',') if team_members is defined else 'admin,developer,tester' }}"
             database_type: "postgresql"
             database_size: "5Gi"
             temp_password: "ChangeMe123!"
