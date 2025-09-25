@@ -25,8 +25,8 @@
 
     - name: Convert team string to team_members list for user creation
       set_fact:
-        team_members: "{{ team.split(',') | map('trim') | list if team is defined and team != 'default' else [] }}"
-      when: team_members is not defined and team is defined
+        team_members: "{{ team_members.split(',') | map('trim') | list if team_members is string else (team.split(',') | map('trim') | list if team is defined and team != 'default' else team_members) }}"
+      when: team_members is defined or team is defined
 
     - name: Set OpenShift API authentication facts
       set_fact:
