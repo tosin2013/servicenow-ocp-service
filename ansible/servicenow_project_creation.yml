@@ -23,10 +23,45 @@
         project_environment: "{{ project_env | default(env_type) | default('development') }}"
       when: project_environment is not defined
 
-    - name: Convert team string to team_members list for user creation
+    - name: Debug received variables
+      debug:
+        msg: |
+          Received variables:
+          - requestor: {{ requestor | default('undefined') }}
+          - team_members: {{ team_members | default('undefined') }} (type: {{ team_members | type_debug if team_members is defined else 'undefined' }})
+          - team: {{ team | default('undefined') }} (type: {{ team | type_debug if team is defined else 'undefined' }})
+          - project_name: {{ project_name | default('undefined') }}
+
+    - name: Ensure team_members is a proper list for user creation
       set_fact:
-        team_members: "{{ team_members.split(',') | map('trim') | list if team_members is string else (team.split(',') | map('trim') | list if team is defined and team != 'default' else team_members) }}"
+        team_members: >-
+          {%- if team_members is defined -%}
+            {%- if team_members is string -%}
+              {{ team_members.split(',') | map('trim') | list }}
+            {%- elif team_members is iterable and team_members is not string -%}
+              {{ team_members | list }}
+            {%- else -%}
+              {{ [team_members] }}
+            {%- endif -%}
+          {%- elif team is defined and team != 'default' -%}
+            {%- if team is string -%}
+              {{ team.split(',') | map('trim') | list }}
+            {%- elif team is iterable and team is not string -%}
+              {{ team | list }}
+            {%- else -%}
+              {{ [team] }}
+            {%- endif -%}
+          {%- else -%}
+            {{ [] }}
+          {%- endif -%}
       when: team_members is defined or team is defined
+
+    - name: Debug processed team_members
+      debug:
+        msg: |
+          Processed team_members:
+          - team_members: {{ team_members | default('undefined') }} (type: {{ team_members | type_debug if team_members is defined else 'undefined' }})
+          - Length: {{ team_members | length if team_members is defined else 'undefined' }}
 
     - name: Set OpenShift API authentication facts
       set_fact:
