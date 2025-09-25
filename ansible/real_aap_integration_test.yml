@@ -20,10 +20,10 @@
     real_display_name: "ServiceNow Real Integration Test"
 
   pre_tasks:
-    # Convert team_members from JSON string to list if needed
-    - name: Parse team_members if provided as JSON string
+    # Convert team_members from comma-separated string to list if needed
+    - name: Parse team_members from comma-separated string
       set_fact:
-        team_members: "{{ team_members | from_json if team_members is string and team_members.startswith('[') else team_members }}"
+        team_members: "{{ team_members.split(',') | map('trim') | list if team_members is string else team_members }}"
       when: team_members is defined
 
   tasks:

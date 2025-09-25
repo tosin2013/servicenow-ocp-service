@@ -31,11 +31,11 @@
     test_justification: "End-to-end integration test to validate complete ServiceNow to OpenShift workflow including AAP job template execution and resource creation."
 
   pre_tasks:
-    # Convert team_members from JSON string to list if needed
-    - name: Parse team_members if provided as JSON string
+    # Convert team_members from comma-separated string to list if needed
+    - name: Parse team_members from comma-separated string
       set_fact:
-        team_members: "{{ team_members | from_json if team_members is string and team_members.startswith('[') else team_members }}"
-        test_team_members: "{{ (team_members | from_json if team_members is string and team_members.startswith('[') else team_members) | join(',') if team_members is defined else 'developer1,developer2,tester1' }}"
+        team_members: "{{ team_members.split(',') | map('trim') | list if team_members is string else team_members }}"
+        test_team_members: "{{ team_members if team_members is string else (team_members | join(',') if team_members is defined else 'developer1,developer2,tester1') }}"
       when: team_members is defined
 
     # AAP Configuration
