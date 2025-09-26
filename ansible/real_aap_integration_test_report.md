@@ -1,7 +1,7 @@
 # Real AAP Integration Test Report
 
-**Test Date**: 2025-09-26T14:30:19Z
-**Test Project**: servicenow-real-1758897019
+**Test Date**: 2025-09-26T14:38:38Z
+**Test Project**: servicenow-real-1758897518
 **ServiceNow Instance**: https://dev295398.service-now.com
 **AAP Controller**: https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
 
@@ -13,11 +13,11 @@
 - **Job Template ID**: 9
 
 ### AAP Job Execution
-- **Job ID**: 238
+- **Job ID**: 241
 - **Job Status**: failed
-- **Job URL**: https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com/#/jobs/playbook/238
-- **Started**: 2025-09-26T14:30:28.602521Z
-- **Finished**: 2025-09-26T14:30:38.450407Z
+- **Job URL**: https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com/#/jobs/playbook/241
+- **Started**: 2025-09-26T14:38:46.924209Z
+- **Finished**: 2025-09-26T14:38:57.800235Z
 
 ### OpenShift Project Creation
 - **Status**: ⚠️ Not Yet Created
@@ -25,22 +25,22 @@
 - **Possible Causes**: Job still running, job failed, or configuration issue
 
 ### ServiceNow Integration
-- **Request Number**: REQ0010102
-- **Request ID**: 90c3e71c47d8ba90292cc82f316d434c
-- **Request URL**: https://dev295398.service-now.com/nav_to.do?uri=sc_request.do?sys_id=90c3e71c47d8ba90292cc82f316d434c
+- **Request Number**: REQ0010103
+- **Request ID**: c6a5e3dc47d8ba90292cc82f316d4347
+- **Request URL**: https://dev295398.service-now.com/nav_to.do?uri=sc_request.do?sys_id=c6a5e3dc47d8ba90292cc82f316d4347
 
 ## Validation Commands
 
 ```bash
 # Check if OpenShift project exists
-oc get project servicenow-real-1758897019
+oc get project servicenow-real-1758897518
 
 # Get project details
-oc describe project servicenow-real-1758897019
+oc describe project servicenow-real-1758897518
 
 # Check AAP job status
 curl -k -H "Authorization: Bearer YOUR_TOKEN" \
-  https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com/api/v2/jobs/238/
+  https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com/api/v2/jobs/241/
 ```
 
 ## Next Steps

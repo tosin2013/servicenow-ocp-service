@@ -38,6 +38,9 @@ vault_keycloak_password: "REPLACE_WITH_KEYCLOAK_ADMIN_PASSWORD"
 vault_rhsso_admin_password: "REPLACE_WITH_KEYCLOAK_ADMIN_PASSWORD"
 vault_keycloak_password: "REPLACE_WITH_KEYCLOAK_ADMIN_PASSWORD"
 
+# User Domain 
+default_email_domain: "example.com"
+
 # =============================================================================
 # OPENSHIFT CONFIGURATION
 # =============================================================================

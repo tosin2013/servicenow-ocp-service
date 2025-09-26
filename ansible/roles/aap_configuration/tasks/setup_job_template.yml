@@ -34,6 +34,7 @@
       servicenow_realm: "servicenow"
       team_members: "{{ team_members | default('[]') }}"
       keycloak_admin_password: "{{ keycloak_admin_password | default(vault_keycloak_password) }}"
+      default_email_domain: "{{ default_email_domain | default('example.com') }}"
     survey_enabled: true
     survey_spec:
       name: ""
@@ -59,6 +60,11 @@
           question_name: "Keycloak Admin Password (leave blank to use vault_keycloak_password)"
           type: "password"
           required: false
+        - variable: default_email_domain
+          question_name: "Default Email Domain"
+          type: "text"
+          required: false
+          default: "example.com"
         - variable: team_members
           question_name: "Team Members (JSON array, e.g. [\"bob\", \"carol\"])"
           type: "textarea"
