@@ -27,7 +27,7 @@ AAP_URL="https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.ope
 
 
 # User provisioning configuration
-REQUESTOR="carol"
+REQUESTOR="matt"
 TEAM_MEMBERS='["bob","alice"]'  # JSON array format for reliable parsing
 
 # Standard command format from GETTING_STARTED.md
