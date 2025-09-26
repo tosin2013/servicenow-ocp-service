@@ -185,18 +185,24 @@
         requested_by: "{{ sn_username }}"
         short_description: "{{ real_display_name }}"
         description: |
-          REAL AAP INTEGRATION TEST - This will create an actual OpenShift project:
+          🚀 ServiceNow-OpenShift Integration: Automated Project Provisioning
           
           Project Details:
           - Project Name: {{ real_project_name }}
           - Display Name: {{ real_display_name }}
           - Environment: Development
-          - Requestor: ServiceNow Admin
-          - Purpose: Validate real AAP job template execution
+          - Requestor: {{ requestor | default('ServiceNow Admin') }}
+          - Team: {{ team_members | join(', ') if team_members is defined and team_members|length > 0 else 'N/A' }}
+          - Purpose: Validate end-to-end ServiceNow to OpenShift automation
+          
+          Login Information:
+          - OpenShift Console: {{ openshift_console_url | default('https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com') }}
+          - Username: {{ requestor | default('ServiceNow Admin') }}
+          - Password: {{ temp_password | default('TempPass123!') }}
           
           Expected Outcomes:
           - OpenShift namespace created: {{ real_project_name }}
-          - Keycloak user provisioned: servicenow.admin
+          - Keycloak user provisioned: {{ requestor | default('servicenow.admin') }}
           - RBAC permissions configured
           - Resource quotas applied
           - Network policies created
