@@ -36,6 +36,7 @@ rhsso_admin_username: "admin"
 # Keycloak Admin Passwords (multiple variables for compatibility)
 vault_keycloak_password: "REPLACE_WITH_KEYCLOAK_ADMIN_PASSWORD"
 vault_rhsso_admin_password: "REPLACE_WITH_KEYCLOAK_ADMIN_PASSWORD"
+vault_keycloak_password: "REPLACE_WITH_KEYCLOAK_ADMIN_PASSWORD"
 
 # =============================================================================
 # OPENSHIFT CONFIGURATION
