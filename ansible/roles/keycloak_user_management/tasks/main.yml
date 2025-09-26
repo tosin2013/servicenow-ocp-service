@@ -25,7 +25,7 @@
 
 - name: Get Keycloak admin token
   uri:
-    url: "{{ keycloak_url | default(rhsso_url) }}/auth/realms/master/protocol/openid-connect/token"
+    url: "{{ rhsso_url | default('https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com') }}/auth/realms/master/protocol/openid-connect/token"
     method: POST
     body_format: form-urlencoded
     body:
