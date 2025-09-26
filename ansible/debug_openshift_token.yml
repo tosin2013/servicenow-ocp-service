@@ -1,0 +1,217 @@
+---
+# ansible/debug_openshift_token.yml
+# Debug OpenShift Token Authentication for AAP Integration
+
+- name: Debug OpenShift Token Authentication
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  vars:
+    # Test variables
+    project_name: "debug-token-test"
+    display_name: "Debug Token Test Project"
+    description: "Test project for debugging OpenShift token authentication"
+    requestor: "debug-user"
+    servicenow_request_number: "REQ0000DEBUG"
+    environment: "development"
+    team: "debug-team"
+
+  tasks:
+    - name: "🔍 DEBUG: Display Ansible execution environment info"
+      debug:
+        msg:
+          - "Ansible version: {{ ansible_version.full }}"
+          - "Python version: {{ ansible_python_version }}"
+          - "Execution environment: {{ ansible_env.get('ANSIBLE_EXECUTION_ENVIRONMENT', 'Not set') }}"
+          - "Current user: {{ ansible_env.USER | default('Unknown') }}"
+          - "Home directory: {{ ansible_env.HOME | default('Unknown') }}"
+          - "Hostname: {{ ansible_hostname | default('Unknown') }}"
+          - "Operating system: {{ ansible_os_family | default('Unknown') }}"
+
+    - name: "🔍 DEBUG: AAP-specific environment detection"
+      debug:
+        msg:
+          - "=== AAP EXECUTION ENVIRONMENT DETECTION ==="
+          - "AWX_TASK_UUID: {{ ansible_env.AWX_TASK_UUID | default('NOT SET - Not running in AAP') }}"
+          - "AWX_JOB_ID: {{ ansible_env.AWX_JOB_ID | default('NOT SET - Not running in AAP') }}"
+          - "AWX_PROJECT_REVISION: {{ ansible_env.AWX_PROJECT_REVISION | default('NOT SET') }}"
+          - "AWX_JOB_TEMPLATE_ID: {{ ansible_env.AWX_JOB_TEMPLATE_ID | default('NOT SET') }}"
+          - "AWX_JOB_TEMPLATE_NAME: {{ ansible_env.AWX_JOB_TEMPLATE_NAME | default('NOT SET') }}"
+          - "ANSIBLE_RUNNER_JOB_ID: {{ ansible_env.ANSIBLE_RUNNER_JOB_ID | default('NOT SET') }}"
+          - "RUNNER_JOB_ID: {{ ansible_env.RUNNER_JOB_ID | default('NOT SET') }}"
+          - "Container environment: {{ ansible_env.container | default('NOT SET') }}"
+          - "Execution context: {{ 'AAP/AWX' if ansible_env.AWX_TASK_UUID is defined else 'LOCAL/MANUAL' }}"
+
+    - name: "🔍 DEBUG: Check environment variables"
+      debug:
+        msg:
+          - "OPENSHIFT_API_TOKEN env var: {{ ansible_env.OPENSHIFT_API_TOKEN | default('NOT SET') | regex_replace('(.{10}).*(.{10})', '\\1...\\2') }}"
+          - "KUBECONFIG env var: {{ ansible_env.KUBECONFIG | default('NOT SET') }}"
+          - "HOME env var: {{ ansible_env.HOME | default('NOT SET') }}"
+          - "PATH env var: {{ ansible_env.PATH | default('NOT SET') }}"
+          - "PWD (current directory): {{ ansible_env.PWD | default('NOT SET') }}"
+          - "ANSIBLE_CONFIG: {{ ansible_env.ANSIBLE_CONFIG | default('NOT SET') }}"
+
+    - name: "🔍 DEBUG: Check for AAP credential injection"
+      debug:
+        msg:
+          - "=== AAP CREDENTIAL DETECTION ==="
+          - "openshift_token variable: {{ 'SET (' + (openshift_token | length | string) + ' chars)' if openshift_token is defined and openshift_token != '' else 'NOT SET - AAP credential not injected' }}"
+          - "vault_openshift_token variable: {{ 'SET (' + (vault_openshift_token | length | string) + ' chars)' if vault_openshift_token is defined and vault_openshift_token != '' else 'NOT SET' }}"
+          - "Credential source priority: AAP credential > Environment variable > Vault variable"
+
+    - name: "🔍 DEBUG: Check for oc command availability"
+      command: which oc
+      register: oc_command_check
+      failed_when: false
+      changed_when: false
+
+    - name: "🔍 DEBUG: Display oc command status"
+      debug:
+        msg:
+          - "oc command found: {{ 'Yes' if oc_command_check.rc == 0 else 'No' }}"
+          - "oc path: {{ oc_command_check.stdout if oc_command_check.rc == 0 else 'Not found' }}"
+
+    - name: "🔍 DEBUG: Check oc login status"
+      command: oc whoami
+      register: oc_whoami_check
+      failed_when: false
+      changed_when: false
+
+    - name: "🔍 DEBUG: Display oc authentication status"
+      debug:
+        msg:
+          - "oc whoami result: {{ oc_whoami_check.stdout if oc_whoami_check.rc == 0 else 'Not authenticated' }}"
+          - "oc whoami exit code: {{ oc_whoami_check.rc }}"
+          - "oc whoami error: {{ oc_whoami_check.stderr if oc_whoami_check.rc != 0 else 'None' }}"
+
+    - name: "🔍 DEBUG: Get oc token if authenticated"
+      command: oc whoami --show-token
+      register: oc_token_check
+      failed_when: false
+      changed_when: false
+      when: oc_whoami_check.rc == 0
+
+    - name: "🔍 DEBUG: Display oc token info"
+      debug:
+        msg:
+          - "oc token available: {{ 'Yes' if oc_token_check is defined and oc_token_check.rc is defined and oc_token_check.rc == 0 else 'No' }}"
+          - "oc token length: {{ oc_token_check.stdout | length if oc_token_check is defined and oc_token_check.rc is defined and oc_token_check.rc == 0 else 'N/A' }}"
+          - "oc token prefix: {{ oc_token_check.stdout[:20] + '...' if oc_token_check is defined and oc_token_check.rc is defined and oc_token_check.rc == 0 else 'N/A' }}"
+
+    - name: "🔍 DEBUG: Check vault variables"
+      debug:
+        msg:
+          - "vault_openshift_token defined: {{ vault_openshift_token is defined }}"
+          - "vault_openshift_token length: {{ vault_openshift_token | length if vault_openshift_token is defined else 'N/A' }}"
+          - "vault_openshift_token prefix: {{ vault_openshift_token[:20] + '...' if vault_openshift_token is defined and vault_openshift_token != '' else 'N/A' }}"
+
+    - name: "🔍 DEBUG: Set OpenShift API authentication facts with debugging"
+      set_fact:
+        openshift_auth:
+          api_key: "{{ lookup('env', 'OPENSHIFT_API_TOKEN') | default(vault_openshift_token, true) | default(oc_token_check.stdout if oc_token_check is defined and oc_token_check.rc is defined and oc_token_check.rc == 0 else '', true) }}"
+        debug_token_sources:
+          env_var: "{{ lookup('env', 'OPENSHIFT_API_TOKEN') | default('NOT SET') }}"
+          vault_var: "{{ vault_openshift_token | default('NOT SET') }}"
+          oc_token: "{{ oc_token_check.stdout if oc_token_check is defined and oc_token_check.rc is defined and oc_token_check.rc == 0 else 'NOT AVAILABLE' }}"
+
+    - name: "🔍 DEBUG: Display token resolution"
+      debug:
+        msg:
+          - "Environment variable OPENSHIFT_API_TOKEN: {{ 'SET' if debug_token_sources.env_var != 'NOT SET' else 'NOT SET' }}"
+          - "Vault variable vault_openshift_token: {{ 'SET' if debug_token_sources.vault_var != 'NOT SET' else 'NOT SET' }}"
+          - "oc command token: {{ 'AVAILABLE' if debug_token_sources.oc_token != 'NOT AVAILABLE' else 'NOT AVAILABLE' }}"
+          - "Final resolved token: {{ 'SET (' + (openshift_auth.api_key | length | string) + ' chars)' if openshift_auth.api_key != '' else 'NOT SET' }}"
+
+    - name: "❌ FAIL: OpenShift API token is not available"
+      fail:
+        msg: |
+          OpenShift API token is not available from any source.
+          
+          Checked sources:
+          1. Environment variable OPENSHIFT_API_TOKEN: {{ 'SET' if debug_token_sources.env_var != 'NOT SET' else 'NOT SET' }}
+          2. Vault variable vault_openshift_token: {{ 'SET' if debug_token_sources.vault_var != 'NOT SET' else 'NOT SET' }}
+          3. oc command token: {{ 'AVAILABLE' if debug_token_sources.oc_token != 'NOT AVAILABLE' else 'NOT AVAILABLE' }}
+          
+          Solutions:
+          1. Set environment variable: export OPENSHIFT_API_TOKEN="your-token-here"
+          2. Add vault_openshift_token to ansible/group_vars/all/vault.yml
+          3. Ensure oc login is working: oc login <cluster-url> --token=<token>
+          4. For AAP: Configure "OpenShift API Token" credential in AAP
+      when: openshift_auth.api_key is not defined or openshift_auth.api_key == ""
+
+    - name: "✅ SUCCESS: OpenShift API token is available"
+      debug:
+        msg:
+          - "✅ OpenShift API token successfully resolved"
+          - "Token length: {{ openshift_auth.api_key | length }} characters"
+          - "Token type: {{ 'SHA256' if openshift_auth.api_key.startswith('sha256~') else 'JWT' if '.' in openshift_auth.api_key else 'Unknown' }}"
+      when: openshift_auth.api_key is defined and openshift_auth.api_key != ""
+
+    - name: "🧪 TEST: Kubernetes API connectivity"
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Namespace
+        name: default
+        host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+        api_key: "{{ openshift_auth.api_key }}"
+        validate_certs: false
+      register: k8s_connectivity_test
+      failed_when: false
+      when: openshift_auth.api_key is defined and openshift_auth.api_key != ""
+
+    - name: "🔍 DEBUG: Display Kubernetes API test results"
+      debug:
+        msg:
+          - "Kubernetes API test: {{ 'SUCCESS' if k8s_connectivity_test is defined and not k8s_connectivity_test.failed else 'FAILED' }}"
+          - "Default namespace found: {{ 'Yes' if k8s_connectivity_test is defined and k8s_connectivity_test.resources is defined else 'No' }}"
+          - "Error message: {{ k8s_connectivity_test.msg if k8s_connectivity_test is defined and k8s_connectivity_test.failed else 'None' }}"
+      when: k8s_connectivity_test is defined
+
+    - name: "🧪 TEST: Create test namespace (dry-run)"
+      kubernetes.core.k8s:
+        state: present
+        host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+        api_key: "{{ openshift_auth.api_key }}"
+        validate_certs: false
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ project_name }}"
+            labels:
+              test: "debug-token-test"
+            annotations:
+              openshift.io/display-name: "{{ display_name }}"
+        dry_run: true
+      register: dry_run_test
+      failed_when: false
+      when: openshift_auth.api_key is defined and openshift_auth.api_key != ""
+
+    - name: "🔍 DEBUG: Display dry-run test results"
+      debug:
+        msg:
+          - "Dry-run test: {{ 'SUCCESS' if dry_run_test is defined and not dry_run_test.failed else 'FAILED' }}"
+          - "Would create namespace: {{ 'Yes' if dry_run_test is defined and not dry_run_test.failed else 'No' }}"
+          - "Error message: {{ dry_run_test.msg if dry_run_test is defined and dry_run_test.failed else 'None' }}"
+      when: dry_run_test is defined
+
+    - name: "📋 SUMMARY: OpenShift Token Debug Results"
+      debug:
+        msg:
+          - "==================== SUMMARY ===================="
+          - "🏗️  EXECUTION CONTEXT:"
+          - "  Running in: {{ 'AAP/AWX' if ansible_env.AWX_TASK_UUID is defined else 'LOCAL/MANUAL' }}"
+          - "  Job ID: {{ ansible_env.AWX_JOB_ID | default('N/A - Local execution') }}"
+          - "  Task UUID: {{ ansible_env.AWX_TASK_UUID | default('N/A - Local execution') }}"
+          - "  Job Template: {{ ansible_env.AWX_JOB_TEMPLATE_NAME | default('N/A - Local execution') }}"
+          - ""
+          - "🔧 TECHNICAL STATUS:"
+          - "  oc command available: {{ 'Yes' if oc_command_check.rc == 0 else 'No' }}"
+          - "  oc authentication: {{ 'Yes' if oc_whoami_check.rc == 0 else 'No' }}"
+          - "  Token resolved: {{ 'Yes' if openshift_auth.api_key is defined and openshift_auth.api_key != '' else 'No' }}"
+          - "  Token source: {{ 'AAP Credential' if openshift_token is defined and openshift_token != '' else 'Vault Variable' if vault_openshift_token is defined and vault_openshift_token != '' else 'Environment Variable' if lookup('env', 'OPENSHIFT_API_TOKEN') != '' else 'None' }}"
+          - "  Kubernetes API access: {{ 'Yes' if k8s_connectivity_test is defined and not k8s_connectivity_test.failed else 'No' }}"
+          - "  Namespace creation (dry-run): {{ 'Yes' if dry_run_test is defined and not dry_run_test.failed else 'No' }}"
+          - "=================================================="

@@ -29,7 +29,7 @@ Before applying any configuration, run the pre-flight check playbook to verify c
 This is the first and most critical configuration playbook. It sets up the foundational realms and clients in RH-SSO (Keycloak) that are required by both OpenShift and ServiceNow.
 
 ```bash
-./run_playbook.sh ../ansible/playbook.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/playbook.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file ../.vault_pass -m stdout
 ```
 
 ## 5. Configure OpenShift OIDC with Keycloak (RH-SSO)
@@ -37,7 +37,7 @@ This is the first and most critical configuration playbook. It sets up the found
 This playbook configures OpenShift to use the Keycloak realms you just created as its OIDC identity provider.
 
 ```bash
-./run_playbook.sh ../ansible/openshift_oidc_playbook.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/openshift_oidc_playbook.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file ../.vault_pass -m stdout
 ```
 
 ## 6. Configure ServiceNow and Keycloak OAuth Integration
@@ -45,7 +45,7 @@ This playbook configures OpenShift to use the Keycloak realms you just created a
 This playbook sets up the OAuth relationship between ServiceNow and Keycloak, allowing them to securely communicate.
 
 ```bash
-./run_playbook.sh ../ansible/oauth_integration_playbook.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/oauth_integration_playbook.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file ../.vault_pass -m stdout
 ```
 
 ## 7. Configure Ansible Automation Platform (AAP)
@@ -53,7 +53,7 @@ This playbook sets up the OAuth relationship between ServiceNow and Keycloak, al
 This playbook configures AAP with the necessary projects, credentials, and job templates for the ServiceNow integration.
 
 ```bash
-./run_playbook.sh ../ansible/configure_aap.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file .vault_pass -m stdout
+./run_playbook.sh ../ansible/configure_aap.yml -e @../ansible/group_vars/all/vault.yml  --vault-password-file ../.vault_pass -m stdout
 ```
 
 ## 8. ServiceNow Integration Phase 1: Catalog Infrastructure

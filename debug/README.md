@@ -16,8 +16,9 @@ These debug scripts help isolate issues at each integration point using direct A
 ```
 debug/
 ├── servicenow/          # ServiceNow API validation
-├── aap/                 # AAP API validation  
+├── aap/                 # AAP API validation
 ├── openshift/           # OpenShift CLI validation
+├── keycloak/            # Keycloak user validation
 ├── run-full-debug.sh    # Master script (runs all checks)
 └── README.md           # This file
 ```
@@ -42,6 +43,9 @@ debug/
 # OpenShift checks
 ./debug/openshift/01-check-projects.sh
 ./debug/openshift/02-check-specific-project.sh [PROJECT_NAME]
+
+# Keycloak checks
+./debug/keycloak/01-check-keycloak-users.sh
 ```
 
 ## 📋 ServiceNow Debug Scripts

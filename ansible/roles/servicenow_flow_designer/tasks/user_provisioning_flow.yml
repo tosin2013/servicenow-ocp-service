@@ -43,7 +43,7 @@
               "name": "Create Keycloak User",
               "type": "rest_message",
               "rest_message": "Keycloak User Creation",
-              "endpoint": "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users",
+              "endpoint": "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/users",
               "method": "POST",
               "authentication": "{{ oauth_credential_alias }}",
               "headers": {
@@ -55,7 +55,7 @@
               "name": "Set Temporary Password",
               "type": "rest_message",
               "rest_message": "Keycloak Password Reset",
-              "endpoint": "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users/${keycloak_user_id}/reset-password",
+              "endpoint": "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/users/${keycloak_user_id}/reset-password",
               "method": "PUT",
               "authentication": "{{ oauth_credential_alias }}",
               "headers": {
@@ -103,7 +103,7 @@
     body:
       name: "Keycloak User Creation"
       description: "REST message for creating users in Keycloak"
-      endpoint: "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users"
+  endpoint: "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/users"
       authentication_type: "oauth2"
       oauth_profile: "{{ oauth_entity_profile }}"
       use_mutual_auth: false
@@ -127,7 +127,7 @@
       rest_message: "{{ rest_message_result.json.result.sys_id | default('') }}"
       function_name: "createUser"
       http_method: "POST"
-      endpoint: "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users"
+  endpoint: "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/users"
       content: |
         {
           "username": "${username}",

@@ -9,7 +9,7 @@
       - "============================================="
       - "Configuring OpenShift to use Keycloak as OIDC identity provider"
       - "OpenShift API: {{ openshift_api_url }}"
-      - "Keycloak URL: {{ keycloak_url }}"
+  - "Keycloak URL: {{ rhsso_url }}"
       - "Realm: {{ keycloak_realm }}"
       - "OIDC Provider: {{ oidc_provider_name }}"
       - ""
@@ -31,7 +31,7 @@
 
 - name: Verify Keycloak Admin Access
   uri:
-    url: "{{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}"
+  url: "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}"
     method: GET
     user: "{{ keycloak_admin_user }}"
     password: "{{ keycloak_admin_password }}"

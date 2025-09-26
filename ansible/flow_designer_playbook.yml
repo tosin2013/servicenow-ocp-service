@@ -74,7 +74,7 @@
           - **Authentication**: None (internal webhook)
           
           ### REST Messages
-          - **Keycloak User Creation**: {{ keycloak_url }}/auth/admin/realms/{{ keycloak_realm }}/users
+          - **Keycloak User Creation**: {{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/users
           - **OpenShift Project Creation**: {{ openshift_api_url }}/api/v1/namespaces
           - **OpenShift Role Binding**: {{ openshift_api_url }}/apis/rbac.authorization.k8s.io/v1/namespaces/{namespace}/rolebindings
           
@@ -86,7 +86,7 @@
           - **Credential Alias**: {{ oauth_credential_alias }}
           
           ### Keycloak Configuration
-          - **URL**: {{ keycloak_url }}
+          - **URL**: {{ rhsso_url }}
           - **Realm**: {{ keycloak_realm }}
           - **Admin User**: {{ keycloak_admin_user }}
           

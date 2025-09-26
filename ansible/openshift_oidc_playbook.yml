@@ -60,7 +60,7 @@
           - **Apps Domain**: {{ openshift_apps_domain }}
 
           ### Keycloak Configuration
-          - **URL**: {{ keycloak_url }}
+          - **URL**: {{ rhsso_url }}
           - **Realm**: {{ keycloak_realm }}
           - **Client ID**: {{ oidc_client_id }}
           - **OIDC Provider Name**: {{ oidc_provider_name }}

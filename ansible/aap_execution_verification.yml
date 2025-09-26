@@ -1,0 +1,121 @@
+---
+# ansible/aap_execution_verification.yml
+# Simple playbook to verify AAP vs local execution
+
+- name: AAP Execution Context Verification
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  tasks:
+    - name: "🔍 EXECUTION CONTEXT DETECTION"
+      debug:
+        msg:
+          - "=============================================="
+          - "🏗️  AAP/AWX EXECUTION CONTEXT VERIFICATION"
+          - "=============================================="
+          - ""
+          - "📊 PRIMARY AAP INDICATORS:"
+          - "  AWX_TASK_UUID: {{ ansible_env.AWX_TASK_UUID | default('❌ NOT SET') }}"
+          - "  AWX_JOB_ID: {{ ansible_env.AWX_JOB_ID | default('❌ NOT SET') }}"
+          - "  AWX_JOB_TEMPLATE_ID: {{ ansible_env.AWX_JOB_TEMPLATE_ID | default('❌ NOT SET') }}"
+          - "  AWX_JOB_TEMPLATE_NAME: {{ ansible_env.AWX_JOB_TEMPLATE_NAME | default('❌ NOT SET') }}"
+          - ""
+          - "🔧 EXECUTION ENVIRONMENT:"
+          - "  User: {{ ansible_env.USER | default('Unknown') }}"
+          - "  Home: {{ ansible_env.HOME | default('Unknown') }}"
+          - "  Hostname: {{ ansible_hostname }}"
+          - "  OS Family: {{ ansible_os_family }}"
+          - "  Python Version: {{ ansible_python_version }}"
+          - ""
+          - "🎯 EXECUTION CONTEXT: {{ 'AAP/AWX' if ansible_env.AWX_TASK_UUID is defined else 'LOCAL/MANUAL' }}"
+          - "=============================================="
+
+    - name: "🔐 CREDENTIAL VERIFICATION"
+      debug:
+        msg:
+          - "=============================================="
+          - "🔐 OPENSHIFT TOKEN CREDENTIAL VERIFICATION"
+          - "=============================================="
+          - ""
+          - "📋 TOKEN SOURCES:"
+          - "  AAP Credential (openshift_token): {{ '✅ SET (' + (openshift_token | length | string) + ' chars)' if openshift_token is defined and openshift_token != '' else '❌ NOT SET' }}"
+          - "  Environment Variable (OPENSHIFT_API_TOKEN): {{ '✅ SET' if lookup('env', 'OPENSHIFT_API_TOKEN') != '' else '❌ NOT SET' }}"
+          - "  Vault Variable (vault_openshift_token): {{ '✅ SET (' + (vault_openshift_token | length | string) + ' chars)' if vault_openshift_token is defined and vault_openshift_token != '' else '❌ NOT SET' }}"
+          - ""
+          - "🎯 RECOMMENDED FOR AAP: Use AAP Credential 'openshift_token'"
+          - "🎯 RECOMMENDED FOR LOCAL: Use vault_openshift_token or environment variable"
+          - "=============================================="
+
+    - name: "🧪 OPENSHIFT API CONNECTIVITY TEST"
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Namespace
+        name: default
+        host: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
+        api_key: "{{ openshift_token | default(lookup('env', 'OPENSHIFT_API_TOKEN'), true) | default(vault_openshift_token, true) }}"
+        validate_certs: false
+      register: connectivity_test
+      failed_when: false
+      when: (openshift_token is defined and openshift_token != '') or (lookup('env', 'OPENSHIFT_API_TOKEN') != '') or (vault_openshift_token is defined and vault_openshift_token != '')
+
+    - name: "📊 FINAL VERIFICATION RESULTS"
+      debug:
+        msg:
+          - "=============================================="
+          - "🎉 AAP EXECUTION VERIFICATION COMPLETE"
+          - "=============================================="
+          - ""
+          - "🏗️  EXECUTION CONTEXT:"
+          - "  Running in: {{ 'AAP/AWX ✅' if ansible_env.AWX_TASK_UUID is defined else 'LOCAL/MANUAL ⚠️' }}"
+          - "  Job ID: {{ ansible_env.AWX_JOB_ID | default('N/A - Local execution') }}"
+          - "  Job Template: {{ ansible_env.AWX_JOB_TEMPLATE_NAME | default('N/A - Local execution') }}"
+          - ""
+          - "🔐 TOKEN STATUS:"
+          - "  Token Available: {{ '✅ YES' if connectivity_test is defined and not connectivity_test.failed else '❌ NO' }}"
+          - "  API Connectivity: {{ '✅ SUCCESS' if connectivity_test is defined and not connectivity_test.failed else '❌ FAILED' }}"
+          - ""
+          - "🌐 AAP JOB URL (if running in AAP):"
+          - "  {{ 'https://ansible-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com/execution/jobs/playbook/' + ansible_env.AWX_JOB_ID + '/output' if ansible_env.AWX_JOB_ID is defined else 'N/A - Not running in AAP' }}"
+          - ""
+          - "✅ VERIFICATION: {{ 'AAP EXECUTION CONFIRMED' if ansible_env.AWX_TASK_UUID is defined else 'LOCAL EXECUTION CONFIRMED' }}"
+          - "=============================================="
+
+    - name: "📝 CREATE EXECUTION EVIDENCE FILE"
+      copy:
+        content: |
+          AAP Execution Verification Report
+          =================================
+          
+          Timestamp: {{ ansible_date_time.iso8601 }}
+          
+          Execution Context: {{ 'AAP/AWX' if ansible_env.AWX_TASK_UUID is defined else 'LOCAL/MANUAL' }}
+          
+          AAP Details:
+          - Job ID: {{ ansible_env.AWX_JOB_ID | default('N/A') }}
+          - Task UUID: {{ ansible_env.AWX_TASK_UUID | default('N/A') }}
+          - Job Template: {{ ansible_env.AWX_JOB_TEMPLATE_NAME | default('N/A') }}
+          - Project Revision: {{ ansible_env.AWX_PROJECT_REVISION | default('N/A') }}
+          
+          Environment:
+          - User: {{ ansible_env.USER | default('Unknown') }}
+          - Hostname: {{ ansible_hostname }}
+          - Python: {{ ansible_python_version }}
+          
+          Token Status:
+          - AAP Credential: {{ 'Available' if openshift_token is defined and openshift_token != '' else 'Not Available' }}
+          - Environment Variable: {{ 'Available' if lookup('env', 'OPENSHIFT_API_TOKEN') != '' else 'Not Available' }}
+          - Vault Variable: {{ 'Available' if vault_openshift_token is defined and vault_openshift_token != '' else 'Not Available' }}
+          - API Connectivity: {{ 'Success' if connectivity_test is defined and not connectivity_test.failed else 'Failed' }}
+          
+          Verification: {{ 'AAP EXECUTION CONFIRMED' if ansible_env.AWX_TASK_UUID is defined else 'LOCAL EXECUTION CONFIRMED' }}
+        dest: "/tmp/aap_execution_verification_{{ ansible_date_time.epoch }}.txt"
+        mode: '0644'
+      register: evidence_file
+
+    - name: "📄 EVIDENCE FILE CREATED"
+      debug:
+        msg:
+          - "📄 Execution evidence saved to: {{ evidence_file.dest }}"
+          - "🔍 You can review this file to confirm execution context"
+          - "💾 File contains timestamp, environment details, and verification results"

@@ -9,7 +9,7 @@
       - "👤 Keycloak User Management"
       - "========================="
       - "Creating users in ServiceNow realm"
-      - "Keycloak URL: {{ keycloak_url | default(rhsso_url) }}"
+  - "Keycloak URL: {{ rhsso_url }}"
       - "Realm: {{ servicenow_realm | default('servicenow') }}"
       - "Requestor: {{ requestor | default('N/A') }}"
       - "Team Members: {{ team_members | default([]) | length }} users"
@@ -50,7 +50,7 @@
 
 - name: Verify ServiceNow realm exists
   uri:
-    url: "{{ keycloak_url | default(rhsso_url) }}/auth/admin/realms/{{ servicenow_realm | default('servicenow') }}"
+  url: "{{ rhsso_url }}/auth/admin/realms/{{ servicenow_realm | default('servicenow') }}"
     method: GET
     headers:
       Authorization: "Bearer {{ keycloak_admin_token }}"

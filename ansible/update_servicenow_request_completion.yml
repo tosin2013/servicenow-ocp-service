@@ -24,7 +24,7 @@
     openshift_apps_domain: "apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
     
     # Keycloak information
-    keycloak_url: "{{ rhsso_url | default('https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com') }}"
+  keycloak_url: "{{ rhsso_url | default('https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com') }}"
     keycloak_realm: "{{ servicenow_realm | default('servicenow') }}"
 
   tasks:
@@ -85,7 +85,7 @@
           • API Endpoint: {{ openshift_api_url }}
           
           🔐 Authentication:
-          • Keycloak SSO: {{ keycloak_url }}/realms/{{ keycloak_realm }}/account
+          • Keycloak SSO: {{ rhsso_url }}/realms/{{ keycloak_realm }}/account
           • Username: {{ requestor }}
           • Default Password: TempPass123! (change on first login)
           
@@ -139,7 +139,7 @@
           
           🎯 User Access Information:
           • Console: {{ openshift_console_url }}/k8s/cluster/projects/{{ project_name }}
-          • Keycloak: {{ keycloak_url }}/realms/{{ keycloak_realm }}/account
+          • Keycloak: {{ rhsso_url }}/realms/{{ keycloak_realm }}/account
           • Username: {{ requestor }}
           
           ✅ The user can now access their OpenShift project!

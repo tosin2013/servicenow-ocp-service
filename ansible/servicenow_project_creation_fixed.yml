@@ -26,7 +26,7 @@
         requestor: "{{ requestor }}"
         team_members: "{{ team_members | default([]) }}"
         servicenow_realm: "{{ servicenow_realm | default('servicenow') }}"
-        keycloak_url: "{{ keycloak_url | default(rhsso_url) }}"
+  keycloak_url: "{{ rhsso_url }}"
         keycloak_admin_username: "{{ keycloak_admin_username | default('admin') }}"
         keycloak_admin_password: "{{ keycloak_admin_password | default(vault_keycloak_password) }}"
         temp_password: "{{ temp_password | default('TempPass123!') }}"

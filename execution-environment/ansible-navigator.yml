@@ -16,10 +16,6 @@ ansible-navigator:
     pull:
       policy: never
     container-engine: auto
-    volume-mounts:
-      - src: /home/ec2-user/servicenow-ocp-service
-        dest: /home/ec2-user/servicenow-ocp-service
-        options: Z
     environment-variables:
       pass:
         - ANSIBLE_ADMIN_USER

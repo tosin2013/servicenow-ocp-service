@@ -43,7 +43,7 @@ This directory contains Jinja2 templates for creating OpenShift projects through
 
 ### Keycloak Integration Variables
 For ServiceNow realm user management:
-- `keycloak_url` - Keycloak server URL (default: auto-detected)
+- `rhsso_url` - Keycloak (RH-SSO) server URL (default: auto-detected)
 - `keycloak_admin_secret` - Keycloak admin client secret (required for user creation)
 - `servicenow_realm` - Keycloak realm name (default: 'servicenow')
 - `manage_keycloak_users` - Enable/disable user creation (default: true)

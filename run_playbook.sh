@@ -68,7 +68,8 @@ cd "${EE_DIR}"
 
 # Execute ansible-navigator, passing all script arguments to it.
 # The playbook path should be relative to the project root.
-ansible-navigator run "${@}" --eei quay.io/takinosh/servicenow-ocp-ee:785b6cec231f96ae1400f6204e7f831ebb67f38a --pull-policy never
+# EE image and pull policy are configured in ansible-navigator.yml
+ansible-navigator run "${@}"
 
 # Capture and exit with the code from the ansible-navigator command.
 EXIT_CODE=$?
