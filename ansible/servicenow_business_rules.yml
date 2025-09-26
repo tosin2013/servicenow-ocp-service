@@ -134,7 +134,7 @@
                   team: current.u_team_members.toString() || 'default',
                   database_type: current.u_database_type.toString() || 'postgresql',
                   database_size: current.u_database_size.toString() || '5Gi',
-                  temp_password: 'ChangeMe123!' // TODO: Generate secure password
+                  temp_password: 'TempPass123!' // TODO: Generate secure password
               };
               
               // Create REST message to AAP

@@ -248,7 +248,7 @@
             team: "{{ team_members | join(',') if team_members is defined else 'admin,developer,tester' }}"
             database_type: "postgresql"
             database_size: "5Gi"
-            temp_password: "ChangeMe123!"
+            temp_password: "TempPass123!"
         status_code: [201]
         return_content: yes
       register: aap_job_launch
