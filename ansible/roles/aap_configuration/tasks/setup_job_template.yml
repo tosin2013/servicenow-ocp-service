@@ -32,6 +32,7 @@
       vault_keycloak_password: "{{ vault_keycloak_password }}"
       keycloak_admin_username: "admin"
       servicenow_realm: "servicenow"
+      team_members: "{{ team_members | default('[]') }}"
     survey_enabled: true
     survey_spec:
       name: ""
@@ -53,6 +54,11 @@
           question_name: "Requestor"
           type: "text"
           required: true
+        - variable: team_members
+          question_name: "Team Members (JSON array, e.g. [\"bob\", \"carol\"])"
+          type: "textarea"
+          required: false
+          default: "[]"
         - variable: servicenow_request_number
           question_name: "ServiceNow Request Number"
           type: "text"
