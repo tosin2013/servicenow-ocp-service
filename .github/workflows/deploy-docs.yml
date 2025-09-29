@@ -375,7 +375,7 @@ jobs:
     
     - name: Create GitHub issue for broken links
       if: steps.live-validation.outputs.status == 'failed'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           const brokenLinksIssueTitle = '🔗 Broken Links Detected on Live Documentation Site';
@@ -435,7 +435,7 @@ jobs:
     
     - name: Close resolved broken links issues
       if: steps.live-validation.outputs.status == 'passed'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           // Find and close any open broken links issues
