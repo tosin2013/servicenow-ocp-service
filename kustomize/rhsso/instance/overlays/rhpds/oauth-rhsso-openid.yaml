@@ -29,7 +29,7 @@ spec:
           email:
             - custom_email_claim
             - email
-        issuer: https://keycloak.example.com/auth/realms/openshift
+        issuer: https://keycloak-sso.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com/auth/realms/openshift
     - htpasswd:
         fileData:
           name: htpasswd-secret

@@ -4,18 +4,20 @@ metadata:
   name: openshift-client
   labels:
     app: sso
+  namespace: sso
 spec:
   realmSelector:
     matchLabels:
       app: openshift
   client:
     clientId: openshift
-    realm": "openshift"
-    secret: <your-openshift-client-secret>
+    realm: "openshift"
+    secret: "openshift-secret-2025"
     clientAuthenticatorType: client-secret
     consentRequired: false
     standardFlowEnabled: true
     implicitFlowEnabled: false
     directAccessGrantsEnabled: true
+    serviceAccountsEnabled: true
     redirectUris:
-      - "https://keycloak.example.com/auth/realms/master/protocol/openid-connect/token"
+      - "https://oauth-openshift.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com/oauth2callback/rhsso"

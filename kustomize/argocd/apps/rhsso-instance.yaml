@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/tosin2013/servicenow-ocp-service.git
     targetRevision: main
-    path: kustomize/rhsso/instance/overlays/default
+    path: kustomize/rhsso/instance/overlays/rhpds
   destination:
     server: https://kubernetes.default.svc
     namespace: sso
