@@ -21,3 +21,7 @@ spec:
       env:
         - name: JGROUPS_CLUSTER_PASSWORD
           value: "changeme123"
+        - name: SSO_HOSTNAME
+          value: "keycloak-sso.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
+        - name: KEYCLOAK_LOGLEVEL
+          value: "DEBUG"
