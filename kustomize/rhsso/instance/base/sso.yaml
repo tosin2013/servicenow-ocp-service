@@ -14,3 +14,8 @@ spec:
   profile: RHSSO
   externalAccess:
     enabled: true
+  keycloakDeploymentSpec:
+    experimental:
+      env:
+        - name: JGROUPS_CLUSTER_PASSWORD
+          value: "changeme123"
