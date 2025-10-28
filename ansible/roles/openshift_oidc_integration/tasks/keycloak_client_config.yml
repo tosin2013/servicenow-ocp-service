@@ -1,0 +1,141 @@
+---
+# Keycloak Client Configuration for OpenShift OIDC
+# This file configures the OpenShift client and required scopes in Keycloak
+
+- name: Get Keycloak admin access token
+  uri:
+    url: "{{ rhsso_url }}/auth/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "{{ keycloak_admin_user }}"
+      password: "{{ keycloak_admin_password }}"
+      grant_type: password
+      client_id: admin-cli
+    validate_certs: false
+    status_code: 200
+  register: keycloak_token_response
+  no_log: true
+
+- name: Set Keycloak access token
+  set_fact:
+    keycloak_access_token: "{{ keycloak_token_response.json.access_token }}"
+  no_log: true
+
+- name: Check if groups client scope exists
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/client-scopes"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_access_token }}"
+    validate_certs: false
+    status_code: 200
+  register: existing_client_scopes
+
+- name: Set groups_scope_exists fact
+  set_fact:
+    groups_scope_exists: "{{ existing_client_scopes.json | selectattr('name', 'equalto', 'groups') | list | length > 0 }}"
+
+- name: Create groups client scope
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/client-scopes"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ keycloak_access_token }}"
+      Content-Type: application/json
+    body_format: json
+    body:
+      name: groups
+      description: Groups scope for OpenShift OIDC
+      protocol: openid-connect
+      attributes:
+        include.in.token.scope: "true"
+        display.on.consent.screen: "true"
+      protocolMappers:
+        - name: groups
+          protocol: openid-connect
+          protocolMapper: oidc-group-membership-mapper
+          consentRequired: false
+          config:
+            full.path: "false"
+            id.token.claim: "true"
+            access.token.claim: "true"
+            claim.name: groups
+            userinfo.token.claim: "true"
+    validate_certs: false
+    status_code: [201, 409]
+  register: groups_scope_creation
+  when: not groups_scope_exists
+
+- name: Get groups scope ID
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/client-scopes"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_access_token }}"
+    validate_certs: false
+    status_code: 200
+  register: client_scopes_list
+
+- name: Set groups scope ID
+  set_fact:
+    groups_scope_id: "{{ (client_scopes_list.json | selectattr('name', 'equalto', 'groups') | first).id }}"
+
+- name: Get OpenShift client details
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/clients"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_access_token }}"
+    validate_certs: false
+    status_code: 200
+  register: keycloak_clients
+
+- name: Find OpenShift client UUID
+  set_fact:
+    openshift_client_uuid: "{{ (keycloak_clients.json | selectattr('clientId', 'equalto', oidc_client_id) | first).id }}"
+  when: keycloak_clients.json | selectattr('clientId', 'equalto', oidc_client_id) | list | length > 0
+
+- name: Check if OpenShift client exists
+  set_fact:
+    openshift_client_exists: "{{ openshift_client_uuid is defined }}"
+
+- name: Get OpenShift client default scopes
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/clients/{{ openshift_client_uuid }}/default-client-scopes"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_access_token }}"
+    validate_certs: false
+    status_code: 200
+  register: client_default_scopes
+  when: openshift_client_exists
+
+- name: Check if groups scope is already added
+  set_fact:
+    groups_scope_added: "{{ client_default_scopes.json | selectattr('name', 'equalto', 'groups') | list | length > 0 }}"
+  when: openshift_client_exists and client_default_scopes is defined
+
+- name: Add groups scope to OpenShift client
+  uri:
+    url: "{{ rhsso_url }}/auth/admin/realms/{{ keycloak_realm }}/clients/{{ openshift_client_uuid }}/default-client-scopes/{{ groups_scope_id }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ keycloak_access_token }}"
+    validate_certs: false
+    status_code: [204, 409]
+  register: add_groups_scope
+  when: 
+    - openshift_client_exists
+    - groups_scope_added is defined
+    - not groups_scope_added
+
+- name: Display Keycloak configuration results
+  debug:
+    msg:
+      - "Keycloak Client Configuration:"
+      - "Groups Scope: {{ 'Created' if (groups_scope_creation.status == 201) else ('Already exists' if groups_scope_exists else 'Skipped') }}"
+      - "Groups Scope Added to Client: {{ 'Yes' if (add_groups_scope is defined and add_groups_scope.status == 204) else ('Already added' if (groups_scope_added | default(false)) else 'Skipped') }}"
+      - "OpenShift Client ID: {{ oidc_client_id }}"
+      - "Keycloak Realm: {{ keycloak_realm }}"
+
