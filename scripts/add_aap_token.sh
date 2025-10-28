@@ -47,7 +47,7 @@ echo -e "${BLUE}🎯 AAP Token Setup${NC}"
 echo -e "${YELLOW}Please follow these steps to get your AAP token:${NC}"
 echo
 echo "1. Login to AAP Controller:"
-echo "   https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+echo "   https://ansible-controller-aap.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
 echo
 echo "2. Navigate: Access → Users → admin → Tokens"
 echo
@@ -83,10 +83,10 @@ fi
 
 # Test token before adding to vault
 echo -e "${BLUE}🧪 Testing AAP token...${NC}"
-AAP_URL="https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+AAP_URL="https://ansible-controller-aap.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
 TEST_RESPONSE=$(curl -s -k -w "%{http_code}" -o /dev/null \
     -H "Authorization: Bearer $AAP_TOKEN" \
-    "$AAP_URL/api/v2/job_templates/9/" || echo "000")
+    "$AAP_URL/api/controller/v2/job_templates/9/" || echo "000")
 
 if [[ "$TEST_RESPONSE" == "200" ]]; then
     echo -e "${GREEN}✅ Token test successful - Job Template 9 accessible${NC}"

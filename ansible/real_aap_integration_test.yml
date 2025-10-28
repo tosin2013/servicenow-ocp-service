@@ -143,7 +143,7 @@
     # Step 2: Test AAP Connectivity Before Creating Request
     - name: Step 2 - Test AAP Job Template Accessibility
       uri:
-        url: "{{ aap_controller_url }}/api/v2/job_templates/{{ aap_job_template_id }}/"
+        url: "{{ aap_controller_url }}/api/controller/v2/job_templates/{{ aap_job_template_id }}/"
         method: GET
         headers:
           Authorization: "Bearer {{ vault_aap_token }}"
@@ -231,7 +231,7 @@
     # Step 4: Manually Trigger AAP Job (Simulating Business Rule)
     - name: Step 4 - Manually Trigger AAP Job Template
       uri:
-        url: "{{ aap_controller_url }}/api/v2/job_templates/{{ aap_job_template_id }}/launch/"
+        url: "{{ aap_controller_url }}/api/controller/v2/job_templates/{{ aap_job_template_id }}/launch/"
         method: POST
         headers:
           Authorization: "Bearer {{ vault_aap_token }}"
@@ -245,10 +245,14 @@
             requestor: "{{ requestor | default('servicenow.admin') }}"
             servicenow_request_number: "{{ real_request.record.number }}"
             environment: "development"
-            team: "{{ team_members | join(',') if team_members is defined else 'admin,developer,tester' }}"
+            team_members_json: "{{ team_members | to_json if team_members is defined and team_members | length > 0 else '[]' }}"
+            team: "{{ team_members | join(',') if team_members is defined and team_members | length > 0 else 'admin,developer,tester' }}"
             database_type: "postgresql"
             database_size: "5Gi"
             temp_password: "TempPass123!"
+            vault_openshift_token: "{{ vault_openshift_token }}"
+            rhsso_url: "{{ rhsso_url }}"
+            vault_keycloak_password: "{{ vault_keycloak_password }}"
         status_code: [201]
         return_content: yes
       register: aap_job_launch
@@ -306,7 +310,7 @@
     # Step 6: Wait and Monitor Job Status
     - name: Step 6 - Wait for AAP Job Completion (5 minutes max)
       uri:
-        url: "{{ aap_controller_url }}/api/v2/jobs/{{ aap_job_launch.json.id }}/"
+        url: "{{ aap_controller_url }}/api/controller/v2/jobs/{{ aap_job_launch.json.id }}/"
         method: GET
         headers:
           Authorization: "Bearer {{ vault_aap_token }}"
@@ -494,7 +498,7 @@
           
           # Check AAP job status
           curl -k -H "Authorization: Bearer YOUR_TOKEN" \
-            {{ aap_controller_url }}/api/v2/jobs/{{ aap_job_launch.json.id | default('JOB_ID') }}/
+            {{ aap_controller_url }}/api/controller/v2/jobs/{{ aap_job_launch.json.id | default('JOB_ID') }}/
           ```
           
           ## Next Steps

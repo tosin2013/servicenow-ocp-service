@@ -16,7 +16,7 @@ BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 # Configuration - Get AAP token from vault
-AAP_URL="https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+AAP_URL="https://ansible-aap.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 print_header() {
@@ -56,7 +56,7 @@ print_step "Step 1: Test AAP API Authentication"
 AUTH_TEST=$(curl -s -w "%{http_code}" -o /dev/null \
   -H "Authorization: Bearer $AAP_TOKEN" \
   -H "Content-Type: application/json" \
-  "$AAP_URL/api/v2/me/")
+  "$AAP_URL/api/controller/v2/me/")
 
 if [ "$AUTH_TEST" = "200" ]; then
     print_success "AAP API authentication successful"
@@ -69,7 +69,7 @@ print_step "Step 2: Get AAP User Info"
 USER_INFO=$(curl -s \
   -H "Authorization: Bearer $AAP_TOKEN" \
   -H "Content-Type: application/json" \
-  "$AAP_URL/api/v2/me/")
+  "$AAP_URL/api/controller/v2/me/")
 
 echo "$USER_INFO" | jq -r '"  • Username: \(.username)
   • First Name: \(.first_name)
@@ -81,7 +81,7 @@ print_step "Step 3: List Available Job Templates"
 JOB_TEMPLATES=$(curl -s \
   -H "Authorization: Bearer $AAP_TOKEN" \
   -H "Content-Type: application/json" \
-  "$AAP_URL/api/v2/job_templates/")
+  "$AAP_URL/api/controller/v2/job_templates/")
 
 TEMPLATE_COUNT=$(echo "$JOB_TEMPLATES" | jq '.count')
 print_success "Found $TEMPLATE_COUNT job templates:"
@@ -92,7 +92,7 @@ print_step "Step 4: Check Specific OpenShift Job Template (ID: 9)"
 OPENSHIFT_TEMPLATE=$(curl -s \
   -H "Authorization: Bearer $AAP_TOKEN" \
   -H "Content-Type: application/json" \
-  "$AAP_URL/api/v2/job_templates/9/")
+  "$AAP_URL/api/controller/v2/job_templates/9/")
 
 if echo "$OPENSHIFT_TEMPLATE" | jq -e '.id' > /dev/null; then
     print_success "OpenShift job template found:"
@@ -112,7 +112,7 @@ print_step "Step 5: Check Recent Job Executions"
 RECENT_JOBS=$(curl -s \
   -H "Authorization: Bearer $AAP_TOKEN" \
   -H "Content-Type: application/json" \
-  "$AAP_URL/api/v2/jobs/?page_size=5&order_by=-created")
+  "$AAP_URL/api/controller/v2/jobs/?page_size=5&order_by=-created")
 
 JOB_COUNT=$(echo "$RECENT_JOBS" | jq '.count')
 print_info "Total jobs in system: $JOB_COUNT"
@@ -124,7 +124,7 @@ print_step "Step 6: Check AAP System Status"
 SYSTEM_STATUS=$(curl -s \
   -H "Authorization: Bearer $AAP_TOKEN" \
   -H "Content-Type: application/json" \
-  "$AAP_URL/api/v2/ping/")
+  "$AAP_URL/api/controller/v2/ping/")
 
 echo "$SYSTEM_STATUS" | jq -r '"  • Version: \(.version)
   • Active Node: \(.active_node)
