@@ -8,14 +8,14 @@ servicenow_username: "admin"
 servicenow_password: "{{ vault_servicenow_password }}"
 
 # Keycloak/RHSSO Configuration
-rhsso_url: "https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+rhsso_url: "https://keycloak-sso.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
 keycloak_username: "admin"
 keycloak_password: "{{ vault_keycloak_password }}"
 servicenow_realm_name: "servicenow"
 
 # OpenShift Configuration
-ocp_api_url: "https://api.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com:6443"
-ocp_apps_domain: "apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+ocp_api_url: "https://api.cluster-b4flj.b4flj.sandbox637.opentlc.com:6443"
+ocp_apps_domain: "apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
 ocp_token: "{{ lookup('env', 'OCP_TOKEN') }}"  # Retrieved from environment variable
 
 # Flow Designer Workflow Names

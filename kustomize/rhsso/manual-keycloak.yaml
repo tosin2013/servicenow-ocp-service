@@ -84,16 +84,20 @@ spec:
           containerPort: 8443
         readinessProbe:
           httpGet:
-            path: /health/ready
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /health/live
+            path: /
             port: 8080
           initialDelaySeconds: 90
           periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 5
+          failureThreshold: 5
         resources:
           requests:
             cpu: 500m

@@ -3,7 +3,7 @@
 # This file contains the actual configuration values for the integration
 
 # Keycloak/RHSSO Configuration
-rhsso_url: "https://keycloak-sso.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+rhsso_url: "https://keycloak-sso.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
 rhsso_admin_user: "admin"
 rhsso_admin_password: "{{ vault_rhsso_admin_password }}"
 
@@ -15,7 +15,7 @@ servicenow_admin_password: "{{ vault_servicenow_admin_password }}"
 # OAuth Configuration
 servicenow_client_secret: "servicenow-secret-2025"
 openshift_client_secret: "openshift-secret-2025"
-openshift_cluster_domain: "apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+openshift_cluster_domain: "apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
 
 # Realm and Client Configuration
 servicenow_realm_name: "servicenow"

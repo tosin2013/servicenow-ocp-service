@@ -12,10 +12,10 @@ ansible-navigator:
     enable: false
   execution-environment:
     enabled: true
-    image: quay.io/takinosh/servicenow-ocp-ee:785b6cec231f96ae1400f6204e7f831ebb67f38a
+    image: quay.io/takinosh/servicenow-ocp-ee:latest
     pull:
-      policy: never
-    container-engine: auto
+      policy: missing
+    container-engine: podman
     environment-variables:
       pass:
         - ANSIBLE_ADMIN_USER

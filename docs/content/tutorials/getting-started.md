@@ -164,9 +164,23 @@ ansible-vault encrypt ansible/group_vars/all/vault.yml --vault-password-file .va
 
 **Critical**: Ensure you create the AAP API token as described in the vault configuration guide - this is essential for ServiceNow integration.
 
+### Step 2.5: Pull Execution Environment
+
+Before running playbooks, pull the ServiceNow OpenShift execution environment container image:
+
+```bash
+# Pull the execution environment image
+podman pull quay.io/takinosh/servicenow-ocp-ee:latest
+
+# Verify the image is available
+podman images | grep servicenow-ocp-ee
+```
+
+This execution environment contains all required Ansible collections and dependencies for the integration.
+
 ### Step 3: Infrastructure Configuration
 
-Run the configuration playbooks in sequence:
+Run the configuration playbooks in sequence using the `run_playbook.sh` wrapper script:
 
 ```bash
 # 1. Pre-flight checks

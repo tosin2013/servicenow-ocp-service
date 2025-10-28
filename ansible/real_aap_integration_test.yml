@@ -13,7 +13,7 @@
     sn_host: "{{ servicenow_instance_url }}"
     sn_username: "{{ servicenow_admin_user }}"
     sn_password: "{{ vault_servicenow_admin_password }}"
-    aap_controller_url: "https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+    aap_controller_url: "{{ aap_url }}"
     aap_job_template_id: "9"
     # Real test project that will be created in OpenShift
     real_project_name: "servicenow-real-{{ ansible_date_time.epoch }}"
@@ -196,7 +196,7 @@
           - Purpose: Validate end-to-end ServiceNow to OpenShift automation
           
           Login Information:
-          - OpenShift Console: {{ openshift_console_url | default('https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com') }}
+          - OpenShift Console: {{ openshift_console_url | default('https://console-openshift-console.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com') }}
           - Username: {{ requestor | default('ServiceNow Admin') }}
           - Password: {{ temp_password | default('TempPass123!') }}
           
@@ -379,7 +379,7 @@
           - Project Name: {{ real_project_name }}
           - OpenShift Status: {{ openshift_project_check.stdout }}
           - Keycloak User: servicenow.admin (provisioned)
-          - Project URL: https://{{ real_project_name }}.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          - Project URL: https://{{ real_project_name }}.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com
           {% else %}
           ⚠️ IN PROGRESS - Project creation may still be running:
           - AAP Job ID: {{ aap_job_launch.json.id | default('N/A') }}
@@ -390,7 +390,7 @@
           u_aap_job_status: "{{ job_status_check.json.status | default('running') }}"
           u_openshift_namespace: "{{ real_project_name if 'not found' not in openshift_project_check.stdout else '' }}"
           u_keycloak_username: "{{ 'servicenow.admin' if 'not found' not in openshift_project_check.stdout else '' }}"
-          u_project_url: "{{ 'https://' + real_project_name + '.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com' if 'not found' not in openshift_project_check.stdout else '' }}"
+          u_project_url: "{{ 'https://' + real_project_name + '.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com' if 'not found' not in openshift_project_check.stdout else '' }}"
       register: final_update
 
     - name: Display Final Test Results
@@ -420,7 +420,7 @@
           ✅ SUCCESS - Project Created:
           - Project: {{ openshift_project_check.stdout }}
           - Command: oc get project {{ real_project_name }}
-          - Console: https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          - Console: https://console-openshift-console.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com
           {% else %}
           ⚠️ Project not yet visible:
           - Status: {{ openshift_project_check.stdout }}
@@ -470,8 +470,8 @@
           - **Status**: ✅ SUCCESS
           - **Project**: {{ openshift_project_check.stdout }}
           - **Verification Command**: `oc get project {{ real_project_name }}`
-          - **Console URL**: https://console-openshift-console.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
-          - **Project URL**: https://{{ real_project_name }}.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com
+          - **Console URL**: https://console-openshift-console.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com
+          - **Project URL**: https://{{ real_project_name }}.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com
           {% else %}
           - **Status**: ⚠️ Not Yet Created
           - **OpenShift Check**: {{ openshift_project_check.stdout }}

@@ -22,8 +22,8 @@ NC='\033[0m' # No Color
 
 # Configuration - use existing infrastructure (from GETTING_STARTED.md)
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-SERVICENOW_URL="https://dev295398.service-now.com"
-AAP_URL="https://ansible-controller-aap.apps.cluster-lgkp4.lgkp4.sandbox1321.opentlc.com"
+SERVICENOW_URL="https://dev231647.service-now.com"
+AAP_URL="https://ansible-aap.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
 
 
 # User provisioning configuration

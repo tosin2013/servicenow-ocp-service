@@ -20,8 +20,10 @@ spec:
     experimental:
       env:
         - name: JGROUPS_CLUSTER_PASSWORD
-          value: "changeme123"
+          value: "On0mdIuH9qWM2FtJ*&#@1rG"
         - name: SSO_HOSTNAME
           value: "keycloak-sso.apps.cluster-b4flj.b4flj.sandbox637.opentlc.com"
         - name: KEYCLOAK_LOGLEVEL
           value: "DEBUG"
+        - name: JAVA_TOOL_OPTIONS
+          value: "-Dcom.redhat.fips=false"
